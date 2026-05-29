@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[reportMissingTypeStubs]
 from pathlib import Path
 from uuid import UUID
 
@@ -9,8 +9,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-from api.schema.internal.auth import ReturnTokens
+from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
 
 from api.schema.internal.errors import APIError, AppException
 from api.logging_config import app_logger, error_logger, request_logger
@@ -32,19 +32,28 @@ if __package__ is None:
 # Import from secundary file to prevent circular imports
 from api.limiter import limiter
 
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+
+
+# Local replacement for slowapi's internal handler. Using our own handler
+# avoids importing a private symbol (`_rate_limit_exceeded_handler`) which
+# may not be exported by the installed `slowapi` version.
+async def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content=APIError(
+            error="Too many requests",
+            code="RATE_LIMIT_EXCEEDED",
+            detail=str(exc),
+        ).model_dump(),
+    )
+
+
 from slowapi.middleware import SlowAPIMiddleware
 
-from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.config import (
-    CORS_ORIGINS,
-    SECURE_COOKIES,
-    ACCESS_TOKEN_EXPIRE_SECONDS,
-    REFRESH_TOKEN_EXPIRE_SECONDS,
-)
+from api.config import CORS_ORIGINS
 
 from api.services.auth_service import (
     cleanup_tokens,
@@ -53,8 +62,40 @@ from api.services.auth_service import (
 
 from api.routes import auth as auth_routes, web as web_routes
 
-# Define main app function config and scheduler
-app = FastAPI()
+# Define main app function config and scheduler using a lifespan context manager
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: ensure the scheduler job is registered and started
+    try:
+        await start_scheduler()
+    except Exception:
+        # If startup fails, log but continue so FastAPI can surface the error
+        app_logger.exception("Failed to start scheduler during startup")
+
+    try:
+        yield
+    finally:
+        # Shutdown: stop scheduler and dispose DB engine to close pooled connections
+        try:
+            if scheduler.running:
+                scheduler.shutdown(wait=False)
+                app_logger.info("Stopped token cleanup scheduler.")
+        except Exception:
+            app_logger.exception("Error stopping scheduler during shutdown")
+
+        try:
+            # Import here to avoid circular import at module import time
+            from .database import engine
+
+            engine.dispose()
+            app_logger.info("Disposed SQLAlchemy engine.")
+        except Exception as e:
+            error_logger.exception("Error disposing DB engine during shutdown: %s", e)
+
+
+app = FastAPI(lifespan=lifespan)
 scheduler = AsyncIOScheduler()
 
 # Setup templates and static files
@@ -202,13 +243,6 @@ async def start_scheduler() -> None:
         pass
 
 
-@app.on_event("shutdown")
-async def stop_scheduler() -> None:
-    if scheduler.running:
-        scheduler.shutdown(wait=False)
-        app_logger.info("Stopped token cleanup scheduler.")
-
-
 @app.middleware(middleware_type="http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
@@ -284,7 +318,7 @@ def _check_database() -> dict[str, str]:
 
 
 @app.get("/health")
-def health() -> dict:
+def health() -> dict[str, bool | dict[str, dict[str, str]]]:
     """Liveness/health endpoint for load balancers and monitoring.
 
     Returns overall status and component details (database).
@@ -295,6 +329,6 @@ def health() -> dict:
 
 
 @app.get("/api/health")
-def api_health() -> dict:
+def api_health() -> dict[str, bool | dict[str, dict[str, str]]]:
     """API-prefixed health endpoint mirror for external API checks."""
     return health()
