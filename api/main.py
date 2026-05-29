@@ -3,7 +3,7 @@ import sys
 import time
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[reportMissingTypeStubs]
 from pathlib import Path
-from uuid import UUID
+from typing import Callable, Awaitable, Any
 
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, FileResponse, Response
@@ -38,13 +38,17 @@ from slowapi.errors import RateLimitExceeded
 # Local replacement for slowapi's internal handler. Using our own handler
 # avoids importing a private symbol (`_rate_limit_exceeded_handler`) which
 # may not be exported by the installed `slowapi` version.
-async def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+async def _rate_limit_exceeded_handler(request: Request, exc: Exception):
+    # Handler typed to Exception to match FastAPI's ExceptionHandler signature.
+    # Use the exception text for the response detail (if it's a RateLimitExceeded
+    # instance this will include useful info; otherwise fall back to str(exc)).
+    detail = str(exc)
     return JSONResponse(
         status_code=429,
         content=APIError(
             error="Too many requests",
             code="RATE_LIMIT_EXCEEDED",
-            detail=str(exc),
+            detail=detail,
         ).model_dump(),
     )
 
@@ -57,10 +61,9 @@ from api.config import CORS_ORIGINS
 
 from api.services.auth_service import (
     cleanup_tokens,
-    get_user_id,
 )
 
-from api.routes import auth as auth_routes, web as web_routes
+from api.routes import auth as auth_routes
 
 # Define main app function config and scheduler using a lifespan context manager
 
@@ -96,7 +99,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-scheduler = AsyncIOScheduler()
+# Annotate as Any to avoid Pylance/pyright complaints when type stubs
+# for apscheduler are missing — we still instantiate the real scheduler.
+scheduler: Any = AsyncIOScheduler()
 
 # Setup templates and static files
 BASE_DIR = Path(__file__).resolve().parent
@@ -175,17 +180,6 @@ app.add_middleware(
 # instance named `router`). Import names are aliased above to avoid shadowing
 # module names with local symbols. Prefix with /api for API routes.
 app.include_router(router=auth_routes.router, prefix="/api")
-# IMPORTANT: Ensure no prefix for the router since it serves from origin
-app.include_router(router=web_routes.router)
-
-# ============================================================================
-# WEB UI ROUTES - Merged from web/app.py
-# ============================================================================
-
-
-def get_user_id_without_csrf(request: Request) -> UUID:
-    """Dependency wrapper for safe GET routes that only need auth."""
-    return get_user_id(connection=request, skip_csrf=True)
 
 
 @app.get("/favicon.ico")
@@ -228,8 +222,8 @@ def ping():
 
 
 async def start_scheduler() -> None:
-    if not scheduler.get_job("cleanup-refresh-tokens"):
-        scheduler.add_job(
+    if not scheduler.get_job("cleanup-refresh-tokens"):  # type: ignore
+        scheduler.add_job(  # type: ignore[reportUnknownMemberType]
             cleanup_tokens,
             trigger="interval",
             hours=1,
@@ -244,7 +238,9 @@ async def start_scheduler() -> None:
 
 
 @app.middleware(middleware_type="http")
-async def log_requests(request: Request, call_next):
+async def log_requests(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     start_time = time.time()
     client_ip = get_client_ip(request)
     path = request.url.path

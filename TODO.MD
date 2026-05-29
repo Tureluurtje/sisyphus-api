@@ -9,3 +9,5 @@
 - [ ] Add user deletion capability
 - [ ] Add Redis bucket limiter
 - [ ] Improve access token claims
+- [ ] Add email rate limiting
+- [ ] Fix PyJWT type stubs with correct versioning

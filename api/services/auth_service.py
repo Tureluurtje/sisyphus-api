@@ -8,11 +8,11 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 import logging
 import time
 from sqlalchemy.orm.session import Session
-import jwt
+import jwt  # type: ignore[reportUnknownMemberType]
 import hashlib
 import importlib
 from uuid import UUID, uuid4
-from typing import Optional
+from typing import Optional, Any
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError, VerifyMismatchError
 from secrets import token_urlsafe
@@ -55,7 +55,7 @@ from api.logging_config import app_logger, error_logger
 _ph = PasswordHasher()
 
 
-def _ensure_aware(dt: datetime) -> datetime:
+def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
     """Ensure a datetime is timezone-aware in UTC.
 
     Many stored datetimes may be naive (no tzinfo). Treat naive values as
@@ -187,7 +187,7 @@ def create_tokens_service(
             "jti": str(jti),
         }
 
-        token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM)
+        token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[reportUnknownMemberType]
         return token
 
     def create_refresh_token(user_id: UUID, db: Session) -> IssuedRefreshToken:
@@ -227,7 +227,7 @@ def create_tokens_service(
         db.flush()
         return IssuedRefreshToken(token=token, id=token_entry.id)
 
-    def rotate_refresh_token(old_refresh_token: str, db: Session) -> str:
+    def rotate_refresh_token(old_refresh_token: str, db: Session) -> IssuedRefreshToken:
         """Validate a refresh token, rotate it and issue a new token pair.
 
         The function verifies the provided refresh token against stored hashed
@@ -267,6 +267,12 @@ def create_tokens_service(
         # Normalize stored datetime to timezone-aware before comparing. Some
         # existing DB rows may contain naive datetimes; treat those as UTC.
         expires_at = _ensure_aware(token_entry.expires_at)
+        if not expires_at:
+            app_logger.error(
+                f"Tokens row with id {token_entry.id} has no `expires_at` column set"
+            )
+            raise InternalError()
+
         now = datetime.now(timezone.utc)
         if expires_at <= now:
             logger.warning(
@@ -328,7 +334,7 @@ def create_tokens_service(
 
 
 def response_cookies_generator(
-    tokens: ReturnTokens | dict, response: Response | None = None
+    tokens: ReturnTokens | dict[str, str], response: Response | None = None
 ) -> Response:
     """Set authentication cookies on a response.
 
@@ -420,7 +426,7 @@ def apply_refreshed_token_cookies(
 def clear_token_cookies_service(response: Response) -> None:
     response.set_cookie(
         key="access_token",
-        value=0,
+        value="",
         httponly=True,
         secure=SECURE_COOKIES,
         samesite="none",
@@ -430,7 +436,7 @@ def clear_token_cookies_service(response: Response) -> None:
 
     response.set_cookie(
         key="refresh_token",
-        value=0,
+        value="",
         httponly=True,
         secure=SECURE_COOKIES,
         samesite="none",
@@ -440,7 +446,7 @@ def clear_token_cookies_service(response: Response) -> None:
 
     response.set_cookie(
         key="csrf_token",
-        value=0,
+        value="",
         secure=SECURE_COOKIES,
         samesite="none",
         path="/",
@@ -579,7 +585,7 @@ async def cleanup_tokens() -> None:
 def get_user_id(
     connection: HTTPConnection,
     skip_csrf: bool = False,
-    response: Response = None,
+    response: Optional[Response] = None,
 ) -> UUID:
     """Extract the user UUID from an access token supplied in a request.
 
@@ -677,6 +683,12 @@ def get_user_id_from_refresh(
             raise RefreshTokenInvalidError()
         # Normalize stored datetime to timezone-aware for comparison.
         expires_at = _ensure_aware(token_entry.expires_at)
+        if not expires_at:
+            app_logger.error(
+                f"Tokens row with id {token_entry.id} has no `expires_at` column set"
+            )
+            raise InternalError()
+
         now = datetime.now(timezone.utc)
         if expires_at <= now:
             logger.warning(
@@ -773,7 +785,7 @@ def register_user(
             db.commit()
             return new_tokens
 
-        except IntegrityError as e:
+        except IntegrityError:
             db.rollback()  # if email is already in use
             raise ConflictError()
 
@@ -793,7 +805,7 @@ def validate_access_token(token: str) -> AccessTokenPayload:
     """
     logger = logging.getLogger(__name__)
     try:
-        jwt_decoded = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        jwt_decoded = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])  # type: ignore[reportUnknownMemberType]
         payload = AccessTokenPayload(**jwt_decoded)
 
         # Check revocation, with a single retry for transient DB errors
@@ -843,7 +855,10 @@ def revoke_refresh_token(
     if user_id is None and token_id is None:
         raise InternalError()
 
-    conditions = [Tokens.revoked_at.is_(None)]
+    # Prefer checking the `revoked` boolean flag rather than `revoked_at`.
+    # This avoids edge cases where `revoked_at` may be NULL but `revoked` is
+    # already set, and is clearer about intent: we only want non-revoked rows.
+    conditions: list[Any] = [Tokens.revoked.is_(False)]
     if user_id is not None:
         conditions.append(Tokens.user_id == user_id)
     if token_id is not None:
