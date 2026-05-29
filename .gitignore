@@ -26,3 +26,4 @@ logs/**
 *.cache
 *.coverage
 .python-version
+git_commit.md
