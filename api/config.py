@@ -109,3 +109,5 @@ REFRESH_TOKEN_EXPIRE_SECONDS = int(_refresh_default)
 
 GOOGLE_OAUTH2_SECRET: str = require_env("GOOGLE_OAUTH2_SECRET")
 WEB_CLIENT_ID: str = require_env("WEB_CLIENT_ID")
+
+RESEND_API_KEY: str = require_env("RESEND_API_KEY")

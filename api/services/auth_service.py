@@ -10,6 +10,7 @@ import time
 from sqlalchemy.orm.session import Session
 import jwt  # type: ignore[reportUnknownMemberType]
 import hashlib
+import resend
 import importlib
 from uuid import UUID, uuid4
 from typing import Optional, Any
@@ -31,6 +32,7 @@ from api.schema.internal.errors import (
     TokenMissingError,
 )
 from api.schema.internal.users import UserProfileDetail
+from api.schema.internal.auth import EmailData
 
 from api.database import get_db_session
 from api.models.auth import User, Tokens, RevokedAccessTokens
@@ -47,12 +49,15 @@ from api.config import (
     MIN_PASSWORD_ZXCVBN_SCORE,
     ACCESS_TOKEN_EXPIRE_SECONDS,
     REFRESH_TOKEN_EXPIRE_SECONDS,
+    RESEND_API_KEY,
 )
 
 from api.logging_config import app_logger, error_logger
 
 # Initialize argon2 PasswordHasher instance
 _ph = PasswordHasher()
+
+resend.api_key = RESEND_API_KEY
 
 
 def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
@@ -66,6 +71,20 @@ def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt
+
+
+def _get_email_from_user_id(
+    user_id: UUID, db: Optional[Session] = None
+) -> Optional[str]:
+    if db:
+        result = db.query(User.email).where(User.id == user_id).scalar()
+    else:
+        with get_db_session() as db:
+            result = db.query(User.email).where(User.id == user_id).scalar()
+
+    if result is None:
+        app_logger.warning(f"Email not found for user id {user_id}")
+    return result
 
 
 def validate_password_strength(password: str, email: Optional[str] = None) -> None:
@@ -584,8 +603,8 @@ async def cleanup_tokens() -> None:
 
 def get_user_id(
     connection: HTTPConnection,
+    response: Response,
     skip_csrf: bool = False,
-    response: Optional[Response] = None,
 ) -> UUID:
     """Extract the user UUID from an access token supplied in a request.
 
@@ -625,8 +644,8 @@ def get_user_id(
 
         # Keep route handlers unchanged: when FastAPI injects a Response into this
         # dependency, we can set refreshed cookies here centrally.
-        if response is not None:
-            response_cookies_generator(response=response, tokens=tokens)
+        #if response is not None:
+        #    response_cookies_generator(response=response, tokens=tokens)
 
         token = tokens.access_token
 
@@ -740,7 +759,7 @@ def authenticate_user(email: str, password: str) -> ReturnTokens:
 
 
 def register_user(
-    first_name: str, last_name: str, email: str, password: str
+    email: str, password: str
 ) -> ReturnTokens:
     """Create a new user account and associated profile, returning tokens.
 
@@ -770,8 +789,6 @@ def register_user(
 
             # Create a new User instance
             new_user = User(
-                first_name=first_name,
-                last_name=last_name,
                 email=email,
                 password=hashed_password,
             )
@@ -783,6 +800,9 @@ def register_user(
             new_tokens = create_tokens_service(user_id=new_user.id, db=db)
 
             db.commit()
+
+            send_account_verification_email(user_id=new_user.id)
+
             return new_tokens
 
         except IntegrityError:
@@ -909,3 +929,29 @@ def get_user_data_service(user_id: UUID) -> UserProfileDetail:
         if not user:
             raise InternalError("User not found")
         return UserProfileDetail.model_validate(user)
+
+
+def _send_email(email_data: EmailData) -> None:
+    params: resend.Emails.SendParams = {
+        "from": "Tureluurtje <no-reply@iteam.kwako.nl>",
+        "to": [email_data.to],
+        "subject": email_data.subject,
+        "html": f"<p>{email_data.message}</p>",
+    }
+    try:
+        email: resend.Emails.SendResponse = resend.Emails.send(params)
+        if email:
+            return
+        else:
+            raise
+    except:
+        app_logger.error("Email did not send correctly")
+        raise InternalError()
+
+
+def send_account_verification_email(user_id: UUID) -> None:
+    _get_email_from_user_id(user_id=user_id)
+    email = EmailData(
+        to="tureluurtje.1@gmail.com", subject="Test Email", message="Hello World!"
+    )
+    _send_email(email_data=email)
