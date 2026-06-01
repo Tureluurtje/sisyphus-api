@@ -35,7 +35,13 @@ from api.schema.internal.users import UserProfileDetail
 from api.schema.internal.auth import EmailData
 
 from api.database import get_db_session
-from api.models.auth import User, Tokens, RevokedAccessTokens
+from api.models.auth import (
+    User,
+    Tokens,
+    RevokedAccessTokens,
+    VerificationTokens,
+    Status,
+)
 from api.schema.internal.auth import (
     AccessTokenPayload,
     ReturnTokens,
@@ -352,6 +358,84 @@ def create_tokens_service(
             raise
 
 
+def create_verification_token(
+    user_id: UUID, purpose: str, db: Optional[Session] = None
+) -> str:
+    """Create a unique verification token for email verification.
+
+    The function generates a random token string, hashes it, and stores the
+    hash in the database associated with the user ID. The raw token is returned
+    for sending to the user.
+
+    Args:
+        user_id: UUID of the user for whom the verification token is issued.
+        db: Optional SQLAlchemy session to use for persistence.
+
+    Returns:
+        The raw verification token string.
+
+    Raises:
+        sqlalchemy.exc.IntegrityError: If a database constraint is violated
+            while creating the token record (propagates after rollback).
+    """
+    token = token_urlsafe(32)
+    token_hash = hash_token(token=token)
+
+    # Validate presence
+    if not purpose:
+        app_logger.error(
+            "create_verification_token: missing or empty 'purpose' for user_id=%s",
+            user_id,
+        )
+        raise InvalidInputError(
+            message="Verification token purpose is required",
+            detail={"field": "purpose"},
+        )
+
+    # Normalize and validate allowed purposes using the Status enum
+    if isinstance(purpose, Status):
+        enum_purpose = purpose
+    else:
+        try:
+            enum_purpose = Status(purpose)
+        except ValueError:
+            allowed = [s.value for s in Status]
+            app_logger.error(
+                "create_verification_token: invalid purpose=%s for user_id=%s",
+                purpose,
+                user_id,
+            )
+            raise InvalidInputError(
+                message="Invalid verification purpose",
+                detail={"field": "purpose", "allowed": allowed},
+            )
+
+
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
+
+    token_entry = VerificationTokens(
+        user_id=user_id,
+        token=token_hash,
+        purpose=enum_purpose,
+        expires_at=expires_at,
+        created_at=datetime.now(tz=timezone.utc),
+    )
+
+    if db is not None:
+        db.add(instance=token_entry)
+        db.flush()
+        return token
+
+    with get_db_session() as local_db:
+        try:
+            local_db.add(instance=token_entry)
+            local_db.commit()
+            return token
+        except Exception:
+            local_db.rollback()
+            raise
+
+
 def response_cookies_generator(
     tokens: ReturnTokens | dict[str, str], response: Response | None = None
 ) -> Response:
@@ -644,7 +728,7 @@ def get_user_id(
 
         # Keep route handlers unchanged: when FastAPI injects a Response into this
         # dependency, we can set refreshed cookies here centrally.
-        #if response is not None:
+        # if response is not None:
         #    response_cookies_generator(response=response, tokens=tokens)
 
         token = tokens.access_token
@@ -758,9 +842,7 @@ def authenticate_user(email: str, password: str) -> ReturnTokens:
         return new_tokens
 
 
-def register_user(
-    email: str, password: str
-) -> ReturnTokens:
+def register_user(email: str, password: str) -> ReturnTokens:
     """Create a new user account and associated profile, returning tokens.
 
     The function creates a user record with an Argon2-hashed password and a

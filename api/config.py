@@ -107,6 +107,9 @@ ACCESS_TOKEN_EXPIRE_SECONDS: int = int(_access_default)
 _refresh_default: str = require_env("REFRESH_TOKEN_EXPIRE_SECONDS", "2592000")
 REFRESH_TOKEN_EXPIRE_SECONDS = int(_refresh_default)
 
+_verification_default: str = require_env("REFRESH_TOKEN_EXPIRE_SECONDS", "2592000")
+VERIFICATION_TOKEN_EXPIRE_SECONDS = int(_refresh_default)
+
 GOOGLE_OAUTH2_SECRET: str = require_env("GOOGLE_OAUTH2_SECRET")
 WEB_CLIENT_ID: str = require_env("WEB_CLIENT_ID")
 
