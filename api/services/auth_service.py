@@ -40,7 +40,7 @@ from api.models.auth import (
     Tokens,
     RevokedAccessTokens,
     VerificationTokens,
-    Status,
+    VerificationPurposes,
 )
 from api.schema.internal.auth import (
     AccessTokenPayload,
@@ -55,7 +55,10 @@ from api.config import (
     MIN_PASSWORD_ZXCVBN_SCORE,
     ACCESS_TOKEN_EXPIRE_SECONDS,
     REFRESH_TOKEN_EXPIRE_SECONDS,
+    VERIFICATION_TOKEN_EXPIRE_SECONDS,
     RESEND_API_KEY,
+    HOST,
+    PORT
 )
 
 from api.logging_config import app_logger, error_logger
@@ -212,7 +215,7 @@ def create_tokens_service(
             "jti": str(jti),
         }
 
-        token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[reportUnknownMemberType]
+        token = str(jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM))  # type: ignore[reportUnknownMemberType]
         return token
 
     def create_refresh_token(user_id: UUID, db: Session) -> IssuedRefreshToken:
@@ -359,7 +362,7 @@ def create_tokens_service(
 
 
 def create_verification_token(
-    user_id: UUID, purpose: str, db: Optional[Session] = None
+    user_id: UUID, purpose: VerificationPurposes, db: Optional[Session] = None
 ) -> str:
     """Create a unique verification token for email verification.
 
@@ -392,31 +395,14 @@ def create_verification_token(
             detail={"field": "purpose"},
         )
 
-    # Normalize and validate allowed purposes using the Status enum
-    if isinstance(purpose, Status):
-        enum_purpose = purpose
-    else:
-        try:
-            enum_purpose = Status(purpose)
-        except ValueError:
-            allowed = [s.value for s in Status]
-            app_logger.error(
-                "create_verification_token: invalid purpose=%s for user_id=%s",
-                purpose,
-                user_id,
-            )
-            raise InvalidInputError(
-                message="Invalid verification purpose",
-                detail={"field": "purpose", "allowed": allowed},
-            )
-
-
-    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(
+        seconds=VERIFICATION_TOKEN_EXPIRE_SECONDS
+    )
 
     token_entry = VerificationTokens(
         user_id=user_id,
         token=token_hash,
-        purpose=enum_purpose,
+        purpose=purpose,
         expires_at=expires_at,
         created_at=datetime.now(tz=timezone.utc),
     )
@@ -425,15 +411,15 @@ def create_verification_token(
         db.add(instance=token_entry)
         db.flush()
         return token
-
-    with get_db_session() as local_db:
-        try:
-            local_db.add(instance=token_entry)
-            local_db.commit()
-            return token
-        except Exception:
-            local_db.rollback()
-            raise
+    else:
+        with get_db_session() as db:
+            try:
+                db.add(instance=token_entry)
+                db.commit()
+                return token
+            except Exception:
+                db.rollback()
+                raise
 
 
 def response_cookies_generator(
@@ -881,9 +867,9 @@ def register_user(email: str, password: str) -> ReturnTokens:
 
             new_tokens = create_tokens_service(user_id=new_user.id, db=db)
 
-            db.commit()
+            send_account_verification_email(user_id=new_user.id, db=db)
 
-            send_account_verification_email(user_id=new_user.id)
+            db.commit()
 
             return new_tokens
 
@@ -1018,7 +1004,7 @@ def _send_email(email_data: EmailData) -> None:
         "from": "Tureluurtje <no-reply@iteam.kwako.nl>",
         "to": [email_data.to],
         "subject": email_data.subject,
-        "html": f"<p>{email_data.message}</p>",
+        "html": f"{email_data.message}",
     }
     try:
         email: resend.Emails.SendResponse = resend.Emails.send(params)
@@ -1031,9 +1017,31 @@ def _send_email(email_data: EmailData) -> None:
         raise InternalError()
 
 
-def send_account_verification_email(user_id: UUID) -> None:
-    _get_email_from_user_id(user_id=user_id)
-    email = EmailData(
-        to="tureluurtje.1@gmail.com", subject="Test Email", message="Hello World!"
+def send_account_verification_email(
+    user_id: UUID, db: Optional[Session] = None
+) -> None:
+    user_email = _get_email_from_user_id(user_id=user_id, db=db)
+    if not user_email:
+        raise InternalError()
+
+    verification_token = create_verification_token(
+        user_id=user_id,
+        purpose=VerificationPurposes.EMAIL_VERIFICATION,
+        db=db,
     )
-    _send_email(email_data=email)
+
+    scheme = "https" if SECURE_COOKIES else "http"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/verificate/{verification_token}"
+
+    html_message = f"""<body>
+    <h2><a href="{verification_url}">Click here to verify your account.</a></h2>
+    <p>Use the above code to verify your account. This code will expire in 60 minutes.</p>
+    <p>If you did not request this verification code, please ignore this email.</p>
+</body>"""
+
+    email_data = EmailData(
+        to=user_email,
+        subject="Account verification",
+        message=html_message,
+    )
+    _send_email(email_data=email_data)
