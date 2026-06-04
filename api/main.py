@@ -181,6 +181,10 @@ app.add_middleware(
 # module names with local symbols. Prefix with /api for API routes.
 app.include_router(router=auth_routes.router, prefix="/api")
 
+# TODO: ADD AUTHORIZATION FOR THIS ENDPOINT
+@app.post("/load_wordlist")
+def load_wordlist():
+    ...
 
 @app.get("/favicon.ico")
 def favicon():

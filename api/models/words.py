@@ -127,7 +127,7 @@ class Cards(Base):
         nullable=False,
     )
 
-    state: Mapped[int] = mapped_column(
+    box: Mapped[int] = mapped_column(
         SmallInteger,
         nullable=False,
     )
