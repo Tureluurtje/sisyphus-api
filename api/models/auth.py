@@ -4,7 +4,7 @@ from datetime import datetime
 import uuid
 from typing import List, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func, text, BIGINT
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,8 +17,8 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    first_name: Mapped[str] = mapped_column(String, nullable=False, default="John")
-    last_name: Mapped[str] = mapped_column(String, nullable=False, default="Doe")
+    username: Mapped[str] = mapped_column(String, nullable=False)
+    grade: Mapped[int] = mapped_column(BIGINT, nullable=False)
 
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)

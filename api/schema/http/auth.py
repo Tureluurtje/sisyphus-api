@@ -13,8 +13,8 @@ class LoginResponse(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    first_name: str
-    last_name: str
+    username: str
+    grade: str
     email: EmailStr
     password: str
 
