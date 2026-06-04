@@ -8,19 +8,20 @@ from api.schema.internal.users import UserProfileDetail
 
 from api.limiter import limiter
 
+from functools import wraps
+from typing import Any, Callable, ParamSpec, TypeVar, cast
+
 P = ParamSpec("P")
 R = TypeVar("R")
 _untyped_limit = getattr(limiter, "limit")
 
 
-def typed_limit(
-    *args: Any, **kwargs: Any
-) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Typed wrapper around slowapi's untyped limiter decorator."""
-    return cast(
-        Callable[[Callable[P, R]], Callable[P, R]], _untyped_limit(*args, **kwargs)
-    )
 
+def typed_limit(*args: Any, **kwargs: Any) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        wrapped = _untyped_limit(*args, **kwargs)(func)
+        return wraps(func)(wrapped)
+    return cast(Callable[[Callable[P, R]], Callable[P, R]], decorator)
 
 from api.schema.http.auth import (
     LoginRequest,
@@ -53,10 +54,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/me")
 @typed_limit("60/minute")
 def get_current_user(
-    request: Request, user_id: Optional[UUID] = Depends(get_user_id)
+    request: Request, user_id: UUID = Depends(get_user_id)
 ) -> UserProfileDetail:
-    if not user_id:
-        raise TokenInvalidError()
     return get_user_data_service(user_id=user_id)
 
 
@@ -76,8 +75,8 @@ async def register(
     request: Request, response: Response, data: RegisterRequest
 ) -> RegisterResponse:
     tokens = register_user(
-        first_name=data.first_name,
-        last_name=data.last_name,
+        username=data.username,
+        grade=data.grade,
         email=data.email,
         password=data.password,
     )

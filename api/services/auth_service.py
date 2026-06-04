@@ -187,7 +187,7 @@ def create_tokens_service(
             "jti": str(jti),
         }
 
-        token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[reportUnknownMemberType]
+        token = str(jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM))  # type: ignore[reportUnknownMemberType]
         return token
 
     def create_refresh_token(user_id: UUID, db: Session) -> IssuedRefreshToken:
@@ -585,7 +585,6 @@ async def cleanup_tokens() -> None:
 def get_user_id(
     connection: HTTPConnection,
     skip_csrf: bool = False,
-    response: Optional[Response] = None,
 ) -> UUID:
     """Extract the user UUID from an access token supplied in a request.
 
@@ -597,7 +596,6 @@ def get_user_id(
     Args:
         connection: HTTP request/websocket connection.
         skip_csrf: Disable CSRF checks (internal use only).
-        response: Optional response object used to set refreshed auth cookies.
 
     Returns:
         The user identifier (UUID) present in the validated token payload.
@@ -622,11 +620,6 @@ def get_user_id(
             connection.state.refreshed_tokens = tokens
         except Exception:
             pass
-
-        # Keep route handlers unchanged: when FastAPI injects a Response into this
-        # dependency, we can set refreshed cookies here centrally.
-        if response is not None:
-            response_cookies_generator(response=response, tokens=tokens)
 
         token = tokens.access_token
 
@@ -739,9 +732,7 @@ def authenticate_user(email: str, password: str) -> ReturnTokens:
         return new_tokens
 
 
-def register_user(
-    first_name: str, last_name: str, email: str, password: str
-) -> ReturnTokens:
+def register_user(username: str, grade: int, email: str, password: str) -> ReturnTokens:
     """Create a new user account and associated profile, returning tokens.
 
     The function creates a user record with an Argon2-hashed password and a
@@ -761,6 +752,9 @@ def register_user(
         fastapi.HTTPException: If the email is already registered
             (HTTP 409).
     """
+    if grade not in (1, 2, 3, 4, 5, 6):
+        raise InvalidInputError("grade must be 1, 2, 3, 4, 5, 6")
+
     validate_password_strength(password=password, email=email)
 
     with get_db_session() as db:
@@ -770,8 +764,8 @@ def register_user(
 
             # Create a new User instance
             new_user = User(
-                first_name=first_name,
-                last_name=last_name,
+                username=username,
+                grade=grade,
                 email=email,
                 password=hashed_password,
             )
@@ -785,9 +779,12 @@ def register_user(
             db.commit()
             return new_tokens
 
-        except IntegrityError:
-            db.rollback()  # if email is already in use
-            raise ConflictError()
+        except IntegrityError as e:
+            db.rollback()  # if email or username is already in use
+            if "username" in str(e.args):
+                raise ConflictError(message="duplicate username")
+            else:
+                raise ConflictError(message="duplicate email")
 
 
 def validate_access_token(token: str) -> AccessTokenPayload:

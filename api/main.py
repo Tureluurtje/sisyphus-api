@@ -7,8 +7,6 @@ from typing import Callable, Awaitable, Any
 
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, FileResponse, Response
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 
@@ -105,9 +103,6 @@ scheduler: Any = AsyncIOScheduler()
 
 # Setup templates and static files
 BASE_DIR = Path(__file__).resolve().parent
-app.mount("/public", StaticFiles(directory=str(BASE_DIR / "public")), name="static")
-app.state.templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-templates = app.state.templates
 
 # Define config for request limiter
 app.state.limiter = limiter
