@@ -17,8 +17,9 @@ class DueWord(BaseModel):
 
 class ReviewedWord(BaseModel):
     wordId: UUID
-    right: int
-    wrong: int
+    reviewedAt: datetime
+    correct: int
+    incorrect: int
     averageResponseTimeMs: int
 
 class Chapter(BaseModel):
@@ -31,3 +32,19 @@ class WordList(BaseModel):
     schoolYear: str
     schoolGrade: int
     chapters: list[Chapter]
+
+
+class LoadWord(BaseModel):
+    word: str
+    translation: str
+    targetDate: datetime
+
+class LoadChapter(BaseModel):
+    name: str
+    words: list[LoadWord]
+
+
+class LoadWordList(BaseModel):
+    schoolYear: str
+    schoolGrade: int
+    chapters: list[LoadChapter]

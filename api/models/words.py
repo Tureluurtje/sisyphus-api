@@ -172,9 +172,14 @@ class Cards(Base):
     )
 
     __table_args__ = (
-        {"extend_existing": True}, UniqueConstraint("user_id", "word_id", name="uq_cards_user_word"),
+        UniqueConstraint(
+            "user_id",
+            "word_id",
+            name="uq_cards_user_word",
+        ),
+        {"extend_existing": True},
     )
-
+    
 class Reviews(Base):
     __tablename__ = "reviews"
 

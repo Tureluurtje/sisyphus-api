@@ -84,7 +84,7 @@ class Tokens(Base):
 class RevokedAccessTokens(Base):
     __tablename__ = "revoked_access_tokens"
 
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     jti: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, nullable=False
     )

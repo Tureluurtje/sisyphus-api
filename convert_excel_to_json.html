@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel to JSON Converter</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --accent: #0f766e;
+            --border: #d1d5db;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(160deg, #eef2ff 0%, var(--bg) 45%, #ecfeff 100%);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 1.6rem;
+        }
+
+        p {
+            margin: 0 0 16px;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input,
+        button,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font: inherit;
+            box-sizing: border-box;
+        }
+
+        button {
+            cursor: pointer;
+            background: var(--accent);
+            color: white;
+            border: none;
+            margin-top: 6px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        textarea {
+            min-height: 260px;
+            resize: vertical;
+            margin-top: 12px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .ok {
+            color: #166534;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap">
+        <section class="card">
+            <h1>Excel to JSON Converter</h1>
+            <p>
+                Pick an <code>.xlsx</code> file, then click convert. This version runs directly in the browser.
+            </p>
+
+            <div class="grid">
+                <div>
+                    <label for="xlsxFile">Excel file (.xlsx)</label>
+                    <input id="xlsxFile" type="file" accept=".xlsx" />
+                </div>
+                <div>
+                    <label for="classYear">Class year</label>
+                    <input id="classYear" type="number" min="1" max="6" placeholder="1-6" />
+                </div>
+                <div>
+                    <label for="sheetName">Sheet name (optional)</label>
+                    <input id="sheetName" type="text" placeholder="Sheet1" />
+                </div>
+            </div>
+
+            <button id="convertBtn" type="button">Convert to JSON</button>
+            <button id="downloadBtn" type="button" disabled>Download JSON</button>
+
+            <div id="status" class="status"></div>
+            <textarea id="output" readonly placeholder="Converted JSON will appear here..."></textarea>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        class Word {
+            constructor(word, translation, targetDate) {
+                this.word = word;
+                this.translation = translation;
+                this.targetDate = targetDate;
+            }
+        }
+
+        class Chapter {
+            constructor(name, words) {
+                this.name = name;
+                this.words = words;
+            }
+        }
+
+        let chapters = [];
+        let currentChapter = null;
+        let lastDate = null;
+        let latestJson = "";
+        let latestBaseName = "converted";
+
+        function showStatus(message, isError) {
+            const statusEl = document.getElementById("status");
+            statusEl.textContent = message;
+            statusEl.className = "status " + (isError ? "error" : "ok");
+        }
+
+        function getCurrentChapter() {
+            if (!chapters.length) {
+                throw new Error("No chapter has been added yet.");
+            }
+            return chapters[chapters.length - 1];
+        }
+
+        // Parse a cell value into a Date.
+        // Formula strings (e.g. "=E6+1") cannot be resolved here without sheet data,
+        // so they are intentionally ignored — SheetJS already provides the cached
+        // computed value for such cells when cellDates:true is set.
+        function toDate(value, prevDate) {
+            if (value == null || value === "") return null;
+
+            // SheetJS returns JS Date objects for date-formatted cells (cellDates:true).
+            if (value instanceof Date) return value;
+
+            // Raw serial numbers (fallback when cellDates is not applied).
+            if (typeof value === "number") {
+                const parsed = XLSX.SSF.parse_date_code(value);
+                if (!parsed) return null;
+                return new Date(parsed.y, parsed.m - 1, parsed.d, parsed.H || 0, parsed.M || 0, parsed.S || 0);
+            }
+
+            if (typeof value === "string") {
+                let s = value.trim();
+
+                // Skip formula strings — their computed values are already returned
+                // by SheetJS as Date objects or numbers; re-evaluating them here
+                // without access to the sheet would produce wrong dates.
+                if (s.startsWith('=') || /^[A-Za-z]+\d+(\s*[+\-]\s*\d+)?$/.test(s)) {
+                    return null;
+                }
+
+                // Handle partial dates like "1-1" or "01/01" (DD-MM), with optional year.
+                const mdMatch = s.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/);
+                if (mdMatch) {
+                    const day = parseInt(mdMatch[1], 10);
+                    const month = parseInt(mdMatch[2], 10) - 1;
+                    const yearPart = mdMatch[3] ? parseInt(mdMatch[3], 10) : null;
+                    let year;
+                    if (yearPart != null) {
+                        year = yearPart < 100 ? 2000 + yearPart : yearPart;
+                    } else if (prevDate instanceof Date) {
+                        year = prevDate.getFullYear();
+                    } else {
+                        year = new Date().getFullYear();
+                    }
+                    return new Date(year, month, day);
+                }
+
+                // Fall back to ISO-like strings.
+                const candidate = new Date(s);
+                if (!Number.isNaN(candidate.getTime())) return candidate;
+            }
+
+            return null;
+        }
+
+        function replaceYearSafe(dateObj, year) {
+            const month = dateObj.getMonth();
+            const day = dateObj.getDate();
+
+            let candidate = new Date(
+                year,
+                month,
+                day,
+                dateObj.getHours(),
+                dateObj.getMinutes(),
+                dateObj.getSeconds(),
+                dateObj.getMilliseconds()
+            );
+
+            // Guard against month overflow (e.g. Feb 29 in a non-leap year).
+            if (candidate.getMonth() !== month) {
+                candidate = new Date(
+                    year,
+                    month,
+                    28,
+                    dateObj.getHours(),
+                    dateObj.getMinutes(),
+                    dateObj.getSeconds(),
+                    dateObj.getMilliseconds()
+                );
+            }
+
+            return candidate;
+        }
+
+        // Advance the year of newDate until it is strictly AFTER prevDate.
+        // Using strict "less than" so equal dates (same day) do NOT trigger a rollover.
+        function adjustYearRollover(newDate, prevDate) {
+            if (!newDate) return null;
+            if (!prevDate) return newDate;
+
+            // If the new date is already after the previous date, no adjustment needed.
+            if (newDate > prevDate) return newDate;
+
+            // Only roll the year forward when the new date is strictly before prevDate.
+            // Equal dates (same-day repetition in the sheet) are left as-is.
+            if (newDate.getTime() === prevDate.getTime()) return newDate;
+
+            let year = prevDate.getFullYear();
+            let candidate = replaceYearSafe(newDate, year);
+
+            while (candidate < prevDate) {
+                year += 1;
+                candidate = replaceYearSafe(newDate, year);
+            }
+
+            return candidate;
+        }
+
+        function generateChapter(name) {
+            const chapter = new Chapter(name, []);
+            chapters.push(chapter);
+            currentChapter = chapter;
+        }
+
+        function generateWord(number, word, translation, targetDate) {
+            const chapter = getCurrentChapter();
+            const newWord = new Word(
+                word,
+                translation,
+                targetDate ? targetDate.toISOString() : null
+            );
+            chapter.words.push(newWord);
+        }
+
+        function isEmptyRow(row) {
+            return row.every((cell) => cell == null || cell === "");
+        }
+
+        function parseRow(row) {
+            if (isEmptyRow(row)) return;
+
+            if (typeof row[1] === "string" && row[1].trim() !== "") {
+                generateChapter(row[1]);
+                return;
+            }
+
+            if (row[4]) {
+                const candidate = toDate(row[4], lastDate);
+                if (candidate) lastDate = adjustYearRollover(candidate, lastDate);
+            }
+
+            generateWord(row[1], row[2], row[3], lastDate);
+        }
+
+        function computeSchoolYear(chapterList) {
+            const years = [];
+
+            for (const chapter of chapterList) {
+                for (const word of chapter.words) {
+                    if (word.targetDate) {
+                        const y = new Date(word.targetDate).getFullYear();
+                        if (!Number.isNaN(y)) years.push(y);
+                    }
+                }
+            }
+
+            if (!years.length) {
+                const y = new Date().getFullYear();
+                const left = String(y % 100).padStart(2, "0");
+                const right = String((y + 1) % 100).padStart(2, "0");
+                return left + "-" + right;
+            }
+
+            const minYear = Math.min(...years);
+            const maxYear = Math.max(...years);
+
+            if (maxYear > minYear) {
+                return String(minYear % 100).padStart(2, "0") + "-" + String(maxYear % 100).padStart(2, "0");
+            }
+
+            return (
+                String(minYear % 100).padStart(2, "0") +
+                "-" +
+                String((minYear + 1) % 100).padStart(2, "0")
+            );
+        }
+
+        function convertToJson(classYear, chapterList) {
+            const learnYear = computeSchoolYear(chapterList);
+            // Return compact JSON (no whitespace) for smaller file size.
+            return JSON.stringify({
+                schoolYear: learnYear,
+                schoolGrade: classYear,
+                chapters: chapterList,
+            });
+        }
+
+        function getSheet(workbook, preferredName) {
+            if (preferredName && workbook.SheetNames.includes(preferredName)) {
+                return workbook.Sheets[preferredName];
+            }
+
+            if (workbook.SheetNames.includes("Sheet1")) {
+                return workbook.Sheets["Sheet1"];
+            }
+
+            return workbook.Sheets[workbook.SheetNames[0]];
+        }
+
+        async function convertFile() {
+            try {
+                showStatus("", false);
+                const fileInput = document.getElementById("xlsxFile");
+                const classYearInput = document.getElementById("classYear");
+                const sheetNameInput = document.getElementById("sheetName");
+                const output = document.getElementById("output");
+                const downloadBtn = document.getElementById("downloadBtn");
+
+                const file = fileInput.files[0];
+                if (!file) {
+                    throw new Error("Choose an .xlsx file first.");
+                }
+
+                if (!file.name.toLowerCase().endsWith(".xlsx")) {
+                    throw new Error("File is not correct Excel type (.xlsx).");
+                }
+
+                const classYear = classYearInput.value;
+                if (!classYear) {
+                    throw new Error("Enter class year (1-6).");
+                }
+
+                const arrayBuffer = await file.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, {
+                    type: "array",
+                    cellDates: true,
+                });
+
+                const preferredSheet = sheetNameInput.value.trim();
+                const worksheet = getSheet(workbook, preferredSheet);
+                const rows = XLSX.utils.sheet_to_json(worksheet, {
+                    header: 1,
+                    raw: true,
+                    defval: null,
+                });
+
+                chapters = [];
+                currentChapter = null;
+                lastDate = null;
+
+                for (const row of rows.slice(1)) {
+                    parseRow(row);
+                }
+
+                latestJson = convertToJson(classYear, chapters);
+                latestBaseName = file.name.replace(/\.xlsx$/i, "") || "converted";
+
+                output.value = latestJson;
+                downloadBtn.disabled = false;
+                showStatus("Converted successfully.", false);
+            } catch (err) {
+                document.getElementById("downloadBtn").disabled = true;
+                showStatus(err.message || String(err), true);
+            }
+        }
+
+        function downloadJson() {
+            if (!latestJson) return;
+
+            const blob = new Blob([latestJson], {
+                type: "application/json"
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = latestBaseName + ".json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById("convertBtn").addEventListener("click", convertFile);
+        document.getElementById("downloadBtn").addEventListener("click", downloadJson);
+    </script>
+</body>
+
+</html>

@@ -61,7 +61,7 @@ from api.services.auth_service import (
     cleanup_tokens,
 )
 
-from api.routes import auth as auth_routes
+from api.routes import auth as auth_routes, words as word_routes
 
 # Define main app function config and scheduler using a lifespan context manager
 
@@ -175,11 +175,8 @@ app.add_middleware(
 # instance named `router`). Import names are aliased above to avoid shadowing
 # module names with local symbols. Prefix with /api for API routes.
 app.include_router(router=auth_routes.router, prefix="/api")
+app.include_router(router=word_routes.router, prefix="/api")
 
-# TODO: ADD AUTHORIZATION FOR THIS ENDPOINT
-@app.post("/load_wordlist")
-def load_wordlist():
-    ...
 
 @app.get("/favicon.ico")
 def favicon():
