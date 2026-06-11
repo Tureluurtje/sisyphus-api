@@ -54,6 +54,10 @@ from api.logging_config import app_logger, error_logger
 # Initialize argon2 PasswordHasher instance
 _ph = PasswordHasher()
 
+#########################################################
+###                     HELPERS                       ###
+#########################################################
+
 
 def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
     """Ensure a datetime is timezone-aware in UTC.
@@ -69,6 +73,17 @@ def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
 
 
 def validate_password_strength(password: str, email: Optional[str] = None) -> None:
+    """Validate that password strenght is good measured with zxcvbn library
+
+    Args:
+        password (str): Password to check
+        email (Optional[str], optional): Optional email to check with the password. Defaults to None.
+
+    Raises:
+        InvalidInputError: Password is longer than 72 characters
+        DependencyUnavailableError: zxcvbn dependency not installed/ not available
+        InvalidInputError: Password is too weak(not level given in `.env` file)
+    """
     user_inputs = [email] if email else []
     if len(password) > 72:
         raise InvalidInputError(detail="Password cannot be longer than 72 characters")
@@ -97,81 +112,32 @@ def validate_password_strength(password: str, email: Optional[str] = None) -> No
         )
 
 
-def validate_user_service(
-    request: Request,
-    allow_refresh: bool = True,
-) -> tuple[Optional[UUID], Optional[ReturnTokens]]:
-    """Validate user by checking their access token."""
-    try:
-        access_token = request.cookies.get("access_token")
-        app_logger.info(
-            f"validate_user: access_token present={access_token is not None}, allow_refresh={allow_refresh}"
-        )
-        try:
-            if access_token is None:
-                raise TokenMissingError()
-            payload = validate_access_token(access_token)
-            return payload.sub, None
-        except (TokenExpiredError, TokenMissingError) as exc:
-            app_logger.info(
-                f"validate_user: access token missing/expired, attempting refresh. Exception: {type(exc).__name__}"
-            )
-            # Only try refresh when token expired and refresh allowed
-            # Allow refresh attempt when token expired or missing (refresh token may still exist)
-            if not allow_refresh:
-                app_logger.info(
-                    "validate_user: refresh not allowed, raising TokenMissingError"
-                )
-                raise TokenMissingError()
-
-            try:
-                app_logger.info(
-                    "validate_user: attempting to refresh using refresh_token cookie"
-                )
-                user_id, raw_refresh = get_user_id_from_refresh(request, skip_csrf=True)
-                app_logger.info(
-                    f"validate_user: refresh_token lookup successful, user_id={user_id}"
-                )
-                tokens = create_tokens_service(
-                    user_id=user_id, old_refresh_token=raw_refresh
-                )
-                app_logger.info(
-                    f"validate_user: new tokens created successfully for user_id={user_id}"
-                )
-                return user_id, tokens
-            except (
-                RefreshTokenMissingError,
-                RefreshTokenInvalidError,
-                ForbiddenError,
-                TokenExpiredError,
-                TokenMissingError,
-            ) as refresh_exc:
-                app_logger.warning(
-                    f"validate_user: refresh failed with {type(refresh_exc).__name__}: {getattr(refresh_exc, 'message', str(refresh_exc))}"
-                )
-                return None, None
-    except (TokenExpiredError, TokenMissingError, TokenInvalidError) as e:
-        return None, None
-    except Exception as e:
-        error_logger.exception(f"Error validating user: {e}")
-        return None, None
+#########################################################
+###                     TOKENS                        ###
+#########################################################
 
 
 def create_tokens_service(
     user_id: UUID, db: Optional[Session] = None, old_refresh_token: Optional[str] = None
 ) -> ReturnTokens:
-    def create_access_token(user_id: UUID) -> str:
-        """Create a signed JWT access token for a user identifier.
+    """Issue new tokens pair, possibly rotating the old refresh token
 
-        The token payload contains a subject (``sub``) equal to the stringified
-        ``user_id`` and an expiration time derived from
-        ``ACCESS_TOKEN_EXPIRE_MINUTES``.
+    Args:
+        user_id (UUID): The user id of the user
+        db (Optional[Session], optional): Optional sqlalchemy `Session` object. Defaults to None.
+        old_refresh_token (Optional[str], optional): The optional old refresh token. If given, gets revoked(rotated). Defaults to None.
+
+    Returns:
+        ReturnTokens: The new, valid refresh, access and csrf tokens wrapped in a `ReturnTokens` object
+    """
+    def create_access_token(user_id: UUID) -> str:
+        """Create a new valid access token for a given user id
 
         Args:
-            user_id: UUID of the user for whom the token is issued.
+            user_id (UUID): The user id of the user for who to generate the token
 
         Returns:
-            A JWT access token string signed with the application secret.
+            str: The valid, newly build access token for the user with the given id
         """
         expire: int = int(
             (
@@ -191,24 +157,14 @@ def create_tokens_service(
         return token
 
     def create_refresh_token(user_id: UUID, db: Session) -> IssuedRefreshToken:
-        """Generate a refresh JWT, persist a hashed copy, and return the raw token.
-
-        The function issues a refresh token with an expiry based on
-        ``REFRESH_TOKEN_EXPIRE_DAYS`` and persists a SHA-256 digest of the token
-        to the ``Tokens`` table. If a database session is not supplied the
-        function will open and close its own session; otherwise the provided
-        session is used and left open.
+        """Create a new, valid refresh token for the given user id
 
         Args:
-            user_id: UUID of the owning user.
-            db: Optional SQLAlchemy session to use for persistence.
+            user_id (UUID): The user id of the user
+            db (Session): Sqlalchemy `Session` object, this session is used to create the refresh token
 
         Returns:
-            The raw JWT refresh token string.
-
-        Raises:
-            sqlalchemy.exc.IntegrityError: If a database constraint is violated
-                while creating the token record (propagates after rollback).
+            IssuedRefreshToken: The issued refresh token, wrapped in a `IssuedRefreshToken` object
         """
 
         token = token_urlsafe(32)
@@ -228,22 +184,20 @@ def create_tokens_service(
         return IssuedRefreshToken(token=token, id=token_entry.id)
 
     def rotate_refresh_token(old_refresh_token: str, db: Session) -> IssuedRefreshToken:
-        """Validate a refresh token, rotate it and issue a new token pair.
-
-        The function verifies the provided refresh token against stored hashed
-        tokens, marks the existing token as revoked, and issues a new access and
-        refresh token pair (the new refresh token is persisted).
+        """rotate a valid refresh token and issue a new one
 
         Args:
-            old_refresh_token: The raw refresh token presented by the client.
-
-        Returns:
-            A dict with keys ``access_token`` and ``refresh_token`` for the
-            newly issued tokens.
+            old_refresh_token (str): The old, valid refresh token
+            db (Session): The active sqlalchemy `Session` object
 
         Raises:
-            fastapi.HTTPException: If the provided refresh token is invalid,
-                revoked, or expired (HTTP 401).
+            RefreshTokenInvalidError: Old refresh token is not found in the db
+            RefreshTokenInvalidError: Old refresh token is invalid
+            InternalError: No expires at column for old refresh token row
+            TokenExpiredError: Old refresh token is expired
+
+        Returns:
+            IssuedRefreshToken: The newly issued refresh token, wrapped in an `IssuedRefreshToken` object
         """
         logger = logging.getLogger(__name__)
         token_hash = hash_token(token=old_refresh_token)
@@ -251,7 +205,7 @@ def create_tokens_service(
 
         if not token_entry:
             logger.warning("rotate_refresh_token: old token not found in DB")
-            raise TokenInvalidError()
+            raise RefreshTokenInvalidError()
 
         if token_entry.revoked:
             # Attempted refresh with revoked token (possible replay):
@@ -304,14 +258,26 @@ def create_tokens_service(
         return new_refresh_token
 
     def create_csrf_token() -> str:
+        """Create a new csrf token
+
+        Returns:
+            str: The newly created csrf token
+        """
         return token_urlsafe(32)
 
     def issue_tokens_with_session(session: Session) -> ReturnTokens:
+        """Issue new token pair with active db session
+
+        Args:
+            session (Session): active sqlalchemy `Session` object
+
+        Returns:
+            ReturnTokens: The wrapped tokens(access, refresh and csrf)
+        """
         new_access_token = create_access_token(user_id=user_id)
         if old_refresh_token:
             new_refresh_token = rotate_refresh_token(old_refresh_token, session)
         else:
-            revoke_refresh_token(user_id=user_id, db=session)
             new_refresh_token = create_refresh_token(user_id, session)
         new_csrf_token = create_csrf_token()
         return ReturnTokens(
@@ -330,7 +296,59 @@ def create_tokens_service(
             return tokens
         except Exception:
             local_db.rollback()
-            raise
+            raise InternalError()
+
+
+def hash_token(token: str) -> str:
+    """Compute a SHA-256 hash for a token
+
+    Args:
+        token (str): The token to hash
+
+    Returns:
+        str: The hashed token
+    """
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def verify_token(token: str, token_hash: str) -> bool:
+    """Verify a token by hashing it and comparing the hash
+
+    Args:
+        token (str): The token to compare with
+        token_hash (str): The token hash to compare to
+
+    Returns:
+        bool: Whether the provided token and token hash match
+    """
+    return hash_token(token) == token_hash
+
+
+async def cleanup_tokens() -> None:
+    """Remove expired or revoked refresh tokens from persistent storage.
+
+    The function opens a new database session and deletes any ``Tokens``
+    records that are either expired (``expires_at`` in the past) or revoked
+    longer than the grace period. This is intended as a maintenance task and
+    does not return a value.
+    """
+    grace_period = datetime.now(tz=timezone.utc) - timedelta(days=7)
+
+    with get_db_session() as db:
+        db.query(Tokens).filter(
+            (Tokens.expires_at < datetime.now(tz=timezone.utc))
+            | (
+                # (Tokens.revoked == True) &
+                (Tokens.revoked_at.isnot(other=None))
+                & (Tokens.revoked_at < grace_period)
+            )
+        ).delete(synchronize_session=False)
+        db.commit()
+
+
+#########################################################
+###                     COOKIES                       ###
+#########################################################
 
 
 def response_cookies_generator(
@@ -424,6 +442,7 @@ def apply_refreshed_token_cookies(
 
 
 def clear_token_cookies_service(response: Response) -> None:
+    """Set the authentication cookies(access token, refresh token and csrf token) to a `max_age` of 0 what makes it that the cookie expires immediately"""
     response.set_cookie(
         key="access_token",
         value="",
@@ -457,6 +476,15 @@ def clear_token_cookies_service(response: Response) -> None:
 def get_access_token_cookie(
     connection: HTTPConnection, access_token: Optional[str] = Cookie(default=None)
 ) -> Optional[str]:
+    """Dependency to retrieve the access token injected by FastAPI in the connection object
+
+    Args:
+        connection (HTTPConnection): `HTTPConnection` object injected by FastAPI which includes the possible access token cookie
+        access_token (Optional[str], optional): Possible injected access token cookie by FastAPI. Defaults to Cookie(default=None).
+
+    Returns:
+        Optional[str]: The optionally, by FastAPI, injected access token by
+    """
     if isinstance(access_token, str) and access_token:
         return access_token
 
@@ -471,6 +499,7 @@ def get_access_token_cookie(
 
 
 def get_access_token_cookie_fallback(connection: HTTPConnection) -> Optional[str]:
+    """Fallback to the `get_access_token_cookie` function. This function tries to take the access token from the Authorization Bearer token header"""
     auth_header = connection.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         return auth_header[7:]
@@ -488,6 +517,11 @@ def get_refresh_token_cookie(
     if not isinstance(refresh_token, str):
         return connection.cookies.get("refresh_token")
     return refresh_token
+
+
+#########################################################
+###                     PASSWORDS                     ###
+#########################################################
 
 
 def check_csrf(connection: HTTPConnection) -> bool:
@@ -534,168 +568,9 @@ def hash_password(password: str) -> str:
     return _ph.hash(password=password)
 
 
-def hash_token(token: str) -> str:
-    """Compute a SHA-256 hex digest for a token string.
-
-    Args:
-        token: The raw token string to hash.
-
-    Returns:
-        The SHA-256 hex digest of ``token``.
-    """
-    return hashlib.sha256(token.encode()).hexdigest()
-
-
-def verify_token(token: str, token_hash: str) -> bool:
-    """Verify that a raw token matches a stored SHA-256 token hash.
-
-    Args:
-        token: The raw token string to verify.
-        token_hash: The stored SHA-256 hex digest to compare against.
-
-    Returns:
-        True if the computed digest of ``token`` equals ``token_hash``,
-        otherwise False.
-    """
-    return hashlib.sha256(token.encode()).hexdigest() == token_hash
-
-
-async def cleanup_tokens() -> None:
-    """Remove expired or revoked refresh tokens from persistent storage.
-
-    The function opens a new database session and deletes any ``Tokens``
-    records that are either expired (``expires_at`` in the past) or revoked
-    longer than the grace period. This is intended as a maintenance task and
-    does not return a value.
-    """
-    grace_period = datetime.now(tz=timezone.utc) - timedelta(days=7)
-
-    with get_db_session() as db:
-        db.query(Tokens).filter(
-            (Tokens.expires_at < datetime.now(tz=timezone.utc))
-            | (
-                # (Tokens.revoked == True) &
-                (Tokens.revoked_at.isnot(other=None))
-                & (Tokens.revoked_at < grace_period)
-            )
-        ).delete(synchronize_session=False)
-        db.commit()
-
-
-def get_user_id(
-    connection: HTTPConnection,
-    skip_csrf: bool = False,
-) -> UUID:
-    """Extract the user UUID from an access token supplied in a request.
-
-    The function attempts to retrieve a bearer token using
-    :pyfunc:`get_access_token`, validates it and returns the subject value as
-    a UUID string. HTTP exceptions are raised for missing or malformed
-    tokens.
-
-    Args:
-        connection: HTTP request/websocket connection.
-        skip_csrf: Disable CSRF checks (internal use only).
-
-    Returns:
-        The user identifier (UUID) present in the validated token payload.
-
-    Raises:
-        fastapi.HTTPException: If no token is provided or the token payload
-            does not include a user identifier.
-    """
-    token = get_access_token_cookie(connection=connection)
-    if not token:
-        refresh_user_id, refresh_token = get_user_id_from_refresh(
-            connection=connection,
-            skip_csrf=skip_csrf,
-        )
-        tokens = create_tokens_service(
-            user_id=refresh_user_id, old_refresh_token=refresh_token
-        )
-
-        # Store refreshed tokens on request state so custom Response-returning
-        # routes can apply them before returning.
-        try:
-            connection.state.refreshed_tokens = tokens
-        except Exception:
-            pass
-
-        token = tokens.access_token
-
-    if (
-        not isinstance(connection, WebSocket)
-        and not check_csrf(connection=connection)
-        and not skip_csrf
-    ):
-        raise ForbiddenError(detail="CSRF token is invalid")
-
-    payload = validate_access_token(token=token)
-
-    user_id = payload.sub
-    if not user_id:
-        raise InternalError()
-    return user_id
-
-
-def get_user_id_from_refresh(
-    connection: HTTPConnection, skip_csrf: bool = False
-) -> tuple[UUID, str]:
-    logger = logging.getLogger(__name__)
-    token = get_refresh_token_cookie(connection)
-
-    if not token:
-        logger.warning("get_user_id_from_refresh: refresh_token cookie not found")
-        raise RefreshTokenMissingError()
-
-    if (
-        not isinstance(connection, WebSocket)
-        and not check_csrf(connection=connection)
-        and not skip_csrf
-    ):
-        logger.warning(
-            "get_user_id_from_refresh: CSRF check failed, skip_csrf=%s", skip_csrf
-        )
-        raise ForbiddenError(detail="CSRF token is invalid")
-
-    with get_db_session() as db:
-        token_hash = hash_token(token)
-        token_entry = db.query(Tokens).where(Tokens.token == token_hash).first()
-        if not token_entry:
-            logger.warning(
-                "get_user_id_from_refresh: token not found in DB (hash=%s)",
-                token_hash[:8],
-            )
-            raise RefreshTokenInvalidError()
-        if token_entry.revoked:
-            logger.warning(
-                "get_user_id_from_refresh: token is revoked (user_id=%s, revoked_at=%s)",
-                token_entry.user_id,
-                token_entry.revoked_at,
-            )
-            raise RefreshTokenInvalidError()
-        # Normalize stored datetime to timezone-aware for comparison.
-        expires_at = _ensure_aware(token_entry.expires_at)
-        if not expires_at:
-            app_logger.error(
-                f"Tokens row with id {token_entry.id} has no `expires_at` column set"
-            )
-            raise InternalError()
-
-        now = datetime.now(timezone.utc)
-        if expires_at <= now:
-            logger.warning(
-                "get_user_id_from_refresh: token expired (expires_at=%s, now=%s)",
-                expires_at,
-                now,
-            )
-            raise RefreshTokenInvalidError()
-        logger.info(
-            "get_user_id_from_refresh: token valid for user_id=%s, expires_at=%s",
-            token_entry.user_id,
-            expires_at,
-        )
-        return (token_entry.user_id, token)
+#########################################################
+###                       MAIN                        ###
+#########################################################
 
 
 def authenticate_user(email: str, password: str) -> ReturnTokens:
@@ -906,3 +781,179 @@ def get_user_data_service(user_id: UUID) -> UserProfileDetail:
         if not user:
             raise InternalError("User not found")
         return UserProfileDetail.model_validate(user)
+
+
+def get_user_id(
+    connection: HTTPConnection,
+    skip_csrf: bool = False,
+) -> UUID:
+    """Extract the user UUID from an access token supplied in a request.
+
+    The function attempts to retrieve a bearer token using
+    :pyfunc:`get_access_token`, validates it and returns the subject value as
+    a UUID string. HTTP exceptions are raised for missing or malformed
+    tokens.
+
+    Args:
+        connection: HTTP request/websocket connection.
+        skip_csrf: Disable CSRF checks (internal use only).
+
+    Returns:
+        The user identifier (UUID) present in the validated token payload.
+
+    Raises:
+        fastapi.HTTPException: If no token is provided or the token payload
+            does not include a user identifier.
+    """
+    token = get_access_token_cookie(connection=connection)
+    if not token:
+        refresh_user_id, refresh_token = get_user_id_from_refresh(
+            connection=connection,
+            skip_csrf=skip_csrf,
+        )
+        tokens = create_tokens_service(
+            user_id=refresh_user_id, old_refresh_token=refresh_token
+        )
+
+        # Store refreshed tokens on request state so custom Response-returning
+        # routes can apply them before returning.
+        try:
+            connection.state.refreshed_tokens = tokens
+        except Exception:
+            pass
+
+        token = tokens.access_token
+
+    if (
+        not isinstance(connection, WebSocket)
+        and not check_csrf(connection=connection)
+        and not skip_csrf
+    ):
+        raise ForbiddenError(detail="CSRF token is invalid")
+
+    payload = validate_access_token(token=token)
+
+    user_id = payload.sub
+    if not user_id:
+        raise InternalError()
+    return user_id
+
+
+def get_user_id_from_refresh(
+    connection: HTTPConnection, skip_csrf: bool = False
+) -> tuple[UUID, str]:
+    logger = logging.getLogger(__name__)
+    token = get_refresh_token_cookie(connection)
+
+    if not token:
+        logger.warning("get_user_id_from_refresh: refresh_token cookie not found")
+        raise RefreshTokenMissingError()
+
+    if (
+        not isinstance(connection, WebSocket)
+        and not check_csrf(connection=connection)
+        and not skip_csrf
+    ):
+        logger.warning(
+            "get_user_id_from_refresh: CSRF check failed, skip_csrf=%s", skip_csrf
+        )
+        raise ForbiddenError(detail="CSRF token is invalid")
+
+    with get_db_session() as db:
+        token_hash = hash_token(token)
+        token_entry = db.query(Tokens).where(Tokens.token == token_hash).first()
+        if not token_entry:
+            logger.warning(
+                "get_user_id_from_refresh: token not found in DB (hash=%s)",
+                token_hash[:8],
+            )
+            raise RefreshTokenInvalidError()
+        if token_entry.revoked:
+            logger.warning(
+                "get_user_id_from_refresh: token is revoked (user_id=%s, revoked_at=%s)",
+                token_entry.user_id,
+                token_entry.revoked_at,
+            )
+            raise RefreshTokenInvalidError()
+        # Normalize stored datetime to timezone-aware for comparison.
+        expires_at = _ensure_aware(token_entry.expires_at)
+        if not expires_at:
+            app_logger.error(
+                f"Tokens row with id {token_entry.id} has no `expires_at` column set"
+            )
+            raise InternalError()
+
+        now = datetime.now(timezone.utc)
+        if expires_at <= now:
+            logger.warning(
+                "get_user_id_from_refresh: token expired (expires_at=%s, now=%s)",
+                expires_at,
+                now,
+            )
+            raise RefreshTokenInvalidError()
+        logger.info(
+            "get_user_id_from_refresh: token valid for user_id=%s, expires_at=%s",
+            token_entry.user_id,
+            expires_at,
+        )
+        return (token_entry.user_id, token)
+
+
+def validate_user_service(
+    request: Request,
+    allow_refresh: bool = True,
+) -> tuple[Optional[UUID], Optional[ReturnTokens]]:
+    """Validate user by checking their access token."""
+    try:
+        access_token = request.cookies.get("access_token")
+        app_logger.info(
+            f"validate_user: access_token present={access_token is not None}, allow_refresh={allow_refresh}"
+        )
+        try:
+            if access_token is None:
+                raise TokenMissingError()
+            payload = validate_access_token(access_token)
+            return payload.sub, None
+        except (TokenExpiredError, TokenMissingError) as exc:
+            app_logger.info(
+                f"validate_user: access token missing/expired, attempting refresh. Exception: {type(exc).__name__}"
+            )
+            # Only try refresh when token expired and refresh allowed
+            # Allow refresh attempt when token expired or missing (refresh token may still exist)
+            if not allow_refresh:
+                app_logger.info(
+                    "validate_user: refresh not allowed, raising TokenMissingError"
+                )
+                raise TokenMissingError()
+
+            try:
+                app_logger.info(
+                    "validate_user: attempting to refresh using refresh_token cookie"
+                )
+                user_id, raw_refresh = get_user_id_from_refresh(request, skip_csrf=True)
+                app_logger.info(
+                    f"validate_user: refresh_token lookup successful, user_id={user_id}"
+                )
+                tokens = create_tokens_service(
+                    user_id=user_id, old_refresh_token=raw_refresh
+                )
+                app_logger.info(
+                    f"validate_user: new tokens created successfully for user_id={user_id}"
+                )
+                return user_id, tokens
+            except (
+                RefreshTokenMissingError,
+                RefreshTokenInvalidError,
+                ForbiddenError,
+                TokenExpiredError,
+                TokenMissingError,
+            ) as refresh_exc:
+                app_logger.warning(
+                    f"validate_user: refresh failed with {type(refresh_exc).__name__}: {getattr(refresh_exc, 'message', str(refresh_exc))}"
+                )
+                return None, None
+    except (TokenExpiredError, TokenMissingError, TokenInvalidError) as e:
+        return None, None
+    except Exception as e:
+        error_logger.exception(f"Error validating user: {e}")
+        return None, None

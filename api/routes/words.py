@@ -1,9 +1,11 @@
+from typing import Optional
+
 from fastapi import APIRouter, Request, Depends
 from uuid import UUID
 
 from api.schema.internal.words import LoadWordList
 from api.services.auth_service import get_user_id
-from api.services.words_service import get_due_words_service, save_wordlist_service
+from api.services.words_service import get_due_words_service, save_wordlist_service, submit_word_review_service
 from api.schema.http.words import DueWordsResponse, WordReviewRequest
 
 router = APIRouter(prefix="/words")
@@ -20,13 +22,16 @@ def load_wordlist(
 
 @router.get("/due")
 def get_due_words(
-    request: Request, limit: int, offset: int, user_id: UUID = Depends(get_user_id)
+    request: Request, limit: Optional[int] = None, offset: Optional[int] = None, user_id: UUID = Depends(get_user_id)
 ) -> DueWordsResponse:
-    due_words = get_due_words_service(user_id)
-    return due_words
+    due_words = get_due_words_service(user_id, limit, offset)
+    return DueWordsResponse(
+        wordAmount=len(due_words),
+        words=due_words
+    )
 
 
 @router.post("/review")
-def submit_word_review(request: Request, data: WordReviewRequest, user_id: UUID):
-    # submit_word_review_service(data)
+def submit_word_review(request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id)):
+    submit_word_review_service(data.reviews)
     return {"success": True}

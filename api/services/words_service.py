@@ -1,13 +1,15 @@
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
-from api.schema.internal.words import ReviewedWord, LoadWordList
+from api.schema.internal.words import DueWord, ReviewedWord, LoadWordList
 from api.models.words import Cards, Chapters, Lists, Words
 from api.models.auth import User
 from api.database import get_db_session
 from api.logging_config import app_logger
-from api.schema.internal.errors import NotFoundError, InternalError
+from api.schema.internal.errors import InternalError
 
 
 def calculate_due_date(box: int) -> Optional[datetime]:
@@ -76,6 +78,18 @@ def calculate_new_stability(
 
     return max(0.05, min(1.0, new_stability))
 
+def calculate_learnyear(current_date: Optional[datetime] = None) -> str:
+    current_date = current_date or datetime.now()
+
+    start_month = 9
+    if current_date.month >= start_month:
+        start_year = current_date.year
+    else:
+        start_year = current_date.year - 1
+
+    end_year = start_year + 1
+
+    return f"{start_year % 100:02d}-{end_year % 100:02d}"
 
 def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
     # TODO: Check if user has admin priveleges
@@ -113,24 +127,67 @@ def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
 
 
 
-def get_due_words_service(user_id: UUID):
+def get_due_words_service(user_id: UUID, limit: Optional[int] = None, offset: Optional[int] = 0) -> list[DueWord]:
+    if limit is not None and limit <= 0:
+        limit = None
+    if offset is not None and offset <= 0:
+        offset = None
+
     with get_db_session() as db:
         # First query for current year
-        learnyear = db.query(User.grade).where(User.id == user_id).scalar()
+        user = db.query(User).where(User.id == user_id).scalar()
 
-        if not learnyear:
-            app_logger.error(f"Grade not found for user with id {user_id}")
+        learnyear = calculate_learnyear()
 
         # Then find cards for this year
-        ...
+        due_words = (
+            db.query(Words)
+            .join(Chapters, Words.chapter_id == Chapters.id)
+            .join(Lists, Chapters.list_id == Lists.id)
+            .outerjoin(
+                Cards,
+                (Cards.word_id == Words.id) &
+                (Cards.user_id == user_id)
+            )
+            .where(
+                Lists.schoolyear == learnyear,
+                Lists.schoolgrade == user.grade,
+                or_(
+                    Cards.id.is_(None),  # never learned
+                    Cards.due_at <= datetime.now(timezone.utc)  # due
+                )
+            )
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
 
+        due_word_model_words: list[DueWord] = []
+        for word in due_words:
+            due_word_model_words.append(DueWord(
+                wordId=word.id,
+                chapterId=word.chapter_id,
+                word=word.word,
+                translation=word.translation
+            ))
+        return due_word_model_words
 
-def add_card_service(user_id: UUID, word_id: UUID) -> Cards:
+def submit_word_review_service(reviews: list[ReviewedWord]) -> None:
+    ...
+
+def add_card_service(user_id: UUID, word_id: UUID, db: Optional[Session] = None) -> Cards:
+    if db:
+        new_card = Cards(user_id=user_id, word_id=word_id, box=0)
+        db.add(new_card)
+        db.flush()
+        db.refresh(new_card)
+        return new_card
+
     with get_db_session() as db:
         new_card = Cards(user_id=user_id, word_id=word_id, box=0)
         db.add(new_card)
         db.commit()
-        db.flush()
+        db.refresh(new_card)
         return new_card
 
 
@@ -143,10 +200,8 @@ def update_card_service(user_id: UUID, reviewed_word: ReviewedWord) -> Cards:
         )
 
         if not existing_card:
-            app_logger.warning(
-                f"Existing card not found for card with id {reviewed_word.wordId} for user with id {user_id}"
-            )
-            raise NotFoundError(detail=f"Card with if {reviewed_word.wordId} not found")
+            # Create card
+            existing_card = add_card_service(user_id=user_id, word_id=reviewed_word.wordId, db=db)
 
         # Update box, stability, last_reviewed and due_at
 
@@ -154,7 +209,7 @@ def update_card_service(user_id: UUID, reviewed_word: ReviewedWord) -> Cards:
             existing_card, reviewed_word.correct, reviewed_word.incorrect
         )
 
-        if reviewed_word.incorrect > 0:
+        if reviewed_word.incorrect == 0:
             # Flawless, so next box
             # Check if already highest box
             if existing_card.box != 5:
@@ -162,6 +217,7 @@ def update_card_service(user_id: UUID, reviewed_word: ReviewedWord) -> Cards:
 
         else:
             # Strict, put back in first box
+            # TODO: Add non strict version, users choice
             existing_card.box = 1
 
         new_due_date = calculate_due_date(existing_card.box)

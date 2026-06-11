@@ -11,5 +11,4 @@ class DueWordsResponse(BaseModel):
     words: list[DueWord]
 
 class WordReviewRequest(BaseModel):
-    sessionId: UUID
     reviews: list[ReviewedWord]

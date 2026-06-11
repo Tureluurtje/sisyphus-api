@@ -10,8 +10,9 @@ from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 
-from api.schema.internal.errors import APIError, AppException
+from api.schema.internal.errors import APIError, AppException, DatabaseConnectionError
 from api.logging_config import app_logger, error_logger, request_logger
+from sqlalchemy.exc import OperationalError
 
 # When running the file directly (for example from the `api/` folder in a debugger)
 # Python's import machinery won't find the top-level `api` package because
@@ -139,6 +140,19 @@ async def validation_handler(request: Request, exc: RequestValidationError):
             detail=exc.errors(),
         ).model_dump(),
     )
+
+
+@app.exception_handler(OperationalError)
+async def database_error_handler(request: Request, exc: OperationalError):
+    error_logger.exception(
+        {
+            "method": request.method,
+            "url": str(request.url),
+            "error": "Database connection error",
+            "detail": str(exc),
+        }
+    )
+    raise DatabaseConnectionError()
 
 
 @app.exception_handler(Exception)

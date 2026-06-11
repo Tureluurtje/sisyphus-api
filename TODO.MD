@@ -11,6 +11,5 @@
 - [ ] Improve access token claims
 - [ ] Add email rate limiting
 - [ ] Fix PyJWT type stubs with correct versioning
-- [ ] Better access token jwt
 - [ ] One "encrypted" cookie instead of three seperate ones(auth)
 - [ ] Option to have wrong card only move back one
