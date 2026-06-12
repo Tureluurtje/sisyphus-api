@@ -5,18 +5,30 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from api.schema.internal.words import DueWord, ReviewedWord, LoadWordList
-from api.models.words import Cards, Chapters, Lists, Words
+from api.models.words import Cards, Chapters, Lists, Reviews, Words
 from api.models.auth import User
 from api.database import get_db_session
 from api.logging_config import app_logger
 from api.schema.internal.errors import InternalError
 
 
+
+def _ensure_aware(dt: datetime) -> datetime:
+    """Ensure a datetime is timezone-aware in UTC.
+
+    Many stored datetimes may be naive (no tzinfo). Treat naive values as
+    UTC to allow consistent comparisons with timezone-aware `now()`.
+    """
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def calculate_due_date(box: int) -> Optional[datetime]:
     now = datetime.now()
     match box:
         case 0:
-            return now
+            return now + timedelta(days=1)
         case 1:
             next_day = now + timedelta(days=1)
             while next_day.weekday() >= 5:
@@ -63,7 +75,7 @@ def calculate_new_stability(
     accuracy = correct_count / max(total, 1)
 
     # days since review
-    days_since_review = (datetime.now(timezone.utc) - card.last_reviewed).days
+    days_since_review = (_ensure_aware(datetime.now(timezone.utc)) - _ensure_aware(card.last_reviewed)).days
 
     if days_since_review < 1:
         days_since_review = 1
@@ -172,12 +184,47 @@ def get_due_words_service(user_id: UUID, limit: Optional[int] = None, offset: Op
             ))
         return due_word_model_words
 
-def submit_word_review_service(reviews: list[ReviewedWord]) -> None:
-    ...
+def submit_word_review_service(user_id: UUID, reviews: list[ReviewedWord]) -> list[Cards]:
+    updated_cards: list[Cards] = []
+    with get_db_session() as db:
+        try:
+            for word in reviews:
+                updated_card = update_card_service(user_id, word, db)
+                updated_cards.append(updated_card)
+                if word.incorrect == 0:
+                    rating = 1
+                else:
+                    rating = 0
+                add_review_entry(
+                    user_id=user_id,
+                    card_id=updated_card.id,
+                    rating=rating,
+                    response_time_ms=word.averageResponseTimeMs,
+                    reviewed_at=word.reviewedAt,
+                    db=db
+                )
+            db.commit()
+        except:
+            db.rollback()
 
-def add_card_service(user_id: UUID, word_id: UUID, db: Optional[Session] = None) -> Cards:
+    return updated_cards
+
+def add_card_service(
+    user_id: UUID,
+    word_id: UUID,
+    reviewed_at: datetime,
+    db: Optional[Session] = None
+) -> Cards:
+    due_at = calculate_due_date(0)
     if db:
-        new_card = Cards(user_id=user_id, word_id=word_id, box=0)
+        new_card = Cards(
+            user_id=user_id,
+            word_id=word_id,
+            due_at=due_at,
+            last_reviewed=reviewed_at,
+            box=0
+        )
+
         db.add(new_card)
         db.flush()
         db.refresh(new_card)
@@ -191,47 +238,71 @@ def add_card_service(user_id: UUID, word_id: UUID, db: Optional[Session] = None)
         return new_card
 
 
-def update_card_service(user_id: UUID, reviewed_word: ReviewedWord) -> Cards:
-    with get_db_session() as db:
-        existing_card: Cards = (
-            db.query(Cards)
-            .where(Cards.user_id == user_id, Cards.id == reviewed_word.wordId)
-            .scalar()
+def update_card_service(user_id: UUID, reviewed_word: ReviewedWord, db: Session) -> Cards:
+    existing_card: Cards = (
+        db.query(Cards)
+        .where(Cards.user_id == user_id, Cards.word_id == reviewed_word.wordId)
+        .first()
+    )
+
+    if not existing_card:
+        # Create card
+        existing_card = add_card_service(
+            user_id=user_id,
+            word_id=reviewed_word.wordId,
+            reviewed_at=reviewed_word.reviewedAt,
+            db=db
         )
 
-        if not existing_card:
-            # Create card
-            existing_card = add_card_service(user_id=user_id, word_id=reviewed_word.wordId, db=db)
+    # Update box, stability, last_reviewed and due_at
 
-        # Update box, stability, last_reviewed and due_at
+    existing_card.stability = calculate_new_stability(
+        existing_card, reviewed_word.correct, reviewed_word.incorrect
+    )
 
-        existing_card.stability = calculate_new_stability(
-            existing_card, reviewed_word.correct, reviewed_word.incorrect
+    if reviewed_word.incorrect == 0:
+        # Flawless, so next box
+        # Check if already highest box
+        if existing_card.box != 5:
+            existing_card.box += 1
+
+    else:
+        # Strict, put back in first box
+        # TODO: Add non strict version, users choice
+        existing_card.box = 1
+
+    new_due_date = calculate_due_date(existing_card.box)
+    if not new_due_date:
+        app_logger.error(
+            f"New due date not calculated properly with word id {existing_card.word_id}"
         )
+        raise InternalError()
 
-        if reviewed_word.incorrect == 0:
-            # Flawless, so next box
-            # Check if already highest box
-            if existing_card.box != 5:
-                existing_card.box += 1
+    existing_card.due_at = new_due_date
 
-        else:
-            # Strict, put back in first box
-            # TODO: Add non strict version, users choice
-            existing_card.box = 1
+    existing_card.last_reviewed = reviewed_word.reviewedAt
 
-        new_due_date = calculate_due_date(existing_card.box)
-        if not new_due_date:
-            app_logger.error(
-                f"New due date not calculated properly with word id {existing_card.word_id}"
-            )
-            raise InternalError()
+    db.flush()
 
-        existing_card.due_at = new_due_date
+    return existing_card
 
-        existing_card.last_reviewed = reviewed_word.reviewedAt
+def add_review_entry(
+    user_id: UUID,
+    card_id: UUID,
+    rating: int,
+    response_time_ms: int,
+    reviewed_at: datetime,
+    db: Session
+) -> None:
+    if rating not in (0,1 ):
+        app_logger.error(f"rating for card id '{card_id}' does not have a correct rating(0 or 1).")
+        raise InternalError()
 
-        db.commit()
-        db.refresh(existing_card)
-
-        return existing_card
+    new_review_entry = Reviews(
+        user_id=user_id,
+        card_id=card_id,
+        rating=rating,
+        response_time_ms=response_time_ms,
+    )
+    db.add(new_review_entry)
+    db.flush()

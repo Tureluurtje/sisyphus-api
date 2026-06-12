@@ -145,6 +145,7 @@ class Cards(Base):
     stability: Mapped[float] = mapped_column(
         Float,
         nullable=False,
+        default=0.3
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -179,7 +180,7 @@ class Cards(Base):
         ),
         {"extend_existing": True},
     )
-    
+
 class Reviews(Base):
     __tablename__ = "reviews"
 
@@ -204,7 +205,7 @@ class Reviews(Base):
     rating: Mapped[int] = mapped_column(
         SmallInteger,
         nullable=False,
-    )
+    ) # 0 for wrong and 1 for right
 
     response_time_ms: Mapped[int | None] = mapped_column(
         Integer,

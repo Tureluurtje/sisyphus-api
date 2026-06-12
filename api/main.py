@@ -284,6 +284,29 @@ async def log_requests(
         )
         raise
 
+@app.middleware(middleware_type="http")
+async def apply_refreshed_tokens(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """Propagate silently-rotated tokens to the outgoing response.
+
+    When get_user_id() transparently refreshes an expired access token via
+    the refresh token, it stashes the new token pair on request.state.
+    FastAPI's dependency-injected Response object picks those cookies up
+    automatically, but routes that return a custom Response/JSONResponse
+    instance bypass that mechanism entirely — the cookies are silently
+    dropped, leaving the client holding a now-revoked refresh token and
+    causing an unexpected logout on the next request.
+
+    This middleware closes that gap by calling apply_refreshed_token_cookies
+    after every response, regardless of how the route returned.
+    """
+    response = await call_next(request)
+    refreshed = getattr(request.state, "refreshed_tokens", None)
+    if refreshed is not None:
+        from api.services.auth_service import response_cookies_generator
+        response_cookies_generator(tokens=refreshed, response=response)
+    return response
 
 # Get client ip for logger
 def get_client_ip(request: Request) -> str:

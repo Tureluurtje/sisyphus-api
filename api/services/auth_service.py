@@ -805,6 +805,14 @@ def get_user_id(
         fastapi.HTTPException: If no token is provided or the token payload
             does not include a user identifier.
     """
+    # Check csrf first
+    if (
+        not isinstance(connection, WebSocket)
+        and not check_csrf(connection=connection)
+        and not skip_csrf
+    ):
+        raise ForbiddenError(detail="CSRF token is invalid")
+
     token = get_access_token_cookie(connection=connection)
     if not token:
         refresh_user_id, refresh_token = get_user_id_from_refresh(
@@ -823,13 +831,6 @@ def get_user_id(
             pass
 
         token = tokens.access_token
-
-    if (
-        not isinstance(connection, WebSocket)
-        and not check_csrf(connection=connection)
-        and not skip_csrf
-    ):
-        raise ForbiddenError(detail="CSRF token is invalid")
 
     payload = validate_access_token(token=token)
 
