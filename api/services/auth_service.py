@@ -815,6 +815,7 @@ def get_user_id(
 
     token = get_access_token_cookie(connection=connection)
     if not token:
+        """
         refresh_user_id, refresh_token = get_user_id_from_refresh(
             connection=connection,
             skip_csrf=skip_csrf,
@@ -831,6 +832,8 @@ def get_user_id(
             pass
 
         token = tokens.access_token
+        """
+        raise TokenMissingError()
 
     payload = validate_access_token(token=token)
 
@@ -839,6 +842,15 @@ def get_user_id(
         raise InternalError()
     return user_id
 
+def get_user_id_skip_csrf(
+    connection: HTTPConnection
+):
+    """Wrapper for `get_user_id` function for non state changing routes.
+
+    Args:
+        connection (HTTPConnection): The, by FastAPI injected, connection
+    """
+    return get_user_id(connection=connection, skip_csrf=True)
 
 def get_user_id_from_refresh(
     connection: HTTPConnection, skip_csrf: bool = False

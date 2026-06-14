@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Depends
 from uuid import UUID
 
 from api.schema.internal.words import LoadWordList
-from api.services.auth_service import get_user_id
+from api.services.auth_service import get_user_id, get_user_id_skip_csrf
 from api.services.words_service import get_due_words_service, save_wordlist_service, submit_word_review_service
 from api.schema.http.words import DueWordsResponse, WordReviewRequest#, WordReviewResponse
 
@@ -23,7 +23,7 @@ def load_wordlist(
 
 @router.get("/due")
 def get_due_words(
-    request: Request, limit: Optional[int] = None, offset: Optional[int] = None, user_id: UUID = Depends(get_user_id)
+    request: Request, limit: Optional[int] = None, offset: Optional[int] = None, user_id: UUID = Depends(get_user_id_skip_csrf)
 ) -> DueWordsResponse:
     due_words = get_due_words_service(user_id, limit, offset)
     return DueWordsResponse(
