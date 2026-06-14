@@ -3,7 +3,7 @@ from uuid import UUID
 import asyncio
 from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
-from api.schema.internal.errors import TokenInvalidError, TokenMissingError
+from api.schema.internal.errors import RefreshTokenMissingError, TokenInvalidError, TokenMissingError
 from api.schema.internal.users import UserProfileDetail
 
 from api.limiter import limiter
@@ -26,6 +26,7 @@ def typed_limit(*args: Any, **kwargs: Any) -> Callable[[Callable[P, R]], Callabl
 from api.schema.http.auth import (
     LoginRequest,
     LoginResponse,
+    RefreshRequest,
     RefreshResponse,
     RegisterRequest,
     RegisterResponse,
@@ -38,6 +39,7 @@ from api.services.auth_service import (
     create_tokens_service,
     get_user_data_service,
     get_user_id_from_refresh,
+    get_user_id_from_refresh_body,
     register_user,
     validate_access_token,
     get_user_id,
@@ -98,15 +100,23 @@ async def validate(
 
     return ValidateResponse(active=True, payload=payload)
 
-
 @router.post(path="/refresh", status_code=status.HTTP_200_OK)
 @typed_limit("5/minute")
 async def refresh(
     request: Request,
     response: Response,
-    refresh_data: tuple[UUID, str] = Depends(get_user_id_from_refresh),
+    body_data: Optional[RefreshRequest] = None,
+    cookie_data: Optional[tuple[UUID, str]] = Depends(get_user_id_from_refresh),
 ) -> RefreshResponse:
-    user_id, old_refresh_token = refresh_data
+    if cookie_data:
+        user_id, old_refresh_token = cookie_data
+    else:
+        if body_data and body_data.old_refresh_token:
+            old_refresh_token = body_data.old_refresh_token
+            user_id = get_user_id_from_refresh_body(old_refresh_token)
+        else:
+            raise RefreshTokenMissingError()
+
     tokens = create_tokens_service(user_id=user_id, old_refresh_token=old_refresh_token)
     response_cookies_generator(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)

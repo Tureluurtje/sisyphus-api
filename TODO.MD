@@ -13,3 +13,4 @@
 - [ ] Fix PyJWT type stubs with correct versioning
 - [ ] One "encrypted" cookie instead of three seperate ones(auth)
 - [ ] Option to have wrong card only move back one
+- [ ] Make refresh token expire x days after last use. Track user login for this(with access token) and update in db/session. Only for 1 session, check with sid in access token claims.

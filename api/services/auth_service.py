@@ -854,13 +854,12 @@ def get_user_id_skip_csrf(
 
 def get_user_id_from_refresh(
     connection: HTTPConnection, skip_csrf: bool = False
-) -> tuple[UUID, str]:
+) -> Optional[tuple[UUID, str]]:
     logger = logging.getLogger(__name__)
     token = get_refresh_token_cookie(connection)
 
     if not token:
-        logger.warning("get_user_id_from_refresh: refresh_token cookie not found")
-        raise RefreshTokenMissingError()
+        return None
 
     if (
         not isinstance(connection, WebSocket)
@@ -911,6 +910,47 @@ def get_user_id_from_refresh(
         )
         return (token_entry.user_id, token)
 
+def get_user_id_from_refresh_body(token: str) -> UUID:
+        logger = logging.getLogger(__name__)
+        with get_db_session() as db:
+            token_hash = hash_token(token)
+            token_entry = db.query(Tokens).where(Tokens.token == token_hash).first()
+            if not token_entry:
+                logger.warning(
+                    "get_user_id_from_refresh_body: token not found in DB (hash=%s)",
+                    token_hash[:8],
+                )
+                raise RefreshTokenInvalidError()
+            if token_entry.revoked:
+                logger.warning(
+                    "get_user_id_from_refresh_body: token is revoked (user_id=%s, revoked_at=%s)",
+                    token_entry.user_id,
+                    token_entry.revoked_at,
+                )
+                raise RefreshTokenInvalidError()
+            # Normalize stored datetime to timezone-aware for comparison.
+            expires_at = _ensure_aware(token_entry.expires_at)
+            if not expires_at:
+                app_logger.error(
+                    f"Tokens row with id {token_entry.id} has no `expires_at` column set"
+                )
+                raise InternalError()
+
+            now = datetime.now(timezone.utc)
+            if expires_at <= now:
+                logger.warning(
+                    "get_user_id_from_refresh_body: token expired (expires_at=%s, now=%s)",
+                    expires_at,
+                    now,
+                )
+                raise RefreshTokenInvalidError()
+            logger.info(
+                "get_user_id_from_refresh_body: token valid for user_id=%s, expires_at=%s",
+                token_entry.user_id,
+                expires_at,
+            )
+            return token_entry.user_id
+
 
 def validate_user_service(
     request: Request,
@@ -943,7 +983,11 @@ def validate_user_service(
                 app_logger.info(
                     "validate_user: attempting to refresh using refresh_token cookie"
                 )
-                user_id, raw_refresh = get_user_id_from_refresh(request, skip_csrf=True)
+                data = get_user_id_from_refresh(request, skip_csrf=True)
+                if not data:
+                    raise RefreshTokenMissingError()
+                user_id, raw_refresh = data
+
                 app_logger.info(
                     f"validate_user: refresh_token lookup successful, user_id={user_id}"
                 )

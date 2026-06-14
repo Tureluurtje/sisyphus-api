@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr
 
 from api.schema.internal.auth import AccessTokenPayload, ReturnTokens
@@ -27,6 +29,9 @@ class ValidateResponse(BaseModel):
     active: bool
     payload: AccessTokenPayload
 
+
+class RefreshRequest(BaseModel):
+    old_refresh_token: Optional[str]
 
 class RefreshResponse(BaseModel):
     tokens: ReturnTokens
