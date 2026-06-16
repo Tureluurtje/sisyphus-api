@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 #from api.models.words import Cards
-from api.schema.internal.words import DueWord, ReviewedWord
+from api.schema.internal.words import DueWord, ReviewedWord, Stack
 
 
 class DueWordsResponse(BaseModel):
@@ -15,3 +15,7 @@ class WordReviewRequest(BaseModel):
 
 # class WordReviewResponse(BaseModel):
 #    reviews: list[Cards]
+
+class GetStacksResponse(BaseModel):
+    wordAmount: int
+    stacks: list[Stack]

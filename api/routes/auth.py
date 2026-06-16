@@ -24,6 +24,7 @@ def typed_limit(*args: Any, **kwargs: Any) -> Callable[[Callable[P, R]], Callabl
     return cast(Callable[[Callable[P, R]], Callable[P, R]], decorator)
 
 from api.schema.http.auth import (
+    DeleteResponse,
     LoginRequest,
     LoginResponse,
     RefreshRequest,
@@ -37,6 +38,7 @@ from api.services.auth_service import (
     authenticate_user,
     clear_token_cookies_service,
     create_tokens_service,
+    delete_account_service,
     get_user_data_service,
     get_user_id_from_refresh,
     get_user_id_from_refresh_body,
@@ -139,3 +141,12 @@ async def logout(
 
     clear_token_cookies_service(response)
     return LogoutResponse(success=True)
+
+@router.delete(path="/delete", status_code=status.HTTP_200_OK)
+async def delete(
+    request: Request,
+    response: Response,
+    user_id: UUID = Depends(get_user_id)
+) -> DeleteResponse:
+    delete_account_service(user_id=user_id)
+    return DeleteResponse(success=True)

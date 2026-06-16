@@ -48,3 +48,8 @@ class LoadWordList(BaseModel):
     schoolYear: str
     schoolGrade: int
     chapters: list[LoadChapter]
+
+class Stack(BaseModel):
+    stack_id: int
+    wordAmount: int
+    words: list[DueWord]

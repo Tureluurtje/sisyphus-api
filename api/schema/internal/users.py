@@ -11,7 +11,9 @@ class Claims(BaseModel):
 class UserProfileDetail(BaseModel):
     user_id: UUID
     username: str
-    grade: int
     email: str
+    grade: int
+    total_words_learned: int
+    streak: int
     created_at: datetime
     updated_at: datetime

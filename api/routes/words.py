@@ -1,12 +1,12 @@
-from typing import Optional
+from typing import Optional, cast
 
 from fastapi import APIRouter, Request, Depends
 from uuid import UUID
 
-from api.schema.internal.words import LoadWordList
+from api.schema.internal.words import LoadWordList, Stack
 from api.services.auth_service import get_user_id, get_user_id_skip_csrf
-from api.services.words_service import get_due_words_service, save_wordlist_service, submit_word_review_service
-from api.schema.http.words import DueWordsResponse, WordReviewRequest#, WordReviewResponse
+from api.services.words_service import get_due_words_service, get_stack_service, save_wordlist_service, submit_word_review_service
+from api.schema.http.words import DueWordsResponse, GetStacksResponse, WordReviewRequest#, WordReviewResponse
 
 router = APIRouter(prefix="/words", tags=["/words"])
 
@@ -31,7 +31,6 @@ def get_due_words(
         words=due_words
     )
 
-
 @router.post("/review")
 def submit_word_review(request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id)):
     #updated_cards = submit_word_review_service(user_id, data.reviews)
@@ -41,3 +40,14 @@ def submit_word_review(request: Request, data: WordReviewRequest, user_id: UUID 
     #    reviews=updated_cards
     #)
     return {"success": True}
+
+@router.get("/stacks")
+def get_stacks(
+    request: Request,
+    user_id: UUID = Depends(get_user_id_skip_csrf)
+) -> GetStacksResponse:
+    stacks = cast(GetStacksResponse, get_stack_service(
+        user_id=user_id,
+        all_stacks=True
+    ))
+    return stacks

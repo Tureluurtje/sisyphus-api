@@ -4,7 +4,8 @@ from typing import Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from api.schema.internal.words import DueWord, ReviewedWord, LoadWordList
+from api.schema.http.words import GetStacksResponse
+from api.schema.internal.words import DueWord, ReviewedWord, LoadWordList, Stack
 from api.models.words import Cards, Chapters, Lists, Reviews, Words
 from api.models.auth import User
 from api.database import get_db_session
@@ -306,3 +307,58 @@ def add_review_entry(
     )
     db.add(new_review_entry)
     db.flush()
+
+def get_stack_service(
+    user_id: UUID,
+    stack_id: Optional[int] = None,
+    all_stacks: Optional[bool] = None,
+) -> GetStacksResponse | Stack:
+    if not all_stacks and stack_id is None:
+        app_logger.error("either `stack_id` or `all_stacks` must be given")
+        raise InternalError()
+
+    if not all_stacks and stack_id not in (0, 1, 2, 3, 4, 5):
+        app_logger.error("`stack_id` parameter not a valid stack id")
+        raise InternalError()
+
+    with get_db_session() as db:
+        query = (
+            db.query(Cards, Words)
+            .join(Words, Words.id == Cards.word_id)
+            .where(Cards.user_id == user_id)
+        )
+
+        if not all_stacks:
+            query = query.where(Cards.box == stack_id)
+
+        rows = query.all()
+        word_amount = len(rows)
+
+        if all_stacks:
+            stacks: dict[int, list[DueWord]] = {i: [] for i in range(6)}
+            for card, word in rows:
+                if card.box in stacks:
+                    stacks[card.box].append(DueWord(
+                        wordId=word.id,
+                        chapterId=word.chapter_id,
+                        word=word.word,
+                        translation=word.translation
+                    ))
+                else:
+                    app_logger.error(f"Word with id {word.id} has no valid box id set")
+
+            stack_0, stack_1, stack_2, stack_3, stack_4, stack_5 = (
+                stacks[0], stacks[1], stacks[2], stacks[3], stacks[4], stacks[5]
+            )
+
+            stack_word_list = [stack_0, stack_1, stack_2, stack_3, stack_4, stack_5]
+            stack_list: list[Stack] = [Stack(stack_id=i, wordAmount=len(stack), words=stack) for i, stack in enumerate(stack_word_list)]
+            return GetStacksResponse(
+                wordAmount=word_amount,
+                stacks=stack_list
+            )
+
+        else:
+            assert stack_id is not None # Narrows Optional[int] to type int for the type checker
+            words = [word for _, word in rows]
+            return Stack(stack_id=stack_id, wordAmount=len(words), words=words)

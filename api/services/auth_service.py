@@ -1,9 +1,9 @@
 from fastapi import Response, Cookie, Request
 from fastapi.responses import JSONResponse
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from starlette.requests import HTTPConnection
 from starlette.websockets import WebSocket
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from sqlalchemy.exc import IntegrityError, OperationalError
 import logging
 import time
@@ -17,7 +17,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError, VerifyMismatchError
 from secrets import token_urlsafe
 
+from api.models.words import Cards, Reviews
 from api.schema.internal.errors import (
+    BadRequestError,
     ConflictError,
     DependencyUnavailableError,
     ForbiddenError,
@@ -111,6 +113,43 @@ def validate_password_strength(password: str, email: Optional[str] = None) -> No
             },
         )
 
+def get_user_review_streak(user_id: UUID, db: Session) -> int:
+    """
+    Returns current consecutive-day review streak for a user.
+    """
+
+    # 1. Query distinct review days
+    rows = (
+        db.query(
+            func.date(Reviews.reviewed_at )
+        )
+        .filter(Reviews.user_id == user_id)
+        .distinct()
+        .all()
+    )
+
+    if not rows:
+        return 0
+
+    # 2. Extract + sort dates descending
+    review_dates = sorted(
+        (r[0] for r in rows),
+        reverse=True
+    )
+
+    today = date.today()
+    expected = today
+    streak = 0
+
+    # 3. Walk backwards through consecutive days
+    for d in review_dates:
+        if d == expected:
+            streak += 1
+            expected -= timedelta(days=1)
+        elif d < expected:
+            break
+
+    return streak
 
 #########################################################
 ###                     TOKENS                        ###
@@ -130,6 +169,7 @@ def create_tokens_service(
     Returns:
         ReturnTokens: The new, valid refresh, access and csrf tokens wrapped in a `ReturnTokens` object
     """
+
     def create_access_token(user_id: UUID) -> str:
         """Create a new valid access token for a given user id
 
@@ -717,6 +757,15 @@ def validate_access_token(token: str) -> AccessTokenPayload:
         raise TokenInvalidError()
 
 
+def delete_account_service(user_id: UUID) -> None:
+    with get_db_session() as db:
+        user_to_delete = db.query(User).where(User.id == user_id).scalar()
+        if not user_to_delete:
+            raise BadRequestError(detail=f"User with id {user_id} not found")
+        db.delete(user_to_delete)
+        db.commit()
+
+
 def revoke_refresh_token(
     user_id: Optional[UUID] = None,
     token_id: Optional[UUID] = None,
@@ -779,8 +828,22 @@ def get_user_data_service(user_id: UUID) -> UserProfileDetail:
     with get_db_session() as db:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
-            raise InternalError("User not found")
-        return UserProfileDetail.model_validate(user)
+            raise BadRequestError("User not found")
+        count_words_learned: int = (
+            db.query(Cards).where(Cards.user_id == user.id).count()
+        )
+        streak = get_user_review_streak(user_id=user.id, db=db)
+
+        return UserProfileDetail(
+            user_id=user.id,
+            username=user.username,
+            email=user.email,
+            grade=user.grade,
+            total_words_learned=count_words_learned,
+            streak=streak,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
 
 def get_user_id(
@@ -842,15 +905,15 @@ def get_user_id(
         raise InternalError()
     return user_id
 
-def get_user_id_skip_csrf(
-    connection: HTTPConnection
-):
+
+def get_user_id_skip_csrf(connection: HTTPConnection):
     """Wrapper for `get_user_id` function for non state changing routes.
 
     Args:
         connection (HTTPConnection): The, by FastAPI injected, connection
     """
     return get_user_id(connection=connection, skip_csrf=True)
+
 
 def get_user_id_from_refresh(
     connection: HTTPConnection, skip_csrf: bool = False
@@ -910,46 +973,47 @@ def get_user_id_from_refresh(
         )
         return (token_entry.user_id, token)
 
-def get_user_id_from_refresh_body(token: str) -> UUID:
-        logger = logging.getLogger(__name__)
-        with get_db_session() as db:
-            token_hash = hash_token(token)
-            token_entry = db.query(Tokens).where(Tokens.token == token_hash).first()
-            if not token_entry:
-                logger.warning(
-                    "get_user_id_from_refresh_body: token not found in DB (hash=%s)",
-                    token_hash[:8],
-                )
-                raise RefreshTokenInvalidError()
-            if token_entry.revoked:
-                logger.warning(
-                    "get_user_id_from_refresh_body: token is revoked (user_id=%s, revoked_at=%s)",
-                    token_entry.user_id,
-                    token_entry.revoked_at,
-                )
-                raise RefreshTokenInvalidError()
-            # Normalize stored datetime to timezone-aware for comparison.
-            expires_at = _ensure_aware(token_entry.expires_at)
-            if not expires_at:
-                app_logger.error(
-                    f"Tokens row with id {token_entry.id} has no `expires_at` column set"
-                )
-                raise InternalError()
 
-            now = datetime.now(timezone.utc)
-            if expires_at <= now:
-                logger.warning(
-                    "get_user_id_from_refresh_body: token expired (expires_at=%s, now=%s)",
-                    expires_at,
-                    now,
-                )
-                raise RefreshTokenInvalidError()
-            logger.info(
-                "get_user_id_from_refresh_body: token valid for user_id=%s, expires_at=%s",
-                token_entry.user_id,
-                expires_at,
+def get_user_id_from_refresh_body(token: str) -> UUID:
+    logger = logging.getLogger(__name__)
+    with get_db_session() as db:
+        token_hash = hash_token(token)
+        token_entry = db.query(Tokens).where(Tokens.token == token_hash).first()
+        if not token_entry:
+            logger.warning(
+                "get_user_id_from_refresh_body: token not found in DB (hash=%s)",
+                token_hash[:8],
             )
-            return token_entry.user_id
+            raise RefreshTokenInvalidError()
+        if token_entry.revoked:
+            logger.warning(
+                "get_user_id_from_refresh_body: token is revoked (user_id=%s, revoked_at=%s)",
+                token_entry.user_id,
+                token_entry.revoked_at,
+            )
+            raise RefreshTokenInvalidError()
+        # Normalize stored datetime to timezone-aware for comparison.
+        expires_at = _ensure_aware(token_entry.expires_at)
+        if not expires_at:
+            app_logger.error(
+                f"Tokens row with id {token_entry.id} has no `expires_at` column set"
+            )
+            raise InternalError()
+
+        now = datetime.now(timezone.utc)
+        if expires_at <= now:
+            logger.warning(
+                "get_user_id_from_refresh_body: token expired (expires_at=%s, now=%s)",
+                expires_at,
+                now,
+            )
+            raise RefreshTokenInvalidError()
+        logger.info(
+            "get_user_id_from_refresh_body: token valid for user_id=%s, expires_at=%s",
+            token_entry.user_id,
+            expires_at,
+        )
+        return token_entry.user_id
 
 
 def validate_user_service(

@@ -39,3 +39,6 @@ class RefreshResponse(BaseModel):
 
 class LogoutResponse(BaseModel):
     success: bool
+
+class DeleteResponse(BaseModel):
+    success: bool
