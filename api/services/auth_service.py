@@ -115,14 +115,12 @@ def validate_password_strength(password: str, email: Optional[str] = None) -> No
 
 def get_user_review_streak(user_id: UUID, db: Session) -> int:
     """
-    Returns current consecutive-day review streak for a user.
+    Returns current consecutive-day review streak for a user,
+    allowing a 1-day grace period.
     """
 
-    # 1. Query distinct review days
     rows = (
-        db.query(
-            func.date(Reviews.reviewed_at )
-        )
+        db.query(func.date(Reviews.reviewed_at))
         .filter(Reviews.user_id == user_id)
         .distinct()
         .all()
@@ -131,7 +129,6 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
     if not rows:
         return 0
 
-    # 2. Extract + sort dates descending
     review_dates = sorted(
         (r[0] for r in rows),
         reverse=True
@@ -139,14 +136,27 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
 
     today = date.today()
     expected = today
-    streak = 0
 
-    # 3. Walk backwards through consecutive days
+    streak = 0
+    grace_used = False
+
     for d in review_dates:
+
+        # exact match → normal streak progression
         if d == expected:
             streak += 1
             expected -= timedelta(days=1)
-        elif d < expected:
+            continue
+
+        # allow 1-day grace (skip one missing day once)
+        if not grace_used and d == expected - timedelta(days=1):
+            grace_used = True
+            streak += 1
+            expected -= timedelta(days=2)  # skip the missed day
+            continue
+
+        # anything older breaks the streak
+        if d < expected - timedelta(days=1):
             break
 
     return streak
