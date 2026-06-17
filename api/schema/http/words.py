@@ -10,11 +10,11 @@ class DueWordsResponse(BaseModel):
 
 
 class WordReviewRequest(BaseModel):
-    reviews: list[ReviewedWord]
+    reviewedWord: list[ReviewedWord]
 
 
-# class WordReviewResponse(BaseModel):
-#    reviews: list[Cards]
+class WordReviewResponse(BaseModel):
+    success: bool
 
 class GetStacksResponse(BaseModel):
     wordAmount: int
