@@ -10,7 +10,7 @@ class DueWordsResponse(BaseModel):
 
 
 class WordReviewRequest(BaseModel):
-    reviewedWord: list[ReviewedWord]
+    reviews: list[ReviewedWord]
 
 
 class WordReviewResponse(BaseModel):
