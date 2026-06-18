@@ -209,6 +209,14 @@ def robots():
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
+@app.get("/legal")
+def legal():
+    """Serve legal.html."""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "legal.html"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
+
 
 @app.get("/sitemap.xml")
 def sitemap():
