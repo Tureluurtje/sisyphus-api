@@ -1,9 +1,8 @@
 from api.config import DATABASE_URL
 
 from contextlib import contextmanager
-from sqlalchemy import create_engine, TypeDecorator, String
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import uuid
 
 # Enable pool_pre_ping to avoid using stale/closed connections from the pool.
 # pool_recycle helps reclaim long-lived connections that some servers close.

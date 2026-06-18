@@ -1,16 +1,33 @@
 from fastapi import APIRouter, status, Depends, Request, Response
 from uuid import UUID
 import asyncio
-from typing import Optional
+from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
-from api.schema.internal.errors import TokenInvalidError, TokenMissingError
+from api.schema.internal.errors import RefreshTokenMissingError, TokenInvalidError, TokenMissingError
 from api.schema.internal.users import UserProfileDetail
 
-from api.limiter import limiter, email_key
+from api.limiter import limiter
+
+from functools import wraps
+from typing import Any, Callable, ParamSpec, TypeVar, cast
+
+P = ParamSpec("P")
+R = TypeVar("R")
+_untyped_limit = getattr(limiter, "limit")
+
+
+
+def typed_limit(*args: Any, **kwargs: Any) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        wrapped = _untyped_limit(*args, **kwargs)(func)
+        return wraps(func)(wrapped)
+    return cast(Callable[[Callable[P, R]], Callable[P, R]], decorator)
 
 from api.schema.http.auth import (
+    DeleteResponse,
     LoginRequest,
     LoginResponse,
+    RefreshRequest,
     RefreshResponse,
     RegisterRequest,
     RegisterResponse,
@@ -21,8 +38,10 @@ from api.services.auth_service import (
     authenticate_user,
     clear_token_cookies_service,
     create_tokens_service,
+    delete_account_service,
     get_user_data_service,
     get_user_id_from_refresh,
+    get_user_id_from_refresh_body,
     register_user,
     validate_access_token,
     get_user_id,
@@ -30,25 +49,22 @@ from api.services.auth_service import (
     revoke_access_token,
     cleanup_tokens,
     get_access_token_cookie,
-    response_cookies_generator
+    response_cookies_generator,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.get("/me")
-@limiter.limit("60/minute")
+@typed_limit("60/minute")
 def get_current_user(
-    request: Request, user_id: Optional[UUID] = Depends(get_user_id)
+    request: Request, user_id: UUID = Depends(get_user_id)
 ) -> UserProfileDetail:
-    if not user_id:
-        raise TokenInvalidError()
     return get_user_data_service(user_id=user_id)
 
 
 @router.post(path="/login", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")  # 10/minute per ip
-@limiter.limit("5/minute", key_func=email_key)
+@typed_limit("10/minute")  # 10/minute per ip
 async def login(
     request: Request, response: Response, data: LoginRequest
 ) -> LoginResponse:
@@ -58,13 +74,13 @@ async def login(
 
 
 @router.post(path="/register", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")
+@typed_limit("10/minute")
 async def register(
     request: Request, response: Response, data: RegisterRequest
 ) -> RegisterResponse:
     tokens = register_user(
-        first_name=data.first_name,
-        last_name=data.last_name,
+        username=data.username,
+        grade=data.grade,
         email=data.email,
         password=data.password,
     )
@@ -73,7 +89,7 @@ async def register(
 
 
 @router.get(path="/validate")
-@limiter.limit("60/minute")
+@typed_limit("60/minute")
 async def validate(
     request: Request, access_token: Optional[str] = Depends(get_access_token_cookie)
 ) -> ValidateResponse:
@@ -86,27 +102,35 @@ async def validate(
 
     return ValidateResponse(active=True, payload=payload)
 
-
 @router.post(path="/refresh", status_code=status.HTTP_200_OK)
-@limiter.limit("5/minute")
+@typed_limit("5/minute")
 async def refresh(
     request: Request,
     response: Response,
-    refresh_data: tuple[UUID, str] = Depends(get_user_id_from_refresh),
+    body_data: Optional[RefreshRequest] = None,
+    cookie_data: Optional[tuple[UUID, str]] = Depends(get_user_id_from_refresh),
 ) -> RefreshResponse:
-    user_id, old_refresh_token = refresh_data
+    if cookie_data:
+        user_id, old_refresh_token = cookie_data
+    else:
+        if body_data and body_data.old_refresh_token:
+            old_refresh_token = body_data.old_refresh_token
+            user_id = get_user_id_from_refresh_body(old_refresh_token)
+        else:
+            raise RefreshTokenMissingError()
+
     tokens = create_tokens_service(user_id=user_id, old_refresh_token=old_refresh_token)
     response_cookies_generator(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
 
 @router.post(path="/logout", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")
+@typed_limit("10/minute")
 async def logout(
     request: Request,
     response: Response,
     user_id: UUID = Depends(dependency=get_user_id),
-    access_token: UUID = Depends(get_access_token_cookie),
+    access_token: Optional[str] = Depends(get_access_token_cookie),
 ) -> LogoutResponse:
     # Revoke any active refresh tokens for this user
     revoke_refresh_token(user_id=user_id)
@@ -117,3 +141,12 @@ async def logout(
 
     clear_token_cookies_service(response)
     return LogoutResponse(success=True)
+
+@router.delete(path="/delete", status_code=status.HTTP_200_OK)
+async def delete(
+    request: Request,
+    response: Response,
+    user_id: UUID = Depends(get_user_id)
+) -> DeleteResponse:
+    delete_account_service(user_id=user_id)
+    return DeleteResponse(success=True)
