@@ -93,7 +93,7 @@ def calculate_new_stability(
     return max(0.05, min(1.0, new_stability))
 
 
-def calculate_learnyear(current_date: Optional[datetime] = None) -> str:
+def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
     current_date = current_date or datetime.now()
 
     start_month = 9
@@ -144,7 +144,7 @@ def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
 
 def get_due_words_service(
     user_id: UUID, limit: Optional[int] = None, offset: Optional[int] = 0
-) -> list[DueWord]:
+) -> Optional[list[DueWord]]:
     if limit is not None and limit <= 0:
         limit = None
     if offset is not None and offset <= 0:
@@ -154,7 +154,16 @@ def get_due_words_service(
         # First query for current year
         user = db.query(User).where(User.id == user_id).scalar()
 
-        learnyear = calculate_learnyear()
+        schoolyear = calculate_schoolyear()
+
+        # Then check if there is a wordlist available for the grade of the user
+        wordlist = db.query(Lists.id).where(
+            Lists.schoolyear == schoolyear,
+            Lists.schoolgrade == user.grade
+        ).scalar()
+
+        if wordlist is None:
+            return None
 
         # Then find cards for this year
         due_words = (
@@ -163,7 +172,7 @@ def get_due_words_service(
             .join(Lists, Chapters.list_id == Lists.id)
             .outerjoin(Cards, (Cards.word_id == Words.id) & (Cards.user_id == user_id))
             .where(
-                Lists.schoolyear == learnyear,
+                Lists.schoolyear == schoolyear,
                 Lists.schoolgrade == user.grade,
                 or_(
                     Cards.id.is_(None),  # never learned
@@ -188,9 +197,7 @@ def get_due_words_service(
         return due_word_model_words
 
 
-def submit_word_review_service(
-    user_id: UUID, reviews: list[ReviewedWord]
-) -> None:
+def submit_word_review_service(user_id: UUID, reviews: list[ReviewedWord]) -> None:
     with get_db_session() as db:
         try:
             for review in reviews:
