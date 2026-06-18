@@ -129,7 +129,8 @@
             </div>
 
             <button id="convertBtn" type="button">Convert to JSON</button>
-            <button id="downloadBtn" type="button" disabled>Download JSON</button>
+            <!--<button id="downloadBtn" type="button" disabled>Download JSON</button>-->
+            <button id="uploadBtn" type="button" disabled>Upload JSON</button>
 
             <div id="status" class="status"></div>
             <textarea id="output" readonly placeholder="Converted JSON will appear here..."></textarea>
@@ -442,8 +443,32 @@
             URL.revokeObjectURL(url);
         }
 
+        function uploadJson() {
+            if (!latestJson) return;
+
+            const blob = new Blob([latestJson], {
+                type: "application/json"
+            });
+            const uploadUrl = "https://localhost:8000/api/words/load"
+            const request = new HttpRequest();
+            request.open("POST", uploadUrl, true);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function () {
+                if (request.readyState === 4) {
+                    if (request.status >= 200 && request.status < 300) {
+                        showStatus("Uploaded successfully.", false);
+                    } else {
+                        showStatus("Upload failed: " + request.statusText, true);
+                    }
+                }
+            };
+            request.send(latestJson);
+
+        }
+
         document.getElementById("convertBtn").addEventListener("click", convertFile);
         document.getElementById("downloadBtn").addEventListener("click", downloadJson);
+        document.getElementById("uploadBtn").addEventListener("click", uploadJson);
     </script>
 </body>
 
