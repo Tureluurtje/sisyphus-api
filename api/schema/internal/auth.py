@@ -1,6 +1,10 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
+class EmailData(BaseModel):
+    to: EmailStr
+    subject: str
+    message: str
 
 class ReturnTokens(BaseModel):
     refresh_token: str
@@ -16,3 +20,4 @@ class AccessTokenPayload(BaseModel):
     sub: UUID
     exp: int
     jti: UUID
+

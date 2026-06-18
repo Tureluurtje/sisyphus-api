@@ -10,6 +10,7 @@ import time
 from sqlalchemy.orm.session import Session
 import jwt  # type: ignore[reportUnknownMemberType]
 import hashlib
+import resend
 import importlib
 from uuid import UUID, uuid4
 from typing import Optional, Any
@@ -31,11 +32,19 @@ from api.schema.internal.errors import (
     TokenExpiredError,
     TokenInvalidError,
     TokenMissingError,
+    VerificationTokenInvalidError,
 )
 from api.schema.internal.users import UserProfileDetail
+from api.schema.internal.auth import EmailData
 
 from api.database import get_db_session
-from api.models.auth import User, Tokens, RevokedAccessTokens
+from api.models.auth import (
+    User,
+    Tokens,
+    RevokedAccessTokens,
+    VerificationTokens,
+    VerificationPurposes,
+)
 from api.schema.internal.auth import (
     AccessTokenPayload,
     ReturnTokens,
@@ -49,16 +58,22 @@ from api.config import (
     MIN_PASSWORD_ZXCVBN_SCORE,
     ACCESS_TOKEN_EXPIRE_SECONDS,
     REFRESH_TOKEN_EXPIRE_SECONDS,
+    VERIFICATION_TOKEN_EXPIRE_SECONDS,
+    RESEND_API_KEY,
+    HOST,
+    PORT
 )
 
 from api.logging_config import app_logger, error_logger
 
 # Initialize argon2 PasswordHasher instance
 _ph = PasswordHasher()
+resend.api_key = RESEND_API_KEY
 
 #########################################################
 ###                     HELPERS                       ###
 #########################################################
+
 
 
 def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
@@ -72,6 +87,20 @@ def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt
+
+
+def _get_email_from_user_id(
+    user_id: UUID, db: Optional[Session] = None
+) -> Optional[str]:
+    if db:
+        result = db.query(User.email).where(User.id == user_id).scalar()
+    else:
+        with get_db_session() as db:
+            result = db.query(User.email).where(User.id == user_id).scalar()
+
+    if result is None:
+        app_logger.warning(f"Email not found for user id {user_id}")
+    return result
 
 
 def validate_password_strength(password: str, email: Optional[str] = None) -> None:
@@ -346,6 +375,68 @@ def create_tokens_service(
             return tokens
         except Exception:
             local_db.rollback()
+            raise
+
+
+def create_verification_token(
+    user_id: UUID, purpose: VerificationPurposes, db: Optional[Session] = None
+) -> str:
+    """Create a unique verification token for email verification.
+
+    The function generates a random token string, hashes it, and stores the
+    hash in the database associated with the user ID. The raw token is returned
+    for sending to the user.
+
+    Args:
+        user_id: UUID of the user for whom the verification token is issued.
+        db: Optional SQLAlchemy session to use for persistence.
+
+    Returns:
+        The raw verification token string.
+
+    Raises:
+        sqlalchemy.exc.IntegrityError: If a database constraint is violated
+            while creating the token record (propagates after rollback).
+    """
+    token = token_urlsafe(32)
+    token_hash = hash_token(token=token)
+
+    # Validate presence
+    if not purpose:
+        app_logger.error(
+            "create_verification_token: missing or empty 'purpose' for user_id=%s",
+            user_id,
+        )
+        raise InvalidInputError(
+            message="Verification token purpose is required",
+            detail={"field": "purpose"},
+        )
+
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(
+        seconds=VERIFICATION_TOKEN_EXPIRE_SECONDS
+    )
+
+    token_entry = VerificationTokens(
+        user_id=user_id,
+        token=token_hash,
+        purpose=purpose,
+        expires_at=expires_at,
+        created_at=datetime.now(tz=timezone.utc),
+    )
+
+    if db is not None:
+        db.add(instance=token_entry)
+        db.flush()
+        return token
+    else:
+        with get_db_session() as db:
+            try:
+                db.add(instance=token_entry)
+                db.commit()
+                return token
+            except Exception:
+                db.rollback()
+                raise
             raise InternalError()
 
 
@@ -701,7 +792,10 @@ def register_user(username: str, grade: int, email: str, password: str) -> Retur
 
             new_tokens = create_tokens_service(user_id=new_user.id, db=db)
 
+            send_account_verification_email(user_id=new_user.id, db=db)
+
             db.commit()
+
             return new_tokens
 
         except IntegrityError as e:
@@ -1088,3 +1182,79 @@ def validate_user_service(
     except Exception as e:
         error_logger.exception(f"Error validating user: {e}")
         return None, None
+
+
+
+def _send_email(email_data: EmailData) -> None:
+    params: resend.Emails.SendParams = {
+        "from": "Tureluurtje <no-reply@iteam.kwako.nl>",
+        "to": [email_data.to],
+        "subject": email_data.subject,
+        "html": f"{email_data.message}",
+    }
+    try:
+        email: resend.Emails.SendResponse = resend.Emails.send(params)
+        if email:
+            return
+        else:
+            raise
+    except:
+        app_logger.error("Email did not send correctly")
+        raise InternalError()
+
+
+def send_account_verification_email(
+    user_id: UUID, db: Optional[Session] = None
+) -> None:
+    user_email = _get_email_from_user_id(user_id=user_id, db=db)
+    if not user_email:
+        raise InternalError()
+
+    verification_token = create_verification_token(
+        user_id=user_id,
+        purpose=VerificationPurposes.EMAIL_VERIFICATION,
+        db=db,
+    )
+
+    scheme = "https" if SECURE_COOKIES else "http"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
+
+    html_message = f"""<body>
+    <h2><a href="{verification_url}">Click here to verify your account.</a></h2>
+    <p>Use the above code to verify your account. This code will expire in 60 minutes.</p>
+    <p>If you did not request this verification code, please ignore this email.</p>
+</body>"""
+
+    email_data = EmailData(
+        to=user_email,
+        subject="Account verification",
+        message=html_message,
+    )
+    _send_email(email_data=email_data)
+
+def verify_token_service(
+    token: str
+) -> None:
+    with get_db_session() as db:
+        verification_token = (
+            db.query(VerificationTokens)
+            .filter(
+                VerificationTokens.token == hash_token(token),
+                VerificationTokens.expires_at > datetime.now(timezone.utc),
+            )
+            .first()
+        )
+
+        if not verification_token:
+            raise VerificationTokenInvalidError()
+
+        # TODO: Add handlers
+        if verification_token.purpose == "email_verification": # From VerificationPurposes PyEnum in auth/models.py
+            return
+        elif verification_token.purpose == "password_reset":
+            return
+        #    user = db.query(User).where(
+        #        User.id == verification_token.user_id
+        #    )
+        #    user.verified = True
+        #    db.commit()
