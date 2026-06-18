@@ -91,6 +91,11 @@ class RefreshTokenInvalidError(AppException):
     code = "REFRESH_TOKEN_INVALID"
     message = "The refresh token is invalid"
 
+class VerificationTokenInvalidError(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    code = "VERIFICATION_TOKEN_INVALID"
+    message = "The verification token is invalid"
+
 
 class ForbiddenError(AppException):
     status_code = status.HTTP_403_FORBIDDEN
