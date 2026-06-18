@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from typing import Any
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(PROJECT_ROOT, "api", "logs")
@@ -25,14 +26,14 @@ DATE_FMT  = "%Y-%m-%d %H:%M:%S"
 
 class PlainLineFormatter(logging.Formatter):
     """Single-line plain-text formatter for .log files."""
-    def format(self, record):
+    def format(self, record: Any):
         base = super().format(record)
         return base
 
 
 class ColorLineFormatter(logging.Formatter):
     """Same single-line format but with per-level ANSI colors for console."""
-    def format(self, record):
+    def format(self, record: Any):
         color = LEVEL_COLORS.get(record.levelname, RESET)
         msg = super().format(record)
         return f"{color}{msg}{RESET}"

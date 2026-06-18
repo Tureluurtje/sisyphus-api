@@ -50,6 +50,12 @@ class UnauthorizedError(AppException):
     message = "Authentication is required"
 
 
+class DatabaseConnectionError(AppException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    code = "DATABASE_CONNECTION_ERROR"
+    message = "Database connection failed. Please try again later."
+
+
 class InvalidCredentialsError(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
     code = "INVALID_CREDENTIALS"
