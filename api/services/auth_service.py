@@ -30,6 +30,7 @@ from api.schema.internal.errors import (
     TokenExpiredError,
     TokenInvalidError,
     TokenMissingError,
+    VerificationTokenInvalidError,
 )
 from api.schema.internal.users import UserProfileDetail
 from api.schema.internal.auth import EmailData
@@ -1031,7 +1032,7 @@ def send_account_verification_email(
     )
 
     scheme = "https" if SECURE_COOKIES else "http"
-    verification_url = f"{scheme}://{HOST}:{PORT}/api/verificate/{verification_token}"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
 
     html_message = f"""<body>
     <h2><a href="{verification_url}">Click here to verify your account.</a></h2>
@@ -1045,3 +1046,30 @@ def send_account_verification_email(
         message=html_message,
     )
     _send_email(email_data=email_data)
+
+def verify_token_service(
+    token: str
+) -> None:
+    with get_db_session() as db:
+        verification_token = (
+            db.query(VerificationTokens)
+            .filter(
+                VerificationTokens.token == hash_token(token),
+                VerificationTokens.expires_at > datetime.now(timezone.utc),
+            )
+            .first()
+        )
+
+        if not verification_token:
+            raise VerificationTokenInvalidError()
+
+        # TODO: Add handlers
+        if verification_token.purpose == "email_verification": # From VerificationPurposes PyEnum in auth/models.py
+            return
+        elif verification_token.purpose == "password_reset":
+            return
+        #    user = db.query(User).where(
+        #        User.id == verification_token.user_id
+        #    )
+        #    user.verified = True
+        #    db.commit()

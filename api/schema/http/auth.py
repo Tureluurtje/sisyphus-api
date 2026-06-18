@@ -29,6 +29,8 @@ class ValidateResponse(BaseModel):
 class RefreshResponse(BaseModel):
     tokens: ReturnTokens
 
+class VerifyResponse(BaseModel):
+    success: bool
 
 class LogoutResponse(BaseModel):
     success: bool

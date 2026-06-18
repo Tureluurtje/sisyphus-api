@@ -30,6 +30,7 @@ from api.schema.http.auth import (
     RegisterResponse,
     ValidateResponse,
     LogoutResponse,
+    VerifyResponse,
 )
 from api.services.auth_service import (
     authenticate_user,
@@ -45,6 +46,7 @@ from api.services.auth_service import (
     cleanup_tokens,
     get_access_token_cookie,
     response_cookies_generator,
+    verify_token_service,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -110,6 +112,14 @@ async def refresh(
     response_cookies_generator(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
+@router.post("/verify")
+@typed_limit("5/minute")
+def verify_email(
+    request: Request,
+    token: str
+) -> VerifyResponse:
+    verify_token_service(token=token) # Raises on invalid token
+    return VerifyResponse(success=True)
 
 @router.post(path="/logout", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")
