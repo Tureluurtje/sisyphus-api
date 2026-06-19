@@ -5,7 +5,6 @@ from uuid import UUID
 
 from starlette import status
 from starlette.responses import Response
-from starlette.status import HTTP_204_NO_CONTENT
 
 from api.schema.internal.words import LoadWordList
 from api.services.auth_service import get_user_id, get_user_id_skip_csrf
