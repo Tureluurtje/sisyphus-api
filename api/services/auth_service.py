@@ -61,7 +61,7 @@ from api.config import (
     VERIFICATION_TOKEN_EXPIRE_SECONDS,
     RESEND_API_KEY,
     HOST,
-    PORT
+    PORT,
 )
 
 from api.logging_config import app_logger, error_logger
@@ -73,7 +73,6 @@ resend.api_key = RESEND_API_KEY
 #########################################################
 ###                     HELPERS                       ###
 #########################################################
-
 
 
 def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
@@ -142,6 +141,7 @@ def validate_password_strength(password: str, email: Optional[str] = None) -> No
             },
         )
 
+
 def get_user_review_streak(user_id: UUID, db: Session) -> int:
     """
     Returns current consecutive-day review streak for a user,
@@ -158,10 +158,7 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
     if not rows:
         return 0
 
-    review_dates = sorted(
-        (r[0] for r in rows),
-        reverse=True
-    )
+    review_dates = sorted((r[0] for r in rows), reverse=True)
 
     today = date.today()
     expected = today
@@ -189,6 +186,7 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
             break
 
     return streak
+
 
 #########################################################
 ###                     TOKENS                        ###
@@ -1184,7 +1182,6 @@ def validate_user_service(
         return None, None
 
 
-
 def _send_email(email_data: EmailData) -> None:
     params: resend.Emails.SendParams = {
         "from": "Tureluurtje <no-reply@iteam.kwako.nl>",
@@ -1232,9 +1229,8 @@ def send_account_verification_email(
     )
     _send_email(email_data=email_data)
 
-def verify_token_service(
-    token: str
-) -> None:
+
+def verify_token_service(token: str) -> None:
     with get_db_session() as db:
         verification_token = (
             db.query(VerificationTokens)
@@ -1248,13 +1244,18 @@ def verify_token_service(
         if not verification_token:
             raise VerificationTokenInvalidError()
 
-        # TODO: Add handlers
-        if verification_token.purpose == "email_verification": # From VerificationPurposes PyEnum in auth/models.py
-            return
+        if (
+            verification_token.purpose == "email_verification"
+        ):  # From VerificationPurposes PyEnum in auth/models.py
+            user = db.get(User, verification_token.user_id)
+            if not user:
+                app_logger.error(msg=f"User not found for id {verification_token.user_id} from verfication tokens table")
+                raise InternalError()
+
+            user.verified = True
+            db.commit()
+
         elif verification_token.purpose == "password_reset":
             return
-        #    user = db.query(User).where(
-        #        User.id == verification_token.user_id
-        #    )
-        #    user.verified = True
-        #    db.commit()
+
+
