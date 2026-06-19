@@ -39,6 +39,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
 
+    verified: Mapped[str] = mapped_column(Boolean, default=False)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), default=func.now(), nullable=False
     )
