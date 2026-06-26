@@ -3,7 +3,11 @@ from uuid import UUID
 import asyncio
 from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
-from api.schema.internal.errors import RefreshTokenMissingError, TokenInvalidError, TokenMissingError
+from api.schema.internal.errors import (
+    RefreshTokenMissingError,
+    TokenInvalidError,
+    TokenMissingError,
+)
 from api.schema.internal.users import UserProfileDetail
 
 from api.limiter import limiter
@@ -16,12 +20,15 @@ R = TypeVar("R")
 _untyped_limit = getattr(limiter, "limit")
 
 
-
-def typed_limit(*args: Any, **kwargs: Any) -> Callable[[Callable[P, R]], Callable[P, R]]:
+def typed_limit(
+    *args: Any, **kwargs: Any
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
         wrapped = _untyped_limit(*args, **kwargs)(func)
         return wraps(func)(wrapped)
+
     return cast(Callable[[Callable[P, R]], Callable[P, R]], decorator)
+
 
 from api.schema.http.auth import (
     DeleteResponse,
@@ -31,9 +38,11 @@ from api.schema.http.auth import (
     RefreshResponse,
     RegisterRequest,
     RegisterResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     ValidateResponse,
     LogoutResponse,
-    VerifyResponse,
+    VerifyEmailResponse,
 )
 from api.services.auth_service import (
     authenticate_user,
@@ -43,6 +52,7 @@ from api.services.auth_service import (
     get_user_data_service,
     get_user_id_from_refresh,
     get_user_id_from_refresh_body,
+    get_user_id_skip_csrf,
     register_user,
     validate_access_token,
     get_user_id,
@@ -51,7 +61,6 @@ from api.services.auth_service import (
     cleanup_tokens,
     get_access_token_cookie,
     response_cookies_generator,
-    verify_token_service,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -60,7 +69,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/me")
 @typed_limit("60/minute")
 def get_current_user(
-    request: Request, user_id: UUID = Depends(get_user_id)
+    request: Request, user_id: UUID = Depends(get_user_id_skip_csrf)
 ) -> UserProfileDetail:
     return get_user_data_service(user_id=user_id)
 
@@ -104,6 +113,7 @@ async def validate(
 
     return ValidateResponse(active=True, payload=payload)
 
+
 @router.post(path="/refresh", status_code=status.HTTP_200_OK)
 @typed_limit("5/minute")
 async def refresh(
@@ -125,14 +135,29 @@ async def refresh(
     response_cookies_generator(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
-@router.post("/verify")
+
+@router.post("/verify-account")
 @typed_limit("5/minute")
-def verify_email(
+def verify_email(request: Request, token: str) -> VerifyEmailResponse:
+    verify_account_service(
+        token=token
+    )  # Raises on invalid token
+    return VerifyEmailResponse(success=True)
+
+
+@router.patch("/reset-password")
+@typed_limit("3/minute")
+def reset_password(
     request: Request,
-    token: str
-) -> VerifyResponse:
-    verify_token_service(token=token) # Raises on invalid token
-    return VerifyResponse(success=True)
+    data: ResetPasswordRequest,
+    token: Optional[str]
+) -> ResetPasswordResponse:
+    reset_password_service(
+        token=token,
+        old_password=data.old_password,
+        new_password=data.new_password
+    )
+    return ResetPasswordResponse(success=True)
 
 @router.post(path="/logout", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")
@@ -152,11 +177,10 @@ async def logout(
     clear_token_cookies_service(response)
     return LogoutResponse(success=True)
 
+
 @router.delete(path="/delete", status_code=status.HTTP_200_OK)
 async def delete(
-    request: Request,
-    response: Response,
-    user_id: UUID = Depends(get_user_id)
+    request: Request, response: Response, user_id: UUID = Depends(get_user_id)
 ) -> DeleteResponse:
     delete_account_service(user_id=user_id)
     return DeleteResponse(success=True)
