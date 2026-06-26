@@ -51,7 +51,14 @@ class RefreshRequest(BaseModel):
 class RefreshResponse(BaseModel):
     tokens: ReturnTokens
 
-class VerifyResponse(BaseModel):
+class VerifyEmailResponse(BaseModel):
+    success: bool
+
+class ResetPasswordRequest(BaseModel):
+    new_password: str
+    old_password: Optional[str]
+
+class ResetPasswordResponse(BaseModel):
     success: bool
 
 class LogoutResponse(BaseModel):
