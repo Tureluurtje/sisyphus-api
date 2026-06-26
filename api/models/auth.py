@@ -22,7 +22,7 @@ from api.database import Base
 from enum import Enum as PyEnum
 
 
-class VerificationPurposes(PyEnum):
+class VerificationTokenPurposes(PyEnum):
     EMAIL_VERIFICATION = "email_verification"
     PASSWORD_RESET = "password_reset"
 
@@ -129,7 +129,7 @@ class VerificationTokens(Base):
     )
     token: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     purpose: Mapped[str] = mapped_column(
-        SQLEnum(VerificationPurposes, name="status_enum"), nullable=False
+        SQLEnum(VerificationTokenPurposes, name="status_enum"), nullable=False
     )
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
