@@ -1,6 +1,7 @@
 from fastapi import Response, Cookie, Request
 from fastapi.responses import JSONResponse
 from datetime import date, datetime, timedelta, timezone
+from numpy.linalg import det
 from starlette.requests import HTTPConnection
 from starlette.websockets import WebSocket
 from sqlalchemy import and_, func
@@ -1230,7 +1231,10 @@ def send_account_verification_email(
     _send_email(email_data=email_data)
 
 
-def verify_token_service(token: str) -> None:
+def verify_token_service(
+    token: str,
+    new_password: Optional[str]
+    ) -> None:
     with get_db_session() as db:
         verification_token = (
             db.query(VerificationTokens)
@@ -1258,4 +1262,22 @@ def verify_token_service(token: str) -> None:
         elif verification_token.purpose == "password_reset":
             return
 
+def verify_email_service(
+    token: Optional[str],
+    old_password: Optional[str],
+    new_password: str
+):
+    if not old_password and not token:
+        raise BadRequestError(detail="`old_password` or `token` param is required")
 
+    if token:
+        verify_token
+
+
+def reset_password_service(
+    user_id: UUID,
+    old_password: Optional[str],
+    new_password: str,
+    db: Optional[Session]
+):
+    ...
