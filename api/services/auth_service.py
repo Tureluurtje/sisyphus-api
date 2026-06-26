@@ -33,6 +33,7 @@ from api.schema.internal.errors import (
     TokenExpiredError,
     TokenInvalidError,
     TokenMissingError,
+    UserNotFoundError,
     VerificationTokenInvalidError,
 )
 from api.schema.internal.users import UserProfileDetail
@@ -44,7 +45,7 @@ from api.models.auth import (
     Tokens,
     RevokedAccessTokens,
     VerificationTokens,
-    VerificationPurposes,
+    VerificationTokenPurposes,
 )
 from api.schema.internal.auth import (
     AccessTokenPayload,
@@ -378,7 +379,7 @@ def create_tokens_service(
 
 
 def create_verification_token(
-    user_id: UUID, purpose: VerificationPurposes, db: Optional[Session] = None
+    user_id: UUID, purpose: VerificationTokenPurposes, db: Optional[Session] = None
 ) -> str:
     """Create a unique verification token for email verification.
 
@@ -1210,7 +1211,7 @@ def send_account_verification_email(
 
     verification_token = create_verification_token(
         user_id=user_id,
-        purpose=VerificationPurposes.EMAIL_VERIFICATION,
+        purpose=VerificationTokenPurposes.EMAIL_VERIFICATION,
         db=db,
     )
 
@@ -1231,53 +1232,83 @@ def send_account_verification_email(
     _send_email(email_data=email_data)
 
 
-def verify_token_service(
+def verify_verification_token(
     token: str,
-    new_password: Optional[str]
-    ) -> None:
-    with get_db_session() as db:
-        verification_token = (
-            db.query(VerificationTokens)
-            .filter(
-                VerificationTokens.token == hash_token(token),
-                VerificationTokens.expires_at > datetime.now(timezone.utc),
-            )
-            .first()
+    token_type_to_check: Optional[VerificationTokenPurposes],
+    db: Session
+    ) -> VerificationTokens:
+    verification_token = (
+        db.query(VerificationTokens)
+        .filter(
+            VerificationTokens.token == hash_token(token),
+            VerificationTokens.expires_at > datetime.now(timezone.utc),
         )
+        .first()
+    )
 
-        if not verification_token:
-            raise VerificationTokenInvalidError()
+    if not verification_token:
+        raise VerificationTokenInvalidError()
 
-        if (
-            verification_token.purpose == "email_verification"
-        ):  # From VerificationPurposes PyEnum in auth/models.py
-            user = db.get(User, verification_token.user_id)
-            if not user:
-                app_logger.error(msg=f"User not found for id {verification_token.user_id} from verfication tokens table")
-                raise InternalError()
+    if (token_type_to_check is not None
+        and verification_token.purpose != token_type_to_check
+    ):
+        raise VerificationTokenInvalidError()
 
-            user.verified = True
-            db.commit()
+    return verification_token
 
-        elif verification_token.purpose == "password_reset":
-            return
 
 def verify_email_service(
-    token: Optional[str],
-    old_password: Optional[str],
-    new_password: str
-):
-    if not old_password and not token:
-        raise BadRequestError(detail="`old_password` or `token` param is required")
+    token: str
+) -> None:
+    with get_db_session() as db:
+        verification_token = verify_verification_token(
+            token=token,
+            token_type_to_check=VerificationTokenPurposes.EMAIL_VERIFICATION,
+            db=db
+        )
 
-    if token:
-        verify_token
+        user = db.get(User, verification_token.user_id)
 
+        if not user:
+            app_logger.error(
+                msg=f"User not found for id {verification_token.user_id} from verfication tokens table"
+            )
+            raise InternalError()
 
-def reset_password_service(
+        user.verified = True
+        db.delete(verification_token)
+        db.commit()
+
+def change_password_service(
     user_id: UUID,
-    old_password: Optional[str],
-    new_password: str,
-    db: Optional[Session]
+    old_password: str,
+    new_password: str
+) -> None:
+    with get_db_session() as db:
+        # Check old password
+        user = db.query(User).filter(User.id == user_id).first()
+
+        if not user:
+            raise UserNotFoundError()
+
+        if not verify_password(
+            plain_password=old_password, hashed_password=user.password
+        ):
+            raise InvalidCredentialsError()
+
+        # Reset password
+        validate_password_strength(password=new_password, email=user.email)
+
+        # Hash the new password and patch the user instance
+        user.password = hash_password(password=new_password)
+
+        # Commit to the database
+        db.commit()
+
+
+
+def reset_forgotten_password_service(
+    token: str,
+    new_password: str
 ):
     ...
