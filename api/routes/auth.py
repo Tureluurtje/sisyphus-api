@@ -31,6 +31,8 @@ def typed_limit(
 
 
 from api.schema.http.auth import (
+    ChangePasswordRequest,
+    ChangePasswordResponse,
     DeleteResponse,
     LoginRequest,
     LoginResponse,
@@ -38,14 +40,15 @@ from api.schema.http.auth import (
     RefreshResponse,
     RegisterRequest,
     RegisterResponse,
-    ResetPasswordRequest,
-    ResetPasswordResponse,
+    ResetForgottenPasswordRequest,
+    ResetForgottenPasswordResponse,
     ValidateResponse,
     LogoutResponse,
     VerifyEmailResponse,
 )
 from api.services.auth_service import (
     authenticate_user,
+    change_password_service,
     clear_token_cookies_service,
     create_tokens_service,
     delete_account_service,
@@ -54,6 +57,7 @@ from api.services.auth_service import (
     get_user_id_from_refresh_body,
     get_user_id_skip_csrf,
     register_user,
+    reset_forgotten_password_service,
     validate_access_token,
     get_user_id,
     revoke_refresh_token,
@@ -61,6 +65,7 @@ from api.services.auth_service import (
     cleanup_tokens,
     get_access_token_cookie,
     response_cookies_generator,
+    verify_email_service,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -139,25 +144,38 @@ async def refresh(
 @router.post("/verify-account")
 @typed_limit("5/minute")
 def verify_email(request: Request, token: str) -> VerifyEmailResponse:
-    verify_account_service(
+    verify_email_service(
         token=token
     )  # Raises on invalid token
     return VerifyEmailResponse(success=True)
 
 
-@router.patch("/reset-password")
+@router.patch("/reset-forgotten-password")
 @typed_limit("3/minute")
-def reset_password(
+def reset_forgotten_password(
     request: Request,
-    data: ResetPasswordRequest,
-    token: Optional[str]
-) -> ResetPasswordResponse:
-    reset_password_service(
+    data: ResetForgottenPasswordRequest,
+    token: str
+) -> ResetForgottenPasswordResponse:
+    reset_forgotten_password_service(
         token=token,
+        new_password=data.new_password
+    ) # Raises on invalid token
+    return ResetForgottenPasswordResponse(success=True)
+
+@router.patch("/change-password")
+@typed_limit("3/minute")
+def change_password(
+    request: Request,
+    data: ChangePasswordRequest,
+    user_id: UUID = Depends(get_user_id)
+) -> ChangePasswordResponse:
+    change_password_service(
+        user_id=user_id,
         old_password=data.old_password,
         new_password=data.new_password
-    )
-    return ResetPasswordResponse(success=True)
+    ) # Raises on invalid token
+    return ChangePasswordResponse(success=True)
 
 @router.post(path="/logout", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")
