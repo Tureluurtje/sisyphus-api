@@ -1,7 +1,6 @@
 from fastapi import Response, Cookie, Request
 from fastapi.responses import JSONResponse
 from datetime import date, datetime, timedelta, timezone
-from numpy.linalg import det
 from starlette.requests import HTTPConnection
 from starlette.websockets import WebSocket
 from sqlalchemy import and_, func
@@ -189,6 +188,19 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
 
     return streak
 
+def get_user(
+    user_id: UUID,
+    db: Session
+) -> User:
+    user = db.get(User, user_id)
+
+    if not user:
+        app_logger.error(
+            msg=f"User not found for id {user_id} from users table"
+        )
+        raise UserNotFoundError()
+
+    return user
 
 #########################################################
 ###                     TOKENS                        ###
@@ -707,6 +719,44 @@ def hash_password(password: str) -> str:
         The Argon2 hashed password as a string suitable for storage.
     """
     return _ph.hash(password=password)
+
+def set_password(
+    user: User,
+    new_password: str,
+) -> None:
+    # Reset password
+    validate_password_strength(password=new_password, email=user.email)
+
+    # Hash the new password and patch the user instance
+    user.password = hash_password(password=new_password)
+
+def change_password(
+    user_id: UUID,
+    old_password: str,
+    new_password: str,
+    db: Session
+) -> None:
+    user = db.get(User, user_id)
+
+    if not user:
+        app_logger.error(
+            msg=f"User not found for id {user_id} from users table"
+        )
+        raise UserNotFoundError()
+
+    # Check old password
+    if not verify_password(
+        plain_password=old_password,
+        hashed_password=user.password
+    ):
+        raise InvalidCredentialsError()
+
+    # Reset password
+    set_password(
+        new_password=new_password,
+        user=user
+    )
+    db.flush()
 
 
 #########################################################
@@ -1285,23 +1335,12 @@ def change_password_service(
     new_password: str
 ) -> None:
     with get_db_session() as db:
-        # Check old password
-        user = db.query(User).filter(User.id == user_id).first()
-
-        if not user:
-            raise UserNotFoundError()
-
-        if not verify_password(
-            plain_password=old_password, hashed_password=user.password
-        ):
-            raise InvalidCredentialsError()
-
-        # Reset password
-        validate_password_strength(password=new_password, email=user.email)
-
-        # Hash the new password and patch the user instance
-        user.password = hash_password(password=new_password)
-
+        change_password(
+            user_id=user_id,
+            old_password=old_password,
+            new_password=new_password,
+            db=db
+        )
         # Commit to the database
         db.commit()
 
@@ -1311,4 +1350,16 @@ def reset_forgotten_password_service(
     token: str,
     new_password: str
 ):
-    ...
+    with get_db_session() as db:
+        verification_token = verify_verification_token(
+            token=token,
+            token_type_to_check=VerificationTokenPurposes.PASSWORD_RESET,
+            db=db
+        )
+
+        set_password(
+            user=get_user(user_id=verification_token.user_id, db=db),
+            new_password=new_password
+        )
+        db.delete(verification_token)
+        db.commit()
