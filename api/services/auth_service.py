@@ -188,19 +188,16 @@ def get_user_review_streak(user_id: UUID, db: Session) -> int:
 
     return streak
 
-def get_user(
-    user_id: UUID,
-    db: Session
-) -> User:
+
+def get_user(user_id: UUID, db: Session) -> User:
     user = db.get(User, user_id)
 
     if not user:
-        app_logger.error(
-            msg=f"User not found for id {user_id} from users table"
-        )
+        app_logger.error(msg=f"User not found for id {user_id} from users table")
         raise UserNotFoundError()
 
     return user
+
 
 #########################################################
 ###                     TOKENS                        ###
@@ -720,6 +717,7 @@ def hash_password(password: str) -> str:
     """
     return _ph.hash(password=password)
 
+
 def set_password(
     user: User,
     new_password: str,
@@ -730,32 +728,22 @@ def set_password(
     # Hash the new password and patch the user instance
     user.password = hash_password(password=new_password)
 
+
 def change_password(
-    user_id: UUID,
-    old_password: str,
-    new_password: str,
-    db: Session
+    user_id: UUID, old_password: str, new_password: str, db: Session
 ) -> None:
     user = db.get(User, user_id)
 
     if not user:
-        app_logger.error(
-            msg=f"User not found for id {user_id} from users table"
-        )
+        app_logger.error(msg=f"User not found for id {user_id} from users table")
         raise UserNotFoundError()
 
     # Check old password
-    if not verify_password(
-        plain_password=old_password,
-        hashed_password=user.password
-    ):
+    if not verify_password(plain_password=old_password, hashed_password=user.password):
         raise InvalidCredentialsError()
 
     # Reset password
-    set_password(
-        new_password=new_password,
-        user=user
-    )
+    set_password(new_password=new_password, user=user)
     db.flush()
 
 
@@ -1268,11 +1256,21 @@ def send_account_verification_email(
     scheme = "https" if SECURE_COOKIES else "http"
     verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
 
-    html_message = f"""<body>
-    <h2><a href="{verification_url}">Click here to verify your account.</a></h2>
-    <p>Use the above code to verify your account. This code will expire in 60 minutes.</p>
-    <p>If you did not request this verification code, please ignore this email.</p>
-</body>"""
+    html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
+<body style="display: flex; font-family: 'Geist', sans-serif;">
+    <div style="margin: auto; text-align: center; width: 35%; border: 1px solid black; padding: 2rem; border-radius: 10px;">
+        <h1 style="color: black;">Verify Your Email</h1>
+        <p>Use the button below to verify your email. It will expire in 60 minutes.</p>
+        <button style="background-color: #007bff; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 5px;"><a href="{verification_url}" style="color: white; text-decoration: none;">Verify Email</a></button>
+        <br>
+        <p>If the button above does not work, copy and paste the following link into your browser:</p>
+        <p style="color: blue;"><a href="{verification_url}" style="color: blue; text-decoration: none;">{verification_url}</a></p>
+        <p style="color: gray; font-size: 12px;">If you did not request this email, please ignore this email.</p>
+    </div>
+</body>
+"""
 
     email_data = EmailData(
         to=user_email,
@@ -1281,12 +1279,49 @@ def send_account_verification_email(
     )
     _send_email(email_data=email_data)
 
+def send_forgotten_password_email(
+    user_id: UUID, db: Optional[Session] = None
+) -> None:
+    user_email = _get_email_from_user_id(user_id=user_id, db=db)
+    if not user_email:
+        raise UserNotFoundError()
+
+    verification_token = create_verification_token(
+        user_id=user_id,
+        purpose=VerificationTokenPurposes.PASSWORD_RESET,
+        db=db,
+    )
+
+    scheme = "https" if SECURE_COOKIES else "http"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
+
+    html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
+<body style="display: flex; font-family: 'Geist', sans-serif;">
+    <div style="margin: auto; text-align: center; width: 35%; border: 1px solid black; padding: 2rem; border-radius: 10px;">
+        <h1 style="color: black;">Password Reset Request</h1>
+        <p>Use the button below to reset your password. It will expire in 60 minutes.</p>
+        <button style="background-color: #007bff; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 5px;"><a href="{verification_url}" style="color: white; text-decoration: none;">Reset Password</a></button>
+        <br>
+        <p>If the button above does not work, copy and paste the following link into your browser:</p>
+        <p style="color: blue;"><a href="{verification_url}" style="color: blue; text-decoration: none;">{verification_url}</a></p>
+        <p style="color: gray; font-size: 12px;">If you did not request this email, please ignore this email.</p>
+    </div>
+</body>
+"""
+
+    email_data = EmailData(
+        to=user_email,
+        subject="Password Reset",
+        message=html_message,
+    )
+    _send_email(email_data=email_data)
+
 
 def verify_verification_token(
-    token: str,
-    token_type_to_check: Optional[VerificationTokenPurposes],
-    db: Session
-    ) -> VerificationTokens:
+    token: str, token_type_to_check: Optional[VerificationTokenPurposes], db: Session
+) -> VerificationTokens:
     verification_token = (
         db.query(VerificationTokens)
         .filter(
@@ -1299,7 +1334,8 @@ def verify_verification_token(
     if not verification_token:
         raise VerificationTokenInvalidError()
 
-    if (token_type_to_check is not None
+    if (
+        token_type_to_check is not None
         and verification_token.purpose != token_type_to_check
     ):
         raise VerificationTokenInvalidError()
@@ -1307,14 +1343,12 @@ def verify_verification_token(
     return verification_token
 
 
-def verify_email_service(
-    token: str
-) -> None:
+def verify_email_service(token: str) -> None:
     with get_db_session() as db:
         verification_token = verify_verification_token(
             token=token,
             token_type_to_check=VerificationTokenPurposes.EMAIL_VERIFICATION,
-            db=db
+            db=db,
         )
 
         user = db.get(User, verification_token.user_id)
@@ -1329,37 +1363,29 @@ def verify_email_service(
         db.delete(verification_token)
         db.commit()
 
+
 def change_password_service(
-    user_id: UUID,
-    old_password: str,
-    new_password: str
+    user_id: UUID, old_password: str, new_password: str
 ) -> None:
     with get_db_session() as db:
         change_password(
-            user_id=user_id,
-            old_password=old_password,
-            new_password=new_password,
-            db=db
+            user_id=user_id, old_password=old_password, new_password=new_password, db=db
         )
         # Commit to the database
         db.commit()
 
 
-
-def reset_forgotten_password_service(
-    token: str,
-    new_password: str
-):
+def reset_forgotten_password_service(token: str, new_password: str):
     with get_db_session() as db:
         verification_token = verify_verification_token(
             token=token,
             token_type_to_check=VerificationTokenPurposes.PASSWORD_RESET,
-            db=db
+            db=db,
         )
 
         set_password(
             user=get_user(user_id=verification_token.user_id, db=db),
-            new_password=new_password
+            new_password=new_password,
         )
         db.delete(verification_token)
         db.commit()
