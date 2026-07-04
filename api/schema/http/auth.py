@@ -51,21 +51,30 @@ class RefreshRequest(BaseModel):
 class RefreshResponse(BaseModel):
     tokens: ReturnTokens
 
+
 class VerifyEmailResponse(BaseModel):
     success: bool
 
+
 class ResetForgottenPasswordRequest(BaseModel):
     new_password: str
+
+
+class ResetForgottenPasswordResponse(BaseModel):
+    success: bool
+
 
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str
 
+
 class ChangePasswordResponse(BaseModel):
     success: bool
 
-class ResetForgottenPasswordResponse(BaseModel):
+class SendForgottenPasswordEmailResponse(BaseModel):
     success: bool
+
 
 class LogoutResponse(BaseModel):
     success: bool
