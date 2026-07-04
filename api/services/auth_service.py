@@ -830,7 +830,7 @@ def register_user(username: str, grade: int, email: str, password: str) -> Retur
 
             new_tokens = create_tokens_service(user_id=new_user.id, db=db)
 
-            send_account_verification_email(user_id=new_user.id, db=db)
+            send_account_verification_email_service(user_id=new_user.id, db=db)
 
             db.commit()
 
@@ -1240,7 +1240,7 @@ def _send_email(email_data: EmailData) -> None:
         raise InternalError()
 
 
-def send_account_verification_email(
+def send_account_verification_email_service(
     user_id: UUID, db: Optional[Session] = None
 ) -> None:
     user_email = _get_email_from_user_id(user_id=user_id, db=db)
@@ -1279,7 +1279,7 @@ def send_account_verification_email(
     )
     _send_email(email_data=email_data)
 
-def send_forgotten_password_email(
+def send_forgotten_password_email_service(
     user_id: UUID, db: Optional[Session] = None
 ) -> None:
     user_email = _get_email_from_user_id(user_id=user_id, db=db)
