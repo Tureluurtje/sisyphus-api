@@ -42,6 +42,7 @@ from api.schema.http.auth import (
     RegisterResponse,
     ResetForgottenPasswordRequest,
     ResetForgottenPasswordResponse,
+    SendForgottenPasswordEmailResponse,
     ValidateResponse,
     LogoutResponse,
     VerifyEmailResponse,
@@ -58,6 +59,7 @@ from api.services.auth_service import (
     get_user_id_skip_csrf,
     register_user,
     reset_forgotten_password_service,
+    send_forgotten_password_email_service,
     validate_access_token,
     get_user_id,
     revoke_refresh_token,
@@ -148,6 +150,17 @@ def verify_email(request: Request, token: str) -> VerifyEmailResponse:
         token=token
     )  # Raises on invalid token
     return VerifyEmailResponse(success=True)
+
+@router.get("/send-forgotten-password-email")
+@typed_limit("3/minute")
+def send_forgotten_password_email(
+    request: Request,
+    user_id: UUID = Depends(get_user_id_skip_csrf)
+) -> SendForgottenPasswordEmailResponse:
+    send_forgotten_password_email_service(
+        user_id=user_id
+    ) # Raises on invalid token
+    return SendForgottenPasswordEmailResponse(success=True)
 
 
 @router.patch("/reset-forgotten-password")
