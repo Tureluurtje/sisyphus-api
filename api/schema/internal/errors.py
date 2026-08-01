@@ -61,6 +61,11 @@ class InvalidCredentialsError(AppException):
     code = "INVALID_CREDENTIALS"
     message = "The provided credentials are incorrect"
 
+class AccountNotVerifiedError(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    code = "ACCOUNT_NOT_VERIFIED"
+    message = "This account is not yet verified"
+
 
 class TokenExpiredError(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED

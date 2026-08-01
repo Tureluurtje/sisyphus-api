@@ -20,6 +20,7 @@ from secrets import token_urlsafe
 
 from api.models.words import Cards, Reviews
 from api.schema.internal.errors import (
+    AccountNotVerifiedError,
     BadRequestError,
     ConflictError,
     DependencyUnavailableError,
@@ -777,6 +778,9 @@ def authenticate_user(email: str, password: str) -> ReturnTokens:
         ):
             raise InvalidCredentialsError()
 
+        if user.verified == False:
+            raise AccountNotVerifiedError()
+
         new_tokens = create_tokens_service(
             user_id=user.id,
             db=db,
@@ -1279,6 +1283,7 @@ def send_account_verification_email_service(
     )
     _send_email(email_data=email_data)
 
+
 def send_forgotten_password_email_service(
     user_id: UUID, db: Optional[Session] = None
 ) -> None:
@@ -1344,6 +1349,14 @@ def verify_verification_token(
 
 
 def verify_email_service(token: str) -> None:
+    """Function to verify the account of an user
+
+    Args:
+        token (str): The token provided in the mail the user got to verify their account
+
+    Raises:
+        InternalError: User id not found in db for given token
+    """
     with get_db_session() as db:
         verification_token = verify_verification_token(
             token=token,
