@@ -192,6 +192,14 @@ app.include_router(router=auth_routes.router, prefix="/api")
 app.include_router(router=word_routes.router, prefix="/api")
 
 
+@app.get("/email-verified")
+def email_verified():
+    """Serve email verified page"""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "email-verified.html"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
+
 @app.get("/favicon.ico")
 def favicon():
     """Serve favicon."""
@@ -208,6 +216,7 @@ def robots():
         return FileResponse(path=str(BASE_DIR / "public" / "robots.txt"))
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
+
 
 @app.get("/legal")
 def legal():
@@ -292,6 +301,7 @@ async def log_requests(
         )
         raise
 
+
 @app.middleware(middleware_type="http")
 async def apply_refreshed_tokens(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -313,8 +323,10 @@ async def apply_refreshed_tokens(
     refreshed = getattr(request.state, "refreshed_tokens", None)
     if refreshed is not None:
         from api.services.auth_service import response_cookies_generator
+
         response_cookies_generator(tokens=refreshed, response=response)
     return response
+
 
 # Get client ip for logger
 def get_client_ip(request: Request) -> str:

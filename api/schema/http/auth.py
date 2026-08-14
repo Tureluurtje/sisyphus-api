@@ -55,6 +55,8 @@ class RefreshResponse(BaseModel):
 class VerifyEmailResponse(BaseModel):
     success: bool
 
+class RequestAccountVerificationEmail(BaseModel):
+    success: bool
 
 class ResetForgottenPasswordRequest(BaseModel):
     new_password: str

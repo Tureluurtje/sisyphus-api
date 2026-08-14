@@ -3,7 +3,11 @@ from uuid import UUID
 import asyncio
 from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
+from fastapi.responses import RedirectResponse
+
+from api.config import HOST, PORT, SECURE_COOKIES
 from api.schema.internal.errors import (
+    BadRequestError,
     RefreshTokenMissingError,
     TokenInvalidError,
     TokenMissingError,
@@ -40,12 +44,12 @@ from api.schema.http.auth import (
     RefreshResponse,
     RegisterRequest,
     RegisterResponse,
+    RequestAccountVerificationEmail,
     ResetForgottenPasswordRequest,
     ResetForgottenPasswordResponse,
     SendForgottenPasswordEmailResponse,
     ValidateResponse,
-    LogoutResponse,
-    VerifyEmailResponse,
+    LogoutResponse
 )
 from api.services.auth_service import (
     authenticate_user,
@@ -54,12 +58,15 @@ from api.services.auth_service import (
     create_tokens_service,
     delete_account_service,
     get_user_data_service,
+    get_user_id_from_email,
     get_user_id_from_refresh,
     get_user_id_from_refresh_body,
     get_user_id_skip_csrf,
     register_user,
     reset_forgotten_password_service,
+    send_account_verification_email_service,
     send_forgotten_password_email_service,
+    user_is_verified,
     validate_access_token,
     get_user_id,
     revoke_refresh_token,
@@ -142,14 +149,28 @@ async def refresh(
     response_cookies_generator(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
+@router.get("/request-account-verification-email")
+@typed_limit("1/5 minute")
+def request_account_verification_email(
+    request: Request,
+    email: str
+) -> RequestAccountVerificationEmail:
+    # TODO: check if email is already verified
+    user_id = get_user_id_from_email(email=email)
+    if user_is_verified(user_id=user_id):
+        raise BadRequestError("The user is already verified")
+    send_account_verification_email_service(user_id=user_id)
+    return RequestAccountVerificationEmail(success=True)
 
-@router.post("/verify-account")
+# Use get so browser can call
+@router.get("/verify-account")
 @typed_limit("5/minute")
-def verify_email(request: Request, token: str) -> VerifyEmailResponse:
+def verify_email(request: Request, token: str) -> RedirectResponse:
     verify_email_service(
         token=token
     )  # Raises on invalid token
-    return VerifyEmailResponse(success=True)
+    scheme = "https" if SECURE_COOKIES else "http"
+    return RedirectResponse(url=f"{scheme}://{HOST}:{PORT}/email-verified", status_code=303)
 
 @router.get("/send-forgotten-password-email")
 @typed_limit("3/minute")

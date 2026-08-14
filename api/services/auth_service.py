@@ -28,6 +28,7 @@ from api.schema.internal.errors import (
     InternalError,
     InvalidCredentialsError,
     InvalidInputError,
+    NotFoundError,
     RefreshTokenInvalidError,
     RefreshTokenMissingError,
     TokenExpiredError,
@@ -92,7 +93,7 @@ def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
 
 def _get_email_from_user_id(
     user_id: UUID, db: Optional[Session] = None
-) -> Optional[str]:
+) -> str:
     if db:
         result = db.query(User.email).where(User.id == user_id).scalar()
     else:
@@ -100,9 +101,31 @@ def _get_email_from_user_id(
             result = db.query(User.email).where(User.id == user_id).scalar()
 
     if result is None:
-        app_logger.warning(f"Email not found for user id {user_id}")
+        raise NotFoundError(f"Email not found for user id {user_id}")
     return result
 
+def get_user_id_from_email(
+    email: str, db: Optional[Session] = None
+) -> UUID:
+    if db:
+        result = db.query(User.id).where(User.email == email).scalar()
+    else:
+        with get_db_session() as db:
+            result = db.query(User.id).where(User.email == email).scalar()
+
+    if result is None:
+        raise NotFoundError(f"User id not found for user email {email}")
+    return result
+
+def user_is_verified(
+    user_id: UUID, db: Optional[Session] = None
+) -> bool:
+    if db:
+        result = db.query(User.verified).where(User.id == user_id).scalar()
+    else:
+        with get_db_session() as db:
+            result = db.query(User.verified).where(User.id == user_id).scalar()
+    return result
 
 def validate_password_strength(password: str, email: Optional[str] = None) -> None:
     """Validate that password strenght is good measured with zxcvbn library
@@ -1258,7 +1281,7 @@ def send_account_verification_email_service(
     )
 
     scheme = "https" if SECURE_COOKIES else "http"
-    verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/auth/verify-account?token={verification_token}"
 
     html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1298,7 +1321,7 @@ def send_forgotten_password_email_service(
     )
 
     scheme = "https" if SECURE_COOKIES else "http"
-    verification_url = f"{scheme}://{HOST}:{PORT}/api/verify?token={verification_token}"
+    verification_url = f"{scheme}://{HOST}:{PORT}/api/auth/reset-forgotten-password?token={verification_token}"
 
     html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1318,7 +1341,7 @@ def send_forgotten_password_email_service(
 
     email_data = EmailData(
         to=user_email,
-        subject="Password Reset",
+        subject="Password Forgotten",
         message=html_message,
     )
     _send_email(email_data=email_data)
