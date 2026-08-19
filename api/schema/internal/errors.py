@@ -169,13 +169,13 @@ class UsernameTakenError(AppException):
 
 
 class ValidationError(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     code = "VALIDATION_ERROR"
     message = "The request validation failed"
 
 
 class SchemaValidationError(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     code = "SCHEMA_VALIDATION_ERROR"
     message = "The request body does not match the required schema"
 
