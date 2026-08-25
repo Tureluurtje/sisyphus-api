@@ -96,7 +96,7 @@ def calculate_new_stability(
 def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
     current_date = current_date or datetime.now()
 
-    start_month = 9
+    start_month = 8
     if current_date.month >= start_month:
         start_year = current_date.year
     else:
