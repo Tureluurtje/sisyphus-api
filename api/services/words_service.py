@@ -1,6 +1,7 @@
 from uuid import UUID
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from typing import Optional
+from zoneinfo import ZoneInfo
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -10,7 +11,9 @@ from api.models.words import Cards, Chapters, Lists, Reviews, Words
 from api.models.auth import User
 from api.database import get_db_session
 from api.logging_config import app_logger
-from api.schema.internal.errors import InternalError
+from api.schema.internal.errors import InternalError, UnauthorizedError
+
+NETHERLANDS_TIMEZONE = ZoneInfo("Europe/Amsterdam")
 
 
 def _ensure_aware(dt: datetime) -> datetime:
@@ -108,9 +111,12 @@ def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
 
 
 def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
-    # TODO: Check if user has admin priveleges
-
     with get_db_session() as db:
+        # TODO: Change hard check with checking for admin priveleges
+        user = db.get(User, user_id)
+        if not user or user.username.lower() != "tureluurtje":
+            raise UnauthorizedError("User does not have admin priveleges")
+
         # First add List
         new_list = Lists(
             schoolyear=word_list.schoolYear,
@@ -165,6 +171,12 @@ def get_due_words_service(
         if wordlist is None:
             return None
 
+        # Include every word scheduled through the end of today in the Netherlands.
+        tomorrow_start = datetime.combine(
+            datetime.now(NETHERLANDS_TIMEZONE).date() + timedelta(days=1),
+            time.min,
+        )
+
         # Then find cards for this year
         due_words = (
             db.query(Words)
@@ -174,6 +186,7 @@ def get_due_words_service(
             .where(
                 Lists.schoolyear == schoolyear,
                 Lists.schoolgrade == user.grade,
+                Words.target_date < tomorrow_start,
                 or_(
                     Cards.id.is_(None),  # never learned
                     Cards.due_at <= datetime.now(timezone.utc),  # due
@@ -334,10 +347,21 @@ def get_stack_service(
         raise InternalError()
 
     with get_db_session() as db:
+        user = db.query(User).where(User.id == user_id).scalar()
+        if user is None:
+            app_logger.error(f"User with id {user_id} not found")
+            raise InternalError()
+
+        schoolyear = calculate_schoolyear()
+
         query = (
             db.query(Cards, Words)
             .join(Words, Words.id == Cards.word_id)
+            .join(Chapters, Chapters.id == Words.chapter_id)
+            .join(Lists, Lists.id == Chapters.list_id)
             .where(Cards.user_id == user_id)
+            .where(Lists.schoolyear == schoolyear)
+            .where(Lists.schoolgrade == user.grade)
         )
 
         if not all_stacks:
@@ -381,5 +405,13 @@ def get_stack_service(
             assert (
                 stack_id is not None
             )  # Narrows Optional[int] to type int for the type checker
-            words = [word for _, word in rows]
+            words = [
+                DueWord(
+                    wordId=word.id,
+                    chapterId=word.chapter_id,
+                    word=word.word,
+                    translation=word.translation,
+                )
+                for _, word in rows
+            ]
             return Stack(stack_id=stack_id, wordAmount=len(words), words=words)

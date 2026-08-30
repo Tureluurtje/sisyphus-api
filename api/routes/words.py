@@ -41,7 +41,7 @@ def get_due_words(
     user_id: UUID = Depends(get_user_id_skip_csrf),
 ) -> DueWordsResponse | Response:
     due_words = get_due_words_service(user_id, limit, offset)
-    if not due_words:
+    if due_words is None:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return DueWordsResponse(wordAmount=len(due_words), words=due_words)
 
