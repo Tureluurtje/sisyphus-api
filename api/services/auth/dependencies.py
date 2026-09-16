@@ -53,7 +53,7 @@ def get_user_id(connection: HTTPConnection, skip_csrf: bool = False) -> UUID:
         raise TokenMissingError()
 
     with get_db_session() as db:
-        payload = validate_access_token(token=access_token)
+        payload = validate_access_token(token=access_token, db=db)
 
         user_id = payload.sub
         if not user_id:
@@ -104,7 +104,7 @@ def get_user_id_from_refresh_body(token: str) -> UUID:
 
 
 def validate_user(
-    request: Request, allow_refresh: bool = True
+    request: Request, db: DbSession, allow_refresh: bool = True
 ) -> tuple[Optional[UUID], Optional[AuthTokens]]:
     """Validate a user by checking their access token, falling back to a
     refresh-token-based re-issue when the access token is missing/expired."""
@@ -113,7 +113,7 @@ def validate_user(
         try:
             if access_token is None:
                 raise TokenMissingError()
-            payload = validate_access_token(access_token)
+            payload = validate_access_token(access_token, db=db)
             return payload.sub, None
         except (TokenExpiredError, TokenMissingError):
             if not allow_refresh:
@@ -126,7 +126,7 @@ def validate_user(
                 user_id, raw_refresh = data
 
                 tokens = issue_auth_tokens(
-                    user_id=user_id, old_refresh_token=raw_refresh
+                    user_id=user_id, old_refresh_token=raw_refresh, db=db
                 )
                 return user_id, tokens
             except (
