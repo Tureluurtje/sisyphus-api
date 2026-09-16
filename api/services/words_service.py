@@ -27,6 +27,16 @@ def _ensure_aware(dt: datetime) -> datetime:
     return dt
 
 
+def _tomorrow_start_local_naive(now: Optional[datetime] = None) -> datetime:
+    local_now = (
+        now.astimezone(NETHERLANDS_TIMEZONE)
+        if now
+        else datetime.now(NETHERLANDS_TIMEZONE)
+    )
+    tomorrow = local_now.date() + timedelta(days=1)
+    return datetime.combine(tomorrow, time.min)
+
+
 def calculate_due_date(box: int) -> Optional[datetime]:
     now = datetime.now()
     match box:
@@ -113,6 +123,7 @@ def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
 def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
     with get_db_session() as db:
         # TODO: Change hard check with checking for admin priveleges
+        # TODO: Check if grade for this year is already loaded
         user = db.get(User, user_id)
         if not user or user.username.lower() != "tureluurtje":
             raise UnauthorizedError("User does not have admin priveleges")
@@ -163,19 +174,17 @@ def get_due_words_service(
         schoolyear = calculate_schoolyear()
 
         # Then check if there is a wordlist available for the grade of the user
-        wordlist = db.query(Lists.id).where(
-            Lists.schoolyear == schoolyear,
-            Lists.schoolgrade == user.grade
-        ).scalar()
+        wordlist = (
+            db.query(Lists.id)
+            .where(Lists.schoolyear == schoolyear, Lists.schoolgrade == user.grade)
+            .scalar()
+        )
 
         if wordlist is None:
             return None
 
         # Include every word scheduled through the end of today in the Netherlands.
-        tomorrow_start = datetime.combine(
-            datetime.now(NETHERLANDS_TIMEZONE).date() + timedelta(days=1),
-            time.min,
-        )
+        tomorrow_start = _tomorrow_start_local_naive()
 
         # Then find cards for this year
         due_words = (
