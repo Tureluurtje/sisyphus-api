@@ -1,8 +1,10 @@
+from typing import Generator
+
 from api.config import DATABASE_URL
 
 from contextlib import contextmanager
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
 # Enable pool_pre_ping to avoid using stale/closed connections from the pool.
 # pool_recycle helps reclaim long-lived connections that some servers close.
@@ -18,5 +20,17 @@ def get_db_session():
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+def get_db_session_dependency() -> Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
