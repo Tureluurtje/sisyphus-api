@@ -6,8 +6,9 @@ import asyncio
 from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from sqlalchemy.orm import Session as DbSession
 
-from api.database import get_db_session
+from api.database import get_db_session_dependency
 from api.schema.internal.errors import (
     BadRequestError,
     RefreshTokenMissingError,
@@ -92,17 +93,17 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/me")
 @typed_limit("60/minute")
 def get_current_user(
-    request: Request, user_id: UUID = Depends(get_user_id_skip_csrf)
+    request: Request, user_id: UUID = Depends(get_user_id_skip_csrf), db: DbSession = Depends(get_db_session_dependency)
 ) -> UserProfileDetail:
-    return get_user_profile(user_id=user_id)
+    return get_user_profile(user_id=user_id, db=db)
 
 
 @router.post(path="/login", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")  # 10/minute per ip
 async def login(
-    request: Request, response: Response, data: LoginRequest
+    request: Request, response: Response, data: LoginRequest, db: DbSession = Depends(get_db_session_dependency)
 ) -> LoginResponse:
-    tokens = authenticate_user(email=data.email, password=data.password)
+    tokens = authenticate_user(email=data.email, password=data.password, db=db)
     set_auth_cookies(response=response, tokens=tokens)
     return LoginResponse(tokens=tokens)
 
@@ -110,13 +111,14 @@ async def login(
 @router.post(path="/register", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")
 async def register(
-    request: Request, response: Response, data: RegisterRequest
+    request: Request, response: Response, data: RegisterRequest, db: DbSession = Depends(get_db_session_dependency)
 ) -> RegisterResponse:
     tokens = register_user(
         username=data.username,
         grade=data.grade,
         email=data.email,
         password=data.password,
+        db=db
     )
     set_auth_cookies(response=response, tokens=tokens)
     return RegisterResponse(tokens=tokens)
@@ -125,12 +127,12 @@ async def register(
 @router.get(path="/validate")
 @typed_limit("60/minute")
 async def validate(
-    request: Request, access_token: Optional[str] = Depends(get_access_token_cookie)
+    request: Request, access_token: Optional[str] = Depends(get_access_token_cookie), db: DbSession = Depends(get_db_session_dependency)
 ) -> ValidateResponse:
     if not access_token:
         raise TokenMissingError()
 
-    payload = validate_access_token(access_token)
+    payload = validate_access_token(access_token, db=db)
     if not payload:
         raise TokenInvalidError()
 
@@ -144,6 +146,7 @@ async def refresh(
     response: Response,
     body_data: Optional[RefreshRequest] = None,
     cookie_data: Optional[tuple[UUID, str]] = Depends(get_user_id_from_refresh),
+    db: DbSession = Depends(get_db_session_dependency)
 ) -> RefreshResponse:
     if cookie_data:
         user_id, old_refresh_token = cookie_data
@@ -154,7 +157,7 @@ async def refresh(
         else:
             raise RefreshTokenMissingError()
 
-    tokens = issue_auth_tokens(user_id=user_id, old_refresh_token=old_refresh_token)
+    tokens = issue_auth_tokens(user_id=user_id, old_refresh_token=old_refresh_token, db=db)
     set_auth_cookies(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
@@ -162,24 +165,23 @@ async def refresh(
 @router.get("/request-account-verification-email")
 @typed_limit("1/5 minute")
 def request_account_verification_email(
-    request: Request, email: str
+    request: Request, email: str, db: DbSession = Depends(get_db_session_dependency)
 ) -> RequestAccountVerificationEmail:
-    with get_db_session() as db:
-        user_id = get_user_id_from_email(email=email, db=db)
-        if not user_id:
-            raise UserNotFoundError()
-        if user_is_verified(user_id=user_id, db=db):
-            raise BadRequestError("The user is already verified")
-        send_verification_email(user_id=user_id, db=db)
-        db.commit()
-        return RequestAccountVerificationEmail(success=True)
+    user_id = get_user_id_from_email(email=email, db=db)
+    if not user_id:
+        raise UserNotFoundError()
+    if user_is_verified(user_id=user_id, db=db):
+        raise BadRequestError("The user is already verified")
+    send_verification_email(user_id=user_id, db=db)
+    db.commit()
+    return RequestAccountVerificationEmail(success=True)
 
 
 # Use get so browser can call
 @router.get("/verify-account")
 @typed_limit("5/minute")
-def verify_account(request: Request, token: str) -> RedirectResponse:
-    verify_email(token=token)  # Raises on invalid token
+def verify_account(request: Request, token: str, db: DbSession = Depends(get_db_session_dependency)) -> RedirectResponse:
+    verify_email(token=token, db=db)  # Raises on invalid token
     return RedirectResponse(
         url=f"https://sisyphus.kwako.nl/email-verified", status_code=303
     )
@@ -188,11 +190,11 @@ def verify_account(request: Request, token: str) -> RedirectResponse:
 @router.post("/send-forgotten-password-email")
 @typed_limit("3/minute")
 def send_forgotten_password_email(
-    request: Request, email: str
+    request: Request, email: str, db: DbSession = Depends(get_db_session_dependency)
 ) -> SendForgottenPasswordEmailResponse:
-    with get_db_session() as db:
-        send_password_reset_email(email=email, db=db)
-        db.commit()
+    send_password_reset_email(email=email, db=db)
+    db.commit()
+
     return SendForgottenPasswordEmailResponse(success=True)
 
 
@@ -213,10 +215,10 @@ def reset_forgotten_password_get(request: Request, token: str):
 @router.patch("/reset-forgotten-password")
 @typed_limit("3/minute")
 def reset_forgotten_password_patch(
-    request: Request, data: ResetForgottenPasswordRequest, token: str
+    request: Request, data: ResetForgottenPasswordRequest, token: str, db: DbSession = Depends(get_db_session_dependency)
 ) -> ResetForgottenPasswordResponse:
     reset_password(
-        token=token, new_password=data.new_password
+        token=token, new_password=data.new_password, db=db
     )  # Raises on invalid token
     return ResetForgottenPasswordResponse(success=True)
 
@@ -224,16 +226,15 @@ def reset_forgotten_password_patch(
 @router.patch("/change-password")
 @typed_limit("3/minute")
 def change_password(
-    request: Request, data: ChangePasswordRequest, user_id: UUID = Depends(get_user_id)
+    request: Request, data: ChangePasswordRequest, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)
 ) -> ChangePasswordResponse:
-    with get_db_session() as db:
-        change_user_password(
-            user_id=user_id,
-            old_password=data.old_password,
-            new_password=data.new_password,
-            db=db,
-        )
-        db.commit()
+    change_user_password(
+        user_id=user_id,
+        old_password=data.old_password,
+        new_password=data.new_password,
+        db=db,
+    )
+    db.commit()
     return ChangePasswordResponse(success=True)
 
 
@@ -244,14 +245,15 @@ async def logout(
     response: Response,
     user_id: UUID = Depends(dependency=get_user_id),
     access_token: Optional[str] = Depends(get_access_token_cookie),
+    db: DbSession = Depends(get_db_session_dependency)
 ) -> LogoutResponse:
-    with get_db_session() as db:
-        # Revoke any active refresh tokens for this user
-        revoke_all_refresh_tokens_for_user(user_id=user_id, db=db)
+    # Revoke any active refresh tokens for this user
+    revoke_all_refresh_tokens_for_user(user_id=user_id, db=db)
 
-        if access_token is not None:
-            revoke_access_token(access_token, db=db)
-        db.commit()
+    if access_token is not None:
+        revoke_access_token(access_token, db=db)
+    db.commit()
+
     asyncio.create_task(coro=cleanup_tokens())  # Run cleanup before the request
 
     clear_auth_cookies(response)
@@ -260,7 +262,7 @@ async def logout(
 
 @router.delete(path="/delete", status_code=status.HTTP_200_OK)
 async def delete(
-    request: Request, response: Response, user_id: UUID = Depends(get_user_id)
+    request: Request, response: Response, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)
 ) -> DeleteResponse:
-    delete_account(user_id=user_id)
+    delete_account(user_id=user_id, db=db)
     return DeleteResponse(success=True)

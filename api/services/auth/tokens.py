@@ -16,7 +16,6 @@ from api.config import (
     SECRET_KEY,
     VERIFICATION_TOKEN_EXPIRE_SECONDS,
 )
-from api.database import get_db_session
 from api.models.auth import (
     RevokedAccessTokens,
     Tokens,
@@ -285,45 +284,44 @@ def verify_token(token: str, token_hash: str) -> bool:
     return hash_token(token) == token_hash
 
 
-def validate_access_token(token: str) -> AccessTokenPayload:
+def validate_access_token(token: str, db: DbSession) -> AccessTokenPayload:
     """
     Decode and validate access token and return the claims(payload)
     """
     try:
-        with get_db_session() as db:
-            jwt_decoded = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
-            payload = AccessTokenPayload(**jwt_decoded)
+        jwt_decoded = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        payload = AccessTokenPayload(**jwt_decoded)
 
-            # Check revocation with one retry for transient db errors
+        # Check revocation with one retry for transient db errors
+        try:
+            revoked_tokens = (
+                db.query(RevokedAccessTokens)
+                .filter(RevokedAccessTokens.jti == payload.jti)
+                .first()
+            )
+        except OperationalError as oe:
+            app_logger.warning(
+                "OperationalError during token revocation check, retrying once: %s", oe
+            )
+            # Short wait to get rid of any transient errors
+            time.sleep(0.05)
             try:
                 revoked_tokens = (
                     db.query(RevokedAccessTokens)
                     .filter(RevokedAccessTokens.jti == payload.jti)
                     .first()
                 )
-            except OperationalError as oe:
-                app_logger.warning(
-                    "OperationalError during token revocation check, retrying once: %s", oe
+            except OperationalError as oe2:
+                app_logger.exception(
+                    "Database unavailable when validating access token: %s", oe2
                 )
-                # Short wait to get rid of any transient errors
-                time.sleep(0.05)
-                try:
-                    revoked_tokens = (
-                        db.query(RevokedAccessTokens)
-                        .filter(RevokedAccessTokens.jti == payload.jti)
-                        .first()
-                    )
-                except OperationalError as oe2:
-                    app_logger.exception(
-                        "Database unavailable when validating access token: %s", oe2
-                    )
-                    # Consider DB unavailable — surface a 503-style error
-                    raise DependencyUnavailableError()
+                # Consider DB unavailable — surface a 503-style error
+                raise DependencyUnavailableError()
 
-            if revoked_tokens:
-                raise jwt.InvalidTokenError()
+        if revoked_tokens:
+            raise jwt.InvalidTokenError()
 
-            return payload
+        return payload
 
     except jwt.ExpiredSignatureError:
         raise TokenExpiredError()
@@ -361,7 +359,7 @@ def revoke_all_refresh_tokens_for_user(user_id: UUID, db: DbSession):
 
 
 def revoke_access_token(access_token: str, db: DbSession):
-    payload = validate_access_token(access_token)
+    payload = validate_access_token(access_token, db=db)
     revoked_token = RevokedAccessTokens(
         user_id=payload.sub,
         jti=payload.jti,
@@ -376,41 +374,21 @@ def revoke_access_token(access_token: str, db: DbSession):
 
 def issue_auth_tokens(
     user_id: UUID,
-    old_refresh_token: Optional[str] = None,
-    db: Optional[DbSession] = None,
+    db: DbSession,
+    old_refresh_token: Optional[str] = None
 ) -> AuthTokens:
     """
     Create a new set of authentication tokens(access, refresh, csrf) and possibly take in old refresh token for rotation
     """
+    new_access_token = _create_access_token(user_id)
+    if old_refresh_token:
+        new_refresh_token = _rotate_refresh_token(old_refresh_token, db)
+    else:
+        new_refresh_token = _create_refresh_token(user_id, db)
+    new_csrf_token = _create_csrf_token()
 
-    def _issue_tokens_with_session(
-        user_id: UUID, old_refresh_token: Optional[str], db: DbSession
-    ) -> AuthTokens:
-        new_access_token = _create_access_token(user_id)
-        if old_refresh_token:
-            new_refresh_token = _rotate_refresh_token(old_refresh_token, db)
-        else:
-            new_refresh_token = _create_refresh_token(user_id, db)
-        new_csrf_token = _create_csrf_token()
-
-        return AuthTokens(
-            access_token=new_access_token,
-            refresh_token=new_refresh_token.token,
-            csrf_token=new_csrf_token,
-        )
-
-    if not db:
-        with get_db_session() as db:
-            try:
-                issued_auth_tokens = _issue_tokens_with_session(
-                    user_id=user_id, old_refresh_token=old_refresh_token, db=db
-                )
-                db.commit()
-                return issued_auth_tokens
-            except Exception:
-                db.rollback()
-                raise
-
-    return _issue_tokens_with_session(
-        user_id=user_id, old_refresh_token=old_refresh_token, db=db
+    return AuthTokens(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token.token,
+        csrf_token=new_csrf_token,
     )
