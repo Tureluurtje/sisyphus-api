@@ -4,7 +4,8 @@ from slowapi.util import get_remote_address
 from fastapi import Request, Depends
 
 from uuid import UUID
-from api.services.auth_service import get_user_id
+
+from api.services.auth.dependencies import get_user_id
 
 limiter = Limiter(key_func=get_remote_address)
 

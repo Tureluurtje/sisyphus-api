@@ -91,9 +91,7 @@ def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
     return dt
 
 
-def _get_email_from_user_id(
-    user_id: UUID, db: Optional[Session] = None
-) -> str:
+def _get_email_from_user_id(user_id: UUID, db: Optional[Session] = None) -> str:
     if db:
         result = db.query(User.email).where(User.id == user_id).scalar()
     else:
@@ -104,9 +102,8 @@ def _get_email_from_user_id(
         raise NotFoundError(f"Email not found for user id {user_id}")
     return result
 
-def get_user_id_from_email(
-    email: str, db: Optional[Session] = None
-) -> UUID:
+
+def get_user_id_from_email(email: str, db: Optional[Session] = None) -> UUID:
     if db:
         result = db.query(User.id).where(User.email == email).scalar()
     else:
@@ -117,15 +114,15 @@ def get_user_id_from_email(
         raise NotFoundError(f"User id not found for user email {email}")
     return result
 
-def user_is_verified(
-    user_id: UUID, db: Optional[Session] = None
-) -> bool:
+
+def user_is_verified(user_id: UUID, db: Optional[Session] = None) -> bool:
     if db:
         result = db.query(User.verified).where(User.id == user_id).scalar()
     else:
         with get_db_session() as db:
             result = db.query(User.verified).where(User.id == user_id).scalar()
     return result
+
 
 def validate_password_strength(password: str, email: Optional[str] = None) -> None:
     """Validate that password strenght is good measured with zxcvbn library
@@ -1280,8 +1277,9 @@ def send_account_verification_email_service(
         db=db,
     )
 
-    scheme = "https" if SECURE_COOKIES else "http"
-    verification_url = f"{scheme}://{HOST}:{PORT}/api/auth/verify-account?token={verification_token}"
+    verification_url = (
+        f"https://sisyphus.kwako.nl/api/auth/verify-account?token={verification_token}"
+    )
 
     html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1308,10 +1306,11 @@ def send_account_verification_email_service(
 
 
 def send_forgotten_password_email_service(
-    user_id: UUID, db: Optional[Session] = None
+    email: str, db: Optional[Session] = None
 ) -> None:
-    user_email = _get_email_from_user_id(user_id=user_id, db=db)
-    if not user_email:
+    user_id = get_user_id_from_email(email)
+
+    if not user_id:
         raise UserNotFoundError()
 
     verification_token = create_verification_token(
@@ -1320,8 +1319,7 @@ def send_forgotten_password_email_service(
         db=db,
     )
 
-    scheme = "https" if SECURE_COOKIES else "http"
-    verification_url = f"{scheme}://{HOST}:{PORT}/api/auth/reset-forgotten-password?token={verification_token}"
+    verification_url = f"https://sisyphus.kwako.nl/api/auth/reset-forgotten-password?token={verification_token}"
 
     html_message = f"""<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1418,6 +1416,13 @@ def reset_forgotten_password_service(token: str, new_password: str):
             token_type_to_check=VerificationTokenPurposes.PASSWORD_RESET,
             db=db,
         )
+
+        user = get_user(user_id=verification_token.user_id, db=db)
+
+        if verify_password(new_password, user.password):
+            raise InvalidInputError(
+                message="Password can't be the same as the old password"
+            )
 
         set_password(
             user=get_user(user_id=verification_token.user_id, db=db),
