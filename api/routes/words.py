@@ -7,7 +7,8 @@ from starlette import status
 from starlette.responses import Response
 
 from api.schema.internal.words import LoadWordList
-from api.services.auth_service import get_user_id, get_user_id_skip_csrf
+#from api.services.auth_service import get_user_id, get_user_id_skip_csrf
+from api.services.auth.dependencies import get_user_id, get_user_id_skip_csrf
 from api.services.words_service import (
     get_due_words_service,
     get_stack_service,

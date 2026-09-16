@@ -14,6 +14,8 @@ from api.schema.internal.errors import APIError, AppException, DatabaseConnectio
 from api.logging_config import app_logger, error_logger, request_logger
 from sqlalchemy.exc import OperationalError
 
+from api.services.auth.dependencies import cleanup_tokens
+
 # When running the file directly (for example from the `api/` folder in a debugger)
 # Python's import machinery won't find the top-level `api` package because
 # sys.path[0] is the `api/` directory. Add the project root to sys.path so
@@ -58,9 +60,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import CORS_ORIGINS
 
-from api.services.auth_service import (
-    cleanup_tokens,
-)
 
 from api.routes import auth as auth_routes, words as word_routes
 
@@ -200,6 +199,7 @@ def email_verified():
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
+
 @app.get("/favicon.ico")
 def favicon():
     """Serve favicon."""
@@ -223,6 +223,15 @@ def legal():
     """Serve legal.html."""
     try:
         return FileResponse(path=str(BASE_DIR / "public" / "legal.html"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
+
+
+@app.get("/support")
+def support():
+    """Serve support.html."""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "support.html"))
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
@@ -322,9 +331,9 @@ async def apply_refreshed_tokens(
     response = await call_next(request)
     refreshed = getattr(request.state, "refreshed_tokens", None)
     if refreshed is not None:
-        from api.services.auth_service import response_cookies_generator
+        from api.services.auth.cookies import set_auth_cookies
 
-        response_cookies_generator(tokens=refreshed, response=response)
+        set_auth_cookies(tokens=refreshed, response=response)
     return response
 
 

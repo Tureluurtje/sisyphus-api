@@ -1,16 +1,19 @@
+from pathlib import Path
+
 from fastapi import APIRouter, status, Depends, Request, Response
 from uuid import UUID
 import asyncio
 from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
-from api.config import HOST, PORT, SECURE_COOKIES
+from api.database import get_db_session
 from api.schema.internal.errors import (
     BadRequestError,
     RefreshTokenMissingError,
     TokenInvalidError,
     TokenMissingError,
+    UserNotFoundError,
 )
 from api.schema.internal.users import UserProfileDetail
 
@@ -18,6 +21,37 @@ from api.limiter import limiter
 
 from functools import wraps
 from typing import Any, Callable, ParamSpec, TypeVar, cast
+
+from api.services.auth.accounts import (
+    authenticate_user,
+    change_user_password,
+    delete_account,
+    get_user_profile,
+    register_user,
+    reset_password,
+    user_is_verified,
+    verify_email,
+)
+from api.services.auth.cookies import (
+    clear_auth_cookies,
+    get_access_token_cookie,
+    set_auth_cookies,
+)
+from api.services.auth.dependencies import (
+    cleanup_tokens,
+    get_user_id,
+    get_user_id_from_email,
+    get_user_id_from_refresh,
+    get_user_id_from_refresh_body,
+    get_user_id_skip_csrf,
+)
+from api.services.auth.email import send_password_reset_email, send_verification_email
+from api.services.auth.tokens import (
+    issue_auth_tokens,
+    revoke_access_token,
+    revoke_all_refresh_tokens_for_user,
+    validate_access_token,
+)
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -49,32 +83,7 @@ from api.schema.http.auth import (
     ResetForgottenPasswordResponse,
     SendForgottenPasswordEmailResponse,
     ValidateResponse,
-    LogoutResponse
-)
-from api.services.auth_service import (
-    authenticate_user,
-    change_password_service,
-    clear_token_cookies_service,
-    create_tokens_service,
-    delete_account_service,
-    get_user_data_service,
-    get_user_id_from_email,
-    get_user_id_from_refresh,
-    get_user_id_from_refresh_body,
-    get_user_id_skip_csrf,
-    register_user,
-    reset_forgotten_password_service,
-    send_account_verification_email_service,
-    send_forgotten_password_email_service,
-    user_is_verified,
-    validate_access_token,
-    get_user_id,
-    revoke_refresh_token,
-    revoke_access_token,
-    cleanup_tokens,
-    get_access_token_cookie,
-    response_cookies_generator,
-    verify_email_service,
+    LogoutResponse,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -85,7 +94,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def get_current_user(
     request: Request, user_id: UUID = Depends(get_user_id_skip_csrf)
 ) -> UserProfileDetail:
-    return get_user_data_service(user_id=user_id)
+    return get_user_profile(user_id=user_id)
 
 
 @router.post(path="/login", status_code=status.HTTP_200_OK)
@@ -94,7 +103,7 @@ async def login(
     request: Request, response: Response, data: LoginRequest
 ) -> LoginResponse:
     tokens = authenticate_user(email=data.email, password=data.password)
-    response_cookies_generator(response=response, tokens=tokens)
+    set_auth_cookies(response=response, tokens=tokens)
     return LoginResponse(tokens=tokens)
 
 
@@ -109,7 +118,7 @@ async def register(
         email=data.email,
         password=data.password,
     )
-    response_cookies_generator(response=response, tokens=tokens)
+    set_auth_cookies(response=response, tokens=tokens)
     return RegisterResponse(tokens=tokens)
 
 
@@ -145,71 +154,88 @@ async def refresh(
         else:
             raise RefreshTokenMissingError()
 
-    tokens = create_tokens_service(user_id=user_id, old_refresh_token=old_refresh_token)
-    response_cookies_generator(response=response, tokens=tokens)
+    tokens = issue_auth_tokens(user_id=user_id, old_refresh_token=old_refresh_token)
+    set_auth_cookies(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
+
 
 @router.get("/request-account-verification-email")
 @typed_limit("1/5 minute")
 def request_account_verification_email(
-    request: Request,
-    email: str
+    request: Request, email: str
 ) -> RequestAccountVerificationEmail:
-    # TODO: check if email is already verified
-    user_id = get_user_id_from_email(email=email)
-    if user_is_verified(user_id=user_id):
-        raise BadRequestError("The user is already verified")
-    send_account_verification_email_service(user_id=user_id)
-    return RequestAccountVerificationEmail(success=True)
+    with get_db_session() as db:
+        user_id = get_user_id_from_email(email=email, db=db)
+        if not user_id:
+            raise UserNotFoundError()
+        if user_is_verified(user_id=user_id, db=db):
+            raise BadRequestError("The user is already verified")
+        send_verification_email(user_id=user_id, db=db)
+        db.commit()
+        return RequestAccountVerificationEmail(success=True)
+
 
 # Use get so browser can call
 @router.get("/verify-account")
 @typed_limit("5/minute")
-def verify_email(request: Request, token: str) -> RedirectResponse:
-    verify_email_service(
-        token=token
-    )  # Raises on invalid token
-    scheme = "https" if SECURE_COOKIES else "http"
-    return RedirectResponse(url=f"{scheme}://{HOST}:{PORT}/email-verified", status_code=303)
+def verify_account(request: Request, token: str) -> RedirectResponse:
+    verify_email(token=token)  # Raises on invalid token
+    return RedirectResponse(
+        url=f"https://sisyphus.kwako.nl/email-verified", status_code=303
+    )
 
-@router.get("/send-forgotten-password-email")
+
+@router.post("/send-forgotten-password-email")
 @typed_limit("3/minute")
 def send_forgotten_password_email(
-    request: Request,
-    user_id: UUID = Depends(get_user_id_skip_csrf)
+    request: Request, email: str
 ) -> SendForgottenPasswordEmailResponse:
-    send_forgotten_password_email_service(
-        user_id=user_id
-    ) # Raises on invalid token
+    with get_db_session() as db:
+        send_password_reset_email(email=email, db=db)
+        db.commit()
     return SendForgottenPasswordEmailResponse(success=True)
+
+
+# TODO: add get option for reset-forgotten-password route
+
+
+@router.get("/reset-forgotten-password")
+@typed_limit("60/minute")
+def reset_forgotten_password_get(request: Request, token: str):
+    try:
+        return FileResponse(
+            path=str(Path(__file__).parents[1] / "public" / "reset-password.html")
+        )
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
 
 
 @router.patch("/reset-forgotten-password")
 @typed_limit("3/minute")
-def reset_forgotten_password(
-    request: Request,
-    data: ResetForgottenPasswordRequest,
-    token: str
+def reset_forgotten_password_patch(
+    request: Request, data: ResetForgottenPasswordRequest, token: str
 ) -> ResetForgottenPasswordResponse:
-    reset_forgotten_password_service(
-        token=token,
-        new_password=data.new_password
-    ) # Raises on invalid token
+    reset_password(
+        token=token, new_password=data.new_password
+    )  # Raises on invalid token
     return ResetForgottenPasswordResponse(success=True)
+
 
 @router.patch("/change-password")
 @typed_limit("3/minute")
 def change_password(
-    request: Request,
-    data: ChangePasswordRequest,
-    user_id: UUID = Depends(get_user_id)
+    request: Request, data: ChangePasswordRequest, user_id: UUID = Depends(get_user_id)
 ) -> ChangePasswordResponse:
-    change_password_service(
-        user_id=user_id,
-        old_password=data.old_password,
-        new_password=data.new_password
-    ) # Raises on invalid token
+    with get_db_session() as db:
+        change_user_password(
+            user_id=user_id,
+            old_password=data.old_password,
+            new_password=data.new_password,
+            db=db,
+        )
+        db.commit()
     return ChangePasswordResponse(success=True)
+
 
 @router.post(path="/logout", status_code=status.HTTP_200_OK)
 @typed_limit("10/minute")
@@ -219,14 +245,16 @@ async def logout(
     user_id: UUID = Depends(dependency=get_user_id),
     access_token: Optional[str] = Depends(get_access_token_cookie),
 ) -> LogoutResponse:
-    # Revoke any active refresh tokens for this user
-    revoke_refresh_token(user_id=user_id)
+    with get_db_session() as db:
+        # Revoke any active refresh tokens for this user
+        revoke_all_refresh_tokens_for_user(user_id=user_id, db=db)
 
-    if access_token is not None:
-        revoke_access_token(access_token)
+        if access_token is not None:
+            revoke_access_token(access_token, db=db)
+        db.commit()
     asyncio.create_task(coro=cleanup_tokens())  # Run cleanup before the request
 
-    clear_token_cookies_service(response)
+    clear_auth_cookies(response)
     return LogoutResponse(success=True)
 
 
@@ -234,5 +262,5 @@ async def logout(
 async def delete(
     request: Request, response: Response, user_id: UUID = Depends(get_user_id)
 ) -> DeleteResponse:
-    delete_account_service(user_id=user_id)
+    delete_account(user_id=user_id)
     return DeleteResponse(success=True)
