@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from functools import wraps
+from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 from uuid import UUID
 
 from fastapi import Request, WebSocket
 from fastapi.requests import HTTPConnection
 from sqlalchemy.orm import Session as DbSession
 
+from api.limiter import limiter
 from api.database import get_db_session
 from api.models.auth import Tokens, User
 from api.schema.internal.auth import AuthTokens
@@ -156,3 +158,16 @@ async def cleanup_tokens() -> None:
             )
         ).delete(synchronize_session=False)
         db.commit()
+
+P = ParamSpec("P")
+R = TypeVar("R")
+_untyped_limit = getattr(limiter, "limit")
+
+def typed_limit(
+    *args: Any, **kwargs: Any
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        wrapped = _untyped_limit(*args, **kwargs)(func)
+        return wraps(func)(wrapped)
+
+    return cast(Callable[[Callable[P, R]], Callable[P, R]], decorator)
