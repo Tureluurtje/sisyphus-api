@@ -61,7 +61,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.config import CORS_ORIGINS
 
 
-from api.routes import auth as auth_routes, words as word_routes
+from api.routes import auth as auth_routes, users as users_routes, words as word_routes
 
 # Define main app function config and scheduler using a lifespan context manager
 
@@ -188,6 +188,7 @@ app.add_middleware(
 # instance named `router`). Import names are aliased above to avoid shadowing
 # module names with local symbols. Prefix with /api for API routes.
 app.include_router(router=auth_routes.router, prefix="/api")
+app.include_router(router=users_routes.router, prefix="/api")
 app.include_router(router=word_routes.router, prefix="/api")
 
 
