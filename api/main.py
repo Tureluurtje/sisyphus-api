@@ -61,7 +61,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.config import CORS_ORIGINS
 
 
-from api.routes import auth as auth_routes, users as users_routes, words as word_routes
+from api.routes import auth as auth_routes, users as users_routes, words as word_routes, leaderboard as leaderboard_routes
 
 # Define main app function config and scheduler using a lifespan context manager
 
@@ -190,6 +190,7 @@ app.add_middleware(
 app.include_router(router=auth_routes.router, prefix="/api")
 app.include_router(router=users_routes.router, prefix="/api")
 app.include_router(router=word_routes.router, prefix="/api")
+app.include_router(router=leaderboard_routes.router, prefix="/api")
 
 
 @app.get("/email-verified")
