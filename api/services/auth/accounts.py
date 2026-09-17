@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DbSession
 
 from api.models.auth import User, VerificationTokenPurposes
-from api.models.words import Cards, Reviews
+from api.models.words import Reviews
 from api.schema.internal.auth import AuthTokens
 from api.schema.internal.errors import (
     AccountNotVerifiedError,
@@ -17,7 +17,6 @@ from api.schema.internal.errors import (
     InvalidInputError,
     UserNotFoundError,
 )
-from api.schema.internal.users import UserProfileDetail
 from api.services.auth.passwords import hash_password, set_password, verify_password
 from api.services.auth.tokens import (
     issue_auth_tokens,
@@ -60,9 +59,7 @@ def authenticate_user(email: str, password: str, db: DbSession) -> AuthTokens:
         # Don't raise UserNotFoundError so attacker has less information
         raise InvalidCredentialsError()
 
-    password_correct = verify_password(
-        password=password, hashed_password=user.password
-    )
+    password_correct = verify_password(password=password, hashed_password=user.password)
 
     if not password_correct:
         raise InvalidCredentialsError()
@@ -76,7 +73,9 @@ def authenticate_user(email: str, password: str, db: DbSession) -> AuthTokens:
     return new_tokens
 
 
-def register_user(username: str, grade: int, email: str, password: str, db: DbSession) -> AuthTokens:
+def register_user(
+    username: str, grade: int, email: str, password: str, db: DbSession
+) -> AuthTokens:
     if grade not in (1, 2, 3, 4, 5, 6):
         raise InvalidInputError("grade must be 1, 2, 3, 4, 5, 6")
 
@@ -121,27 +120,6 @@ def delete_account(user_id: UUID, db: DbSession) -> None:
     if not user_to_delete:
         raise UserNotFoundError()
     db.delete(user_to_delete)
-
-
-def get_user_profile(user_id: UUID, db: DbSession) -> UserProfileDetail:
-    user = db.get(User, user_id)
-    if not user:
-        raise UserNotFoundError()
-    count_words_learned: int = (
-        db.query(Cards).where(Cards.user_id == user.id).count()
-    )
-    streak = get_user_review_streak(user_id=user.id, db=db)
-
-    return UserProfileDetail(
-        user_id=user.id,
-        username=user.username,
-        email=user.email,
-        grade=user.grade,
-        total_words_learned=count_words_learned,
-        streak=streak,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
 
 
 def get_user_review_streak(user_id: UUID, db: DbSession) -> int:
