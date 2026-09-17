@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional, Any
 from datetime import datetime
 
@@ -36,3 +36,7 @@ class UpdateUserProfileRequest(BaseModel):
 
     class ConfigDict:
         from_attributes = True
+
+class UpdateUserSettings(BaseModel):
+    grade: int | None = None
+    email: EmailStr | None = None
