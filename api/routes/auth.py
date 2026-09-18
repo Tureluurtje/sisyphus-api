@@ -57,7 +57,6 @@ from api.schema.http.auth import (
     RefreshRequest,
     RefreshResponse,
     RegisterRequest,
-    RegisterResponse,
     RequestAccountVerificationEmail,
     ResetForgottenPasswordRequest,
     ResetForgottenPasswordResponse,
@@ -90,7 +89,7 @@ async def register(
     response: Response,
     data: RegisterRequest,
     db: DbSession = Depends(get_db_session_dependency),
-) -> RegisterResponse:
+) -> None:
     tokens = register_user(
         username=data.username,
         grade=data.grade,
@@ -100,7 +99,7 @@ async def register(
     )
     db.commit()
     set_auth_cookies(response=response, tokens=tokens)
-    return RegisterResponse(tokens=tokens)
+    return None
 
 
 @router.get(path="/validate")
@@ -147,7 +146,7 @@ async def refresh(
 
 
 @router.get("/request-account-verification-email")
-@typed_limit("1/5 minute")
+@typed_limit("1/minute")
 def request_account_verification_email(
     request: Request, email: str, db: DbSession = Depends(get_db_session_dependency)
 ) -> RequestAccountVerificationEmail:
@@ -209,6 +208,7 @@ def reset_forgotten_password_patch(
     reset_password(
         token=token, new_password=data.new_password, db=db
     )  # Raises on invalid token
+    db.commit()
     return ResetForgottenPasswordResponse(success=True)
 
 
@@ -260,4 +260,5 @@ async def delete(
     db: DbSession = Depends(get_db_session_dependency),
 ) -> DeleteResponse:
     delete_account(user_id=user_id, db=db)
+    db.commit()
     return DeleteResponse(success=True)

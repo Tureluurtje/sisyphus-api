@@ -47,7 +47,7 @@ def update_user_settings(
     if settings.email is not None:
         raise NotImplementedYetError()
 
-    db.refresh(user)
+    db.flush()
 
     count_words_learned: int = (
         db.query(Cards).where(Cards.user_id == user.id).count()
