@@ -8,7 +8,7 @@ from api.schema.http.leaderboard import LeaderboardList, LeaderboardRow
 from api.schema.internal.errors import UserNotFoundError
 
 
-def _get_users_from_class(user_id: UUID, db: DbSession) -> list[User]:
+def _get_classmates(user_id: UUID, db: DbSession) -> list[User]:
     user = db.get(User, user_id)
     if not user:
         raise UserNotFoundError()
@@ -17,7 +17,7 @@ def _get_users_from_class(user_id: UUID, db: DbSession) -> list[User]:
     return db.query(User).filter(User.grade == user.grade, User.dev == False).all()
 
 
-def _calculate_xp(user_id: UUID, db: DbSession) -> int:
+def _calculate_user_xp(user_id: UUID, db: DbSession) -> int:
     user = db.get(User, user_id)
 
     if not user:
@@ -43,18 +43,18 @@ def _calculate_xp(user_id: UUID, db: DbSession) -> int:
     return total_xp
 
 
-def get_full_leaderboard(user_id: UUID, db: DbSession) -> LeaderboardList:
+def get_class_leaderboard(user_id: UUID, db: DbSession) -> LeaderboardList:
     user = db.get(User, user_id)
 
     if not user:
         raise UserNotFoundError()
 
-    class_user_list = _get_users_from_class(user_id, db)
+    class_user_list = _get_classmates(user_id, db)
 
     per_user_xp: dict[User, int] = {}
 
     for class_member in class_user_list:
-        per_user_xp[class_member] = _calculate_xp(class_member.id, db)
+        per_user_xp[class_member] = _calculate_user_xp(class_member.id, db)
 
     sorted_members = sorted(per_user_xp.items(), key=lambda item: item[1], reverse=True)
 
@@ -66,10 +66,10 @@ def get_full_leaderboard(user_id: UUID, db: DbSession) -> LeaderboardList:
     )
 
 
-def get_me_leaderboard(user_id: UUID, db: DbSession) -> LeaderboardRow:
-    full_leaderboard = get_full_leaderboard(user_id, db)
+def get_user_leaderboard(user_id: UUID, db: DbSession) -> LeaderboardRow:
+    class_leaderboard = get_class_leaderboard(user_id, db)
 
-    for row in full_leaderboard.root:
+    for row in class_leaderboard.root:
         if user_id == row.user_id:
             return row
 
