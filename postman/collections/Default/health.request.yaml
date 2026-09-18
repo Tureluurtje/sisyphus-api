@@ -1,0 +1,5 @@
+$kind: http-request
+url: "{{url-no-api}}/health"
+method: GET
+settings: {}
+order: 2000

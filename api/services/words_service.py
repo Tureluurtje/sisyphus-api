@@ -1,8 +1,9 @@
 from uuid import UUID
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from typing import Optional
+from zoneinfo import ZoneInfo
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session as DbSession
 
 from api.schema.http.words import GetStacksResponse
 from api.schema.internal.words import DueWord, ReviewedWord, LoadWordList, Stack
@@ -10,7 +11,9 @@ from api.models.words import Cards, Chapters, Lists, Reviews, Words
 from api.models.auth import User
 from api.database import get_db_session
 from api.logging_config import app_logger
-from api.schema.internal.errors import InternalError
+from api.schema.internal.errors import InternalError, NotFoundError, UnauthorizedError
+
+NETHERLANDS_TIMEZONE = ZoneInfo("Europe/Amsterdam")
 
 
 def _ensure_aware(dt: datetime) -> datetime:
@@ -22,6 +25,16 @@ def _ensure_aware(dt: datetime) -> datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt
+
+
+def _tomorrow_start_local_naive(now: Optional[datetime] = None) -> datetime:
+    local_now = (
+        now.astimezone(NETHERLANDS_TIMEZONE)
+        if now
+        else datetime.now(NETHERLANDS_TIMEZONE)
+    )
+    tomorrow = local_now.date() + timedelta(days=1)
+    return datetime.combine(tomorrow, time.min)
 
 
 def calculate_due_date(box: int) -> Optional[datetime]:
@@ -96,7 +109,7 @@ def calculate_new_stability(
 def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
     current_date = current_date or datetime.now()
 
-    start_month = 9
+    start_month = 8
     if current_date.month >= start_month:
         start_year = current_date.year
     else:
@@ -108,9 +121,13 @@ def calculate_schoolyear(current_date: Optional[datetime] = None) -> str:
 
 
 def save_wordlist_service(user_id: UUID, word_list: LoadWordList) -> None:
-    # TODO: Check if user has admin priveleges
-
     with get_db_session() as db:
+        # TODO: Change hard check with checking for admin priveleges
+        # TODO: Check if grade for this year is already loaded
+        user = db.get(User, user_id)
+        if not user or user.username.lower() != "tureluurtje":
+            raise UnauthorizedError("User does not have admin priveleges")
+
         # First add List
         new_list = Lists(
             schoolyear=word_list.schoolYear,
@@ -157,13 +174,17 @@ def get_due_words_service(
         schoolyear = calculate_schoolyear()
 
         # Then check if there is a wordlist available for the grade of the user
-        wordlist = db.query(Lists.id).where(
-            Lists.schoolyear == schoolyear,
-            Lists.schoolgrade == user.grade
-        ).scalar()
+        wordlist = (
+            db.query(Lists.id)
+            .where(Lists.schoolyear == schoolyear, Lists.schoolgrade == user.grade)
+            .scalar()
+        )
 
         if wordlist is None:
             return None
+
+        # Include every word scheduled through the end of today in the Netherlands.
+        tomorrow_start = _tomorrow_start_local_naive()
 
         # Then find cards for this year
         due_words = (
@@ -174,6 +195,7 @@ def get_due_words_service(
             .where(
                 Lists.schoolyear == schoolyear,
                 Lists.schoolgrade == user.grade,
+                Words.target_date < tomorrow_start,
                 or_(
                     Cards.id.is_(None),  # never learned
                     Cards.due_at <= datetime.now(timezone.utc),  # due
@@ -195,6 +217,74 @@ def get_due_words_service(
                 )
             )
         return due_word_model_words
+
+def get_difficult_words_service(
+    user_id: UUID,
+    db: DbSession,
+    max_stability: float,
+) -> Optional[list[DueWord]]:
+    query = (
+        db.query(Words)
+        .join(Cards, Cards.word_id == Words.id)
+        .join(Chapters, Chapters.id == Words.chapter_id)
+        .join(Lists, Lists.id == Chapters.list_id)
+        .where(
+            Cards.user_id == user_id,
+            Cards.stability <= max_stability,
+            Lists.schoolyear == calculate_schoolyear(),
+        )
+    )
+
+    user = db.query(User).where(User.id == user_id).scalar()
+
+    if user is None:
+        return None
+
+    query = query.where(Lists.schoolgrade == user.grade)
+
+    words = query.all()
+
+    return [
+        DueWord(
+            wordId=word.id,
+            chapterId=word.chapter_id,
+            word=word.word,
+            translation=word.translation,
+        )
+        for word in words
+    ]
+
+def submit_difficult_word_review_service(
+    user_id: UUID,
+    reviewed_words: list[ReviewedWord],
+    db: DbSession,
+) -> None:
+    for word in reviewed_words:
+        card = (
+            db.query(Cards)
+            .where(
+                Cards.user_id == user_id,
+                Cards.word_id == word.wordId,
+            )
+            .first()
+        )
+
+        if not card:
+            raise NotFoundError("Card not found for user")
+
+        # Increase/decrease stability using the normal calculation
+        card.stability = calculate_new_stability(
+            card,
+            word.correct,
+            word.incorrect,
+        )
+
+        # Intentionally do NOT update:
+        # card.box
+        # card.due_at
+        # card.last_reviewed
+
+        db.flush()
 
 
 def submit_word_review_service(user_id: UUID, reviews: list[ReviewedWord]) -> None:
@@ -220,7 +310,7 @@ def submit_word_review_service(user_id: UUID, reviews: list[ReviewedWord]) -> No
 
 
 def add_card_service(
-    user_id: UUID, word_id: UUID, reviewed_at: datetime, db: Optional[Session] = None
+    user_id: UUID, word_id: UUID, reviewed_at: datetime, db: Optional[DbSession] = None
 ) -> Cards:
     due_at = calculate_due_date(0)
     if db:
@@ -246,7 +336,7 @@ def add_card_service(
 
 
 def update_card_service(
-    user_id: UUID, reviewed_word: ReviewedWord, db: Session
+    user_id: UUID, reviewed_word: ReviewedWord, db: DbSession
 ) -> Cards:
     existing_card: Cards = (
         db.query(Cards)
@@ -302,7 +392,7 @@ def add_review_entry(
     rating: int,
     response_time_ms: int,
     reviewed_at: datetime,
-    db: Session,
+    db: DbSession,
 ) -> None:
     if rating not in (0, 1):
         app_logger.error(
@@ -334,10 +424,21 @@ def get_stack_service(
         raise InternalError()
 
     with get_db_session() as db:
+        user = db.query(User).where(User.id == user_id).scalar()
+        if user is None:
+            app_logger.error(f"User with id {user_id} not found")
+            raise InternalError()
+
+        schoolyear = calculate_schoolyear()
+
         query = (
             db.query(Cards, Words)
             .join(Words, Words.id == Cards.word_id)
+            .join(Chapters, Chapters.id == Words.chapter_id)
+            .join(Lists, Lists.id == Chapters.list_id)
             .where(Cards.user_id == user_id)
+            .where(Lists.schoolyear == schoolyear)
+            .where(Lists.schoolgrade == user.grade)
         )
 
         if not all_stacks:
@@ -381,5 +482,13 @@ def get_stack_service(
             assert (
                 stack_id is not None
             )  # Narrows Optional[int] to type int for the type checker
-            words = [word for _, word in rows]
+            words = [
+                DueWord(
+                    wordId=word.id,
+                    chapterId=word.chapter_id,
+                    word=word.word,
+                    translation=word.translation,
+                )
+                for _, word in rows
+            ]
             return Stack(stack_id=stack_id, wordAmount=len(words), words=words)

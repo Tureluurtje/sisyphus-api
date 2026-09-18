@@ -1,0 +1,14 @@
+workspace:
+  id: 4d0697c2-6d2a-40c2-ba1d-5378b0d3561a
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/Leaderboard: 36602196-25ae0b79-9a60-4d70-8331-ce38d03b4e15
+    ../postman/collections/Default: 36602196-d929a4c4-0aff-414b-a94e-f99ce1fc61e3
+    ../postman/collections/Words: 36602196-05ab7568-db9b-4570-9c43-17822a76fc83
+    ../postman/collections/Authentication: 36602196-13f34b2a-403f-42f4-a9d2-d6d56edc55e1
+  environments:
+    ../postman/environments/dev.environment.yaml: 36602196-1a2c4374-e2b2-4f9d-92da-593133efe6c8
+    ../postman/environments/prod.environment.yaml: 36602196-13b2171d-8f25-4d23-8eff-3a77fe5258bf

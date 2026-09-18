@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sisyphus — Support</title>
+    <meta name="description" content="Get help and support for Sisyphus, a Latin vocabulary learning app.">
+
+    <style>
+        :root {
+            --background: #f5f7fa;
+            --surface: #ffffff;
+            --text: #111827;
+            --secondary: #6b7280;
+            --border: #e5e7eb;
+            --accent: #3478f6;
+            --accent-hover: #2868dc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "SF Pro Display",
+                "SF Pro Text",
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: min(900px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 28px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: var(--accent);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        main {
+            padding: 70px 0 90px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 55px;
+        }
+
+        .hero h1 {
+            margin: 0 0 12px;
+
+            font-size: clamp(36px, 6vw, 52px);
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+        }
+
+        .hero p {
+            margin: 0 auto;
+            max-width: 600px;
+
+            color: var(--secondary);
+            font-size: 18px;
+        }
+
+        .section {
+            margin-bottom: 45px;
+        }
+
+        .section h2 {
+            margin: 0 0 18px;
+
+            font-size: 25px;
+            letter-spacing: -0.4px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 14px;
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--secondary);
+        }
+
+        .contact {
+            background: var(--text);
+            color: white;
+            border-radius: 18px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .contact h2 {
+            margin: 0 0 8px;
+        }
+
+        .contact p {
+            margin: 0 0 22px;
+            color: #d1d5db;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 20px;
+
+            border-radius: 10px;
+            background: var(--accent);
+            color: white;
+
+            text-decoration: none;
+            font-weight: 600;
+
+            transition: background 0.15s ease;
+        }
+
+        .button:hover {
+            background: var(--accent-hover);
+        }
+
+        footer {
+            padding: 25px 0;
+            border-top: 1px solid var(--border);
+
+            color: var(--secondary);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 50px 0 70px;
+            }
+
+            .container {
+                width: min(100% - 28px, 900px);
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .contact {
+                padding: 26px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="container nav">
+        <a href="/" class="brand">
+            Sisyphus
+        </a>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <h1>How can we help?</h1>
+            <p>
+                Find answers to common questions about Sisyphus,
+                or get in touch if you need further assistance.
+            </p>
+        </section>
+
+        <section class="section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="card">
+                <h3>What is Sisyphus?</h3>
+                <p>
+                    Sisyphus is a Latin vocabulary learning app designed
+                    to help you learn and retain words through spaced
+                    repetition.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>How does the Leitner system work?</h3>
+                <p>
+                    Sisyphus uses the Leitner system to organize words
+                    into different stacks based on how well you know them.
+                    Words you remember are reviewed less frequently,
+                    while words you struggle with are reviewed more often.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Why don't I have any words to review?</h3>
+                <p>
+                    Sisyphus only shows words that are currently due for
+                    review. If you have completed your available reviews,
+                    there may simply be no words due at the moment.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>What happens when I answer a word correctly?</h3>
+                <p>
+                    Your answer affects the word's position in the
+                    Leitner system. Correct answers allow words to
+                    progress, while incorrect answers bring them back
+                    for more frequent practice.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Can I create and organize vocabulary lists?</h3>
+                <p>
+                    Yes. Sisyphus lets you work with vocabulary lists
+                    so that you can keep different sets of Latin words
+                    organized for your studies.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Is my progress saved?</h3>
+                <p>
+                    Your learning progress is associated with your account
+                    and synchronized with Sisyphus's backend so that your
+                    progress can be maintained between sessions.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>I'm having trouble logging in. What should I do?</h3>
+                <p>
+                    First, make sure you have an active internet connection
+                    and try signing in again. If the problem persists,
+                    contact support and include a description of what
+                    happens when you try to log in.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>I found a bug. How do I report it?</h3>
+                <p>
+                    Please contact support and describe what you were
+                    doing when the problem occurred, what you expected
+                    to happen, and what happened instead. Screenshots
+                    are helpful when applicable.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Account & Privacy</h2>
+
+            <div class="card">
+                <h3>How is my account data handled?</h3>
+                <p>
+                    Sisyphus uses account authentication and stores the
+                    information necessary to provide your account and
+                    learning experience. We aim to keep the information
+                    we store limited to what is needed to operate the app.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>How can I request help with my account?</h3>
+                <p>
+                    Contact support using the email address below and
+                    include the email address associated with your account.
+                    Do not send your password or authentication tokens.
+                </p>
+            </div>
+        </section>
+
+        <section class="contact">
+            <h2>Still need help?</h2>
+
+            <p>
+                We're happy to help with bugs, account problems,
+                or other questions about Sisyphus.
+            </p>
+
+            <a
+                class="button"
+                href="mailto:tureluurtje.1@gmail.com"
+            >
+                Contact Support
+            </a>
+        </section>
+
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        © 2026 Tureluurtje · Sisyphus
+    </div>
+</footer>
+
+</body>
+</html>

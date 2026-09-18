@@ -14,6 +14,8 @@ from api.schema.internal.errors import APIError, AppException, DatabaseConnectio
 from api.logging_config import app_logger, error_logger, request_logger
 from sqlalchemy.exc import OperationalError
 
+from api.services.auth.dependencies import cleanup_tokens
+
 # When running the file directly (for example from the `api/` folder in a debugger)
 # Python's import machinery won't find the top-level `api` package because
 # sys.path[0] is the `api/` directory. Add the project root to sys.path so
@@ -58,11 +60,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import CORS_ORIGINS
 
-from api.services.auth_service import (
-    cleanup_tokens,
-)
 
-from api.routes import auth as auth_routes, words as word_routes
+from api.routes import auth as auth_routes, users as users_routes, words as word_routes, leaderboard as leaderboard_routes
 
 # Define main app function config and scheduler using a lifespan context manager
 
@@ -189,7 +188,18 @@ app.add_middleware(
 # instance named `router`). Import names are aliased above to avoid shadowing
 # module names with local symbols. Prefix with /api for API routes.
 app.include_router(router=auth_routes.router, prefix="/api")
+app.include_router(router=users_routes.router, prefix="/api")
 app.include_router(router=word_routes.router, prefix="/api")
+app.include_router(router=leaderboard_routes.router, prefix="/api")
+
+
+@app.get("/email-verified")
+def email_verified():
+    """Serve email verified page"""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "email-verified.html"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
 
 
 @app.get("/favicon.ico")
@@ -209,11 +219,21 @@ def robots():
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
+
 @app.get("/legal")
 def legal():
     """Serve legal.html."""
     try:
         return FileResponse(path=str(BASE_DIR / "public" / "legal.html"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
+
+
+@app.get("/support")
+def support():
+    """Serve support.html."""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "support.html"))
     except FileNotFoundError:
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
@@ -292,6 +312,7 @@ async def log_requests(
         )
         raise
 
+
 @app.middleware(middleware_type="http")
 async def apply_refreshed_tokens(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -312,9 +333,11 @@ async def apply_refreshed_tokens(
     response = await call_next(request)
     refreshed = getattr(request.state, "refreshed_tokens", None)
     if refreshed is not None:
-        from api.services.auth_service import response_cookies_generator
-        response_cookies_generator(tokens=refreshed, response=response)
+        from api.services.auth.cookies import set_auth_cookies
+
+        set_auth_cookies(tokens=refreshed, response=response)
     return response
+
 
 # Get client ip for logger
 def get_client_ip(request: Request) -> str:

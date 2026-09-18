@@ -1,0 +1,5 @@
+$kind: http-request
+url: "{{url}}/words/stacks"
+method: GET
+settings: {}
+order: 6000
