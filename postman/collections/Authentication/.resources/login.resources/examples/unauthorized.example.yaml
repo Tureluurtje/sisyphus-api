@@ -1,0 +1,28 @@
+$kind: http-example
+request:
+  url: "{{url}}/auth/login"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "email": "test@test.com",
+          "password": "superwrongpassword"
+      }
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    date: Fri, 18 Sep 2026 16:57:59 GMT
+    server: uvicorn
+    content-length: "93"
+    content-type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "The provided credentials are incorrect",
+        "code": "INVALID_CREDENTIALS",
+        "detail": null
+      }
+order: 2955630142784355

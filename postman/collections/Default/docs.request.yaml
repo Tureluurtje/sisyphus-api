@@ -1,0 +1,5 @@
+$kind: http-request
+url: "{{url-no-api}}/docs"
+method: GET
+settings: {}
+order: 1000

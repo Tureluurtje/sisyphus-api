@@ -1,0 +1,29 @@
+$kind: http-example
+request:
+  url: "{{url}}/auth/refresh"
+  method: POST
+  headers:
+    X-CSRF-Token: "{{csrf_token}}"
+  body:
+    type: json
+    content: |-
+      {
+          "old_refresh_token": "EXAMPLE_INVALID_REFRESH_TOKEN"
+      }
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    date: Fri, 18 Sep 2026 17:02:22 GMT
+    server: uvicorn
+    content-length: "85"
+    content-type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "The refresh token is invalid",
+        "code": "REFRESH_TOKEN_INVALID",
+        "detail": null
+      }
+order: 1789750945935

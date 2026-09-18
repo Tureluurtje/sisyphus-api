@@ -1,0 +1,60 @@
+$kind: http-example
+request:
+  url: "{{url}}/auth/login"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "email": "test@test.com",
+          "password": "superhardpassword"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: date
+      value: Fri, 18 Sep 2026 16:56:06 GMT
+    - key: server
+      value: uvicorn
+    - key: content-length
+      value: "376"
+    - key: content-type
+      value: application/json
+    - key: set-cookie
+      value: access_token=EXAMPLE_ACCESS_TOKEN; HttpOnly; Max-Age=900; Path=/; SameSite=none
+    - key: set-cookie
+      value: refresh_token=EXAMPLE_REFRESH_TOKEN; HttpOnly; Max-Age=31536000; Path=/; SameSite=none
+    - key: set-cookie
+      value: csrf_token=1CMNkErUwxoiRd-BSQ6XqOJl6KJYOl7wSNUcgPeO3qA; Max-Age=31536000; Path=/; SameSite=none
+  body:
+    type: json
+    content: |-
+      {
+        "tokens": {
+          "refresh_token": "EXAMPLE_REFRESH_TOKEN",
+          "access_token": "EXAMPLE_ACCESS_TOKEN",
+          "csrf_token": "1CMNkErUwxoiRd-BSQ6XqOJl6KJYOl7wSNUcgPeO3qA"
+        }
+      }
+    $type: |-
+      {
+          "type": "object",
+          "properties": {
+              "tokens": {
+                  "type": "object",
+                  "properties": {
+                      "refresh_token": {
+                          "type": "string"
+                      },
+                      "access_token": {
+                          "type": "string"
+                      },
+                      "csrf_token": {
+                          "type": "string"
+                      }
+                  }
+              }
+          }
+      }
+order: 1789750570821

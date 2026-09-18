@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{url}}/auth/login"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "email": "test@test.com",
+        "password": "superhardpassword"
+    }
+settings: {}
+examples: .resources/login.resources/examples
+order: 1000

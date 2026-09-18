@@ -1,0 +1,5 @@
+$kind: http-request
+url: "{{url}}/auth/validate"
+method: GET
+settings: {}
+order: 5000

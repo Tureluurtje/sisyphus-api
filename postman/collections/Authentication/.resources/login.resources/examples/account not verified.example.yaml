@@ -1,0 +1,28 @@
+$kind: http-example
+request:
+  url: "{{url}}/auth/login"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "email": "test@test.com",
+          "password": "superhardpassword"
+      }
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    date: Fri, 18 Sep 2026 17:01:36 GMT
+    server: uvicorn
+    content-length: "88"
+    content-type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "This account is not yet verified",
+        "code": "ACCOUNT_NOT_VERIFIED",
+        "detail": null
+      }
+order: 4038382588096242

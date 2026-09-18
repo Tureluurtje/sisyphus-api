@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{url}}/auth/request-account-verification-email?email=tureluurtje.1@gmail.com"
+method: GET
+queryParams:
+  email: tureluurtje.1@gmail.com
+settings: {}
+order: 8000
