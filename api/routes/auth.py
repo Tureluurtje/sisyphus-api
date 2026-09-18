@@ -78,6 +78,7 @@ async def login(
     db: DbSession = Depends(get_db_session_dependency),
 ) -> LoginResponse:
     tokens = authenticate_user(email=data.email, password=data.password, db=db)
+    db.commit()
     set_auth_cookies(response=response, tokens=tokens)
     return LoginResponse(tokens=tokens)
 
@@ -97,6 +98,7 @@ async def register(
         password=data.password,
         db=db,
     )
+    db.commit()
     set_auth_cookies(response=response, tokens=tokens)
     return RegisterResponse(tokens=tokens)
 
@@ -139,6 +141,7 @@ async def refresh(
     tokens = issue_auth_tokens(
         user_id=user_id, old_refresh_token=old_refresh_token, db=db
     )
+    db.commit()
     set_auth_cookies(response=response, tokens=tokens)
     return RefreshResponse(tokens=tokens)
 
