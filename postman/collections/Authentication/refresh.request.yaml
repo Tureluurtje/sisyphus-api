@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{url}}/auth/refresh"
+method: POST
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+body:
+  type: json
+  content: |-
+    {
+        "old_refresh_token": "EXAMPLE_OLD_REFRESH_TOKEN"
+    }
+settings: {}
+examples: .resources/refresh.resources/examples
+order: 3000

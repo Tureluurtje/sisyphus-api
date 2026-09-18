@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{url}}/leaderboard/me"
+method: GET
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+order: 1000

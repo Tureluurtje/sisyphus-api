@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{url}}/words/due?limit=0&offset=0"
+method: GET
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+queryParams:
+  limit: "0"
+  offset: "0"
+settings: {}
+order: 1000
