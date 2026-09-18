@@ -71,7 +71,7 @@ def submit_word_review(
     # )
     return {"success": True}
 
-@router.post("difficult/review")
+@router.post("/difficult/review")
 @typed_limit("60/minute")
 def submit_difficult_word_review(
     request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)
