@@ -22,8 +22,10 @@ def get_db_session():
         yield db
     except Exception:
         db.rollback()
+        raise
     finally:
         db.close()
+
 
 def get_db_session_dependency() -> Generator[Session, None, None]:
     db = SessionLocal()

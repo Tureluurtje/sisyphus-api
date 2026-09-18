@@ -41,6 +41,8 @@ class User(Base):
 
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    dev: Mapped[bool] = mapped_column(Boolean, default=False)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), default=func.now(), nullable=False
     )
