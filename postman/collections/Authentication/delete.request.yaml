@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{url}}/auth/delete"
+method: DELETE
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+settings: {}
+order: 7000

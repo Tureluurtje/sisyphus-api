@@ -30,7 +30,8 @@ PyJWT==2.13.0
 python-dotenv==1.2.2
 pytokens==0.4.1
 psycopg[binary]==3.2.10
-slowapi==0.1.9
+resend==2.30.1
+slowapi==0.1.10
 SQLAlchemy==2.0.49
 starlette==1.0.1
 types-PyJWT==1.7.1

@@ -2,7 +2,7 @@ from typing import Optional, Any
 
 from pydantic import BaseModel, EmailStr, field_validator
 
-from api.schema.internal.auth import AccessTokenPayload, ReturnTokens
+from api.schema.internal.auth import AccessTokenPayload, AuthTokens
 
 
 class LoginRequest(BaseModel):
@@ -18,7 +18,7 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    tokens: ReturnTokens
+    tokens: AuthTokens
 
 
 class RegisterRequest(BaseModel):
@@ -36,7 +36,7 @@ class RegisterRequest(BaseModel):
 
 
 class RegisterResponse(BaseModel):
-    tokens: ReturnTokens
+    tokens: AuthTokens
 
 
 class ValidateResponse(BaseModel):
@@ -49,7 +49,33 @@ class RefreshRequest(BaseModel):
 
 
 class RefreshResponse(BaseModel):
-    tokens: ReturnTokens
+    tokens: AuthTokens
+
+
+class VerifyEmailResponse(BaseModel):
+    success: bool
+
+class RequestAccountVerificationEmail(BaseModel):
+    success: bool
+
+class ResetForgottenPasswordRequest(BaseModel):
+    new_password: str
+
+
+class ResetForgottenPasswordResponse(BaseModel):
+    success: bool
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class ChangePasswordResponse(BaseModel):
+    success: bool
+
+class SendForgottenPasswordEmailResponse(BaseModel):
+    success: bool
 
 
 class LogoutResponse(BaseModel):

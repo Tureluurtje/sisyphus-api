@@ -290,7 +290,9 @@
             const newWord = new Word(
                 word,
                 translation,
-                targetDate ? targetDate.toISOString() : null
+                targetDate
+                    ? `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}T00:00:00`
+                    : null
             );
             chapter.words.push(newWord);
         }

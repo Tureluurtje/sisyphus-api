@@ -61,6 +61,11 @@ class InvalidCredentialsError(AppException):
     code = "INVALID_CREDENTIALS"
     message = "The provided credentials are incorrect"
 
+class AccountNotVerifiedError(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    code = "ACCOUNT_NOT_VERIFIED"
+    message = "This account is not yet verified"
+
 
 class TokenExpiredError(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
@@ -90,6 +95,11 @@ class RefreshTokenInvalidError(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
     code = "REFRESH_TOKEN_INVALID"
     message = "The refresh token is invalid"
+
+class VerificationTokenInvalidError(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    code = "VERIFICATION_TOKEN_INVALID"
+    message = "The verification token is invalid"
 
 
 class ForbiddenError(AppException):
@@ -159,13 +169,13 @@ class UsernameTakenError(AppException):
 
 
 class ValidationError(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     code = "VALIDATION_ERROR"
     message = "The request validation failed"
 
 
 class SchemaValidationError(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     code = "SCHEMA_VALIDATION_ERROR"
     message = "The request body does not match the required schema"
 

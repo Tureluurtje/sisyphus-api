@@ -1,0 +1,17 @@
+$kind: collection
+scripts:
+  - type: http:afterResponse
+    code: |-
+      // Extract all cookies as an object
+      let cookies = pm.cookies.toObject();
+
+      if (!cookies.access_token || !cookies.refresh_token || !cookies.csrf_token) {
+          console.log("Cookies not found in response")
+      } else {
+
+          // Save cookies to environment variables for reuse
+          pm.environment.set("access_token", cookies.access_token);
+          pm.environment.set("refresh_token", cookies.refresh_token);
+          pm.environment.set("csrf_token", cookies.csrf_token);
+      }
+    language: text/javascript

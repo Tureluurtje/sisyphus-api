@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{url}}/auth/register"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "username": "Test",
+        "grade": 1,
+        "email": "test@test.com",
+        "password": "superhardpassword"
+    }
+settings: {}
+examples: .resources/register.resources/examples
+order: 2000

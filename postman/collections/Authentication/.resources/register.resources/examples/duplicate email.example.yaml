@@ -1,0 +1,30 @@
+$kind: http-example
+request:
+  url: "{{url}}/auth/register"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "username": "Test",
+          "grade": 1,
+          "email": "test@test.com",
+          "password": "superhardpassword"
+      }
+response:
+  statusCode: 409
+  statusText: Conflict
+  headers:
+    date: Fri, 18 Sep 2026 16:59:38 GMT
+    server: uvicorn
+    content-length: "59"
+    content-type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "duplicate email",
+        "code": "CONFLICT",
+        "detail": null
+      }
+order: 1789750782734

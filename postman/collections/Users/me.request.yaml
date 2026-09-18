@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{url}}/users/me"
+method: GET
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+examples: .resources/me.resources/examples
+order: 1789751125457

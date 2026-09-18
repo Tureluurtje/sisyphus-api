@@ -1,0 +1,35 @@
+$kind: http-request
+url: "{{url}}/words/review"
+method: POST
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+body:
+  type: json
+  content: |-
+    {
+        "reviews": [
+            {
+                "wordId": "16af61f5-402f-4611-b7b7-201713bb503d",
+                "reviewedAt": "2026-06-11 10:18:45.654765",
+                "correct": 1,
+                "incorrect": 0,
+                "averageResponseTimeMs": 1000
+            },
+            {
+                "wordId": "06ba05a8-764b-434f-aad0-7375be5dd749",
+                "reviewedAt": "2026-06-11 10:18:45.654765",
+                "correct": 2,
+                "incorrect": 2,
+                "averageResponseTimeMs": 1000
+            },
+            {
+                "wordId": "a9b1e88b-5d9d-4dcc-8fa3-b15f8a545328",
+                "reviewedAt": "2026-06-11 10:18:45.654765",
+                "correct": 3,
+                "incorrect": 2,
+                "averageResponseTimeMs": 1000
+            }
+        ]
+    }
+settings: {}
+order: 4000
