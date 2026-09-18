@@ -17,9 +17,11 @@ from api.services.auth.dependencies import (
     typed_limit,
 )
 from api.services.words_service import (
+    get_difficult_words_service,
     get_due_words_service,
     get_stack_service,
     save_wordlist_service,
+    submit_difficult_word_review_service,
     submit_word_review_service,
 )
 from api.schema.http.words import (
@@ -69,6 +71,20 @@ def submit_word_review(
     # )
     return {"success": True}
 
+@router.post("difficult/review")
+@typed_limit("60/minute")
+def submit_difficult_word_review(
+    request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)
+):
+    # updated_cards = submit_word_review_service(user_id, data.reviews)
+    submit_difficult_word_review_service(user_id, data.reviews, db)
+    db.commit()
+    # TODO: Possibly return new cards for frontend caching
+    # return WordReviewResponse(
+    #    reviews=updated_cards
+    # )
+    return {"success": True}
+
 
 @router.get("/stacks")
 @typed_limit("60/minute")
@@ -88,7 +104,7 @@ def get_difficult_words(
     user_id: UUID = Depends(get_user_id_skip_csrf),
     db: DbSession = Depends(get_db_session_dependency),
 ):
-    due_words = get_difficult_words_service(user_id, db)
+    due_words = get_difficult_words_service(user_id, db, max_stability=0.3)
     if due_words is None:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return DueWordsResponse(wordAmount=len(due_words), words=due_words)
