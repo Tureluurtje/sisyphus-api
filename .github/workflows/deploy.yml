@@ -20,4 +20,4 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            /opt/sisyphus/deploy.sh
+            /opt/kwako/sisyphus-api/deploy.sh
