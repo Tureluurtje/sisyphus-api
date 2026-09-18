@@ -237,7 +237,7 @@ def _rotate_refresh_token(old_refresh_token: str, db: DbSession) -> IssuedRefres
     )
 
     revoke_refresh_token(
-        token_id=new_refresh_token.id, replaced_by=new_refresh_token.id, db=db
+        token_id=old_refresh_token_db_entry.id, replaced_by=new_refresh_token.id, db=db
     )
     app_logger.info(
         "rotate_refresh_token: revoked old token (id=%s, replaced_by=%s)",
