@@ -1,5 +1,10 @@
 FROM python:3.13.0
 
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+
+USER nonroot
+
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -9,8 +14,8 @@ COPY requirements.txt ./requirements.txt
 COPY api ./api
 COPY asgi_app.py ./
 
-RUN pip install --no-cache-dir --upgrade pip \
-	&& pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --only-binary :all: --require-hashes --upgrade pip \
+	&& pip install --no-cache-dir --only-binary :all: --require-hashes -r requirements.txt
 
 EXPOSE 9000
 
