@@ -168,7 +168,7 @@ def verify_account(
 ) -> RedirectResponse:
     verify_email(token=token, db=db)  # Raises on invalid token
     return RedirectResponse(
-        url=f"https://sisyphus.kwako.nl/email-verified", status_code=303
+        url="https://sisyphus.kwako.nl/email-verified", status_code=303
     )
 
 
@@ -181,9 +181,6 @@ def send_forgotten_password_email(
     db.commit()
 
     return SendForgottenPasswordEmailResponse(success=True)
-
-
-# TODO: add get option for reset-forgotten-password route
 
 
 @router.get("/reset-forgotten-password")

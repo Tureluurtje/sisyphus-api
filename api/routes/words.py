@@ -63,12 +63,8 @@ def get_due_words(
 def submit_word_review(
     request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id)
 ):
-    # updated_cards = submit_word_review_service(user_id, data.reviews)
     submit_word_review_service(user_id, data.reviews)
-    # TODO: Possibly return new cards for frontend caching
-    # return WordReviewResponse(
-    #    reviews=updated_cards
-    # )
+    
     return {"success": True}
 
 @router.post("/difficult/review")
@@ -76,13 +72,8 @@ def submit_word_review(
 def submit_difficult_word_review(
     request: Request, data: WordReviewRequest, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)
 ):
-    # updated_cards = submit_word_review_service(user_id, data.reviews)
     submit_difficult_word_review_service(user_id, data.reviews, db)
     db.commit()
-    # TODO: Possibly return new cards for frontend caching
-    # return WordReviewResponse(
-    #    reviews=updated_cards
-    # )
     return {"success": True}
 
 
