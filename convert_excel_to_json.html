@@ -129,15 +129,18 @@
             </div>
 
             <button id="convertBtn" type="button">Convert to JSON</button>
-            <!--<button id="downloadBtn" type="button" disabled>Download JSON</button>-->
             <button id="uploadBtn" type="button" disabled>Upload JSON</button>
 
             <div id="status" class="status"></div>
-            <textarea id="output" readonly placeholder="Converted JSON will appear here..."></textarea>
+            <textarea id="output" readonly placeholder="Converted JSON will appear here..." aria-label="Output"></textarea>
         </section>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+        crossorigin="anonymous"
+        integrity="sha-384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw"
+    ></script>
     <script>
         class Word {
             constructor(word, translation, targetDate) {
@@ -179,50 +182,61 @@
         // computed value for such cells when cellDates:true is set.
         function toDate(value, prevDate) {
             if (value == null || value === "") return null;
-
-            // SheetJS returns JS Date objects for date-formatted cells (cellDates:true).
             if (value instanceof Date) return value;
-
-            // Raw serial numbers (fallback when cellDates is not applied).
-            if (typeof value === "number") {
-                const parsed = XLSX.SSF.parse_date_code(value);
-                if (!parsed) return null;
-                return new Date(parsed.y, parsed.m - 1, parsed.d, parsed.H || 0, parsed.M || 0, parsed.S || 0);
-            }
-
-            if (typeof value === "string") {
-                let s = value.trim();
-
-                // Skip formula strings — their computed values are already returned
-                // by SheetJS as Date objects or numbers; re-evaluating them here
-                // without access to the sheet would produce wrong dates.
-                if (s.startsWith('=') || /^[A-Za-z]+\d+(\s*[+\-]\s*\d+)?$/.test(s)) {
-                    return null;
-                }
-
-                // Handle partial dates like "1-1" or "01/01" (DD-MM), with optional year.
-                const mdMatch = s.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/);
-                if (mdMatch) {
-                    const day = parseInt(mdMatch[1], 10);
-                    const month = parseInt(mdMatch[2], 10) - 1;
-                    const yearPart = mdMatch[3] ? parseInt(mdMatch[3], 10) : null;
-                    let year;
-                    if (yearPart != null) {
-                        year = yearPart < 100 ? 2000 + yearPart : yearPart;
-                    } else if (prevDate instanceof Date) {
-                        year = prevDate.getFullYear();
-                    } else {
-                        year = new Date().getFullYear();
-                    }
-                    return new Date(year, month, day);
-                }
-
-                // Fall back to ISO-like strings.
-                const candidate = new Date(s);
-                if (!Number.isNaN(candidate.getTime())) return candidate;
-            }
-
+            if (typeof value === "number") return fromSerial(value);
+            if (typeof value === "string") return fromString(value.trim(), prevDate);
             return null;
+        }
+
+        function fromSerial(serial) {
+            const parsed = XLSX.SSF.parse_date_code(serial);
+            if (!parsed) return null;
+            return new Date(
+                parsed.y,
+                parsed.m - 1,
+                parsed.d,
+                parsed.H || 0,
+                parsed.M || 0,
+                parsed.S || 0
+            );
+        }
+
+        // Formula strings are skipped: SheetJS already returns their computed
+        // values as Date objects or numbers, so re-evaluating them here would be wrong.
+        function isFormula(s) {
+            if (s.startsWith("=")) return true;
+            return /^[A-Za-z]+\d+(\s*[+-]\s*\d+)?$/.test(s);
+        }
+
+        function fromString(s, prevDate) {
+            if (isFormula(s)) return null;
+
+            const md = parseMonthDay(s, prevDate);
+            if (md) return md;
+
+            const candidate = new Date(s);
+            return Number.isNaN(candidate.getTime()) ? null : candidate;
+        }
+
+        // Handles partial dates like "1-1" or "01/01" (DD-MM), with optional year.
+        function parseMonthDay(s, prevDate) {
+            const m = s.match(/^(\d{1,2})[/.-](\d{1,2})(?:[/.-](\d{2,4}))?$/);
+            if (!m) return null;
+
+            const day = Number.parseInt(m[1], 10);
+            const month = Number.parseInt(m[2], 10) - 1;
+            const year = resolveYear(m[3], prevDate);
+            return new Date(year, month, day);
+        }
+
+        function resolveYear(yearPart, prevDate) {
+            if (yearPart == null) {
+                return prevDate instanceof Date
+                    ? prevDate.getFullYear()
+                    : new Date().getFullYear();
+            }
+            const y = Number.parseInt(yearPart, 10);
+            return y < 100 ? 2000 + y : y;
         }
 
         function replaceYearSafe(dateObj, year) {
@@ -448,9 +462,6 @@
         function uploadJson() {
             if (!latestJson) return;
 
-            const blob = new Blob([latestJson], {
-                type: "application/json"
-            });
             const uploadUrl = "https://localhost:8000/api/words/load"
             const request = new HttpRequest();
             request.open("POST", uploadUrl, true);
