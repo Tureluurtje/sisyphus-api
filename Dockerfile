@@ -12,8 +12,10 @@ COPY requirements.txt ./requirements.txt
 COPY api ./api
 COPY asgi_app.py ./
 
-RUN pip install --no-cache-dir --only-binary :all: --require-hashes --upgrade pip \
-    && pip install --no-cache-dir --only-binary :all: --require-hashes -r requirements.txt \
+RUN pip install --no-cache-dir \
+        --only-binary :all: \
+        --require-hashes \
+        -r requirements.txt \
     && chown -R nonroot:nonroot /app
 
 USER nonroot
