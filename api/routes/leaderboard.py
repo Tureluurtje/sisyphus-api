@@ -9,7 +9,7 @@ from api.services.leaderboard_service import get_class_leaderboard, get_user_lea
 router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 
 
-@router.get("/")
+@router.get("")
 @typed_limit("30/minute")
 def get_class_leaderboard_endpoint(
     request: Request,

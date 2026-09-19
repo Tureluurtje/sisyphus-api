@@ -1,12 +1,12 @@
 name: prod
 values:
   - key: url
-    value: ""
+    value: ''
   - key: access_token
-    value: ""
+    value: ''
   - key: refresh_token
-    value: ""
+    value: ''
   - key: csrf_token
-    value: ""
+    value: ''
   - key: url-no-api
-    value: ""
+    value: ''
