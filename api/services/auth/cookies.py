@@ -54,7 +54,7 @@ def set_auth_cookies(
         )
 
     if csrf_token is not None:
-        response.set_cookie(
+        response.set_cookie( # NOSONAR python:S3330 - CSRF token must be JS-readable (double-submit pattern)
             key="csrf_token",
             value=csrf_token,
             httponly=False,
@@ -105,7 +105,7 @@ def clear_auth_cookies(response: Response) -> None:
         max_age=0,
     )
 
-    response.set_cookie(
+    response.set_cookie( # NOSONAR python:S3330 - CSRF token must be JS-readable (double-submit pattern)
         key="csrf_token",
         value="",
         secure=SECURE_COOKIES,
