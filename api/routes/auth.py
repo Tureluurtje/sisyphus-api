@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session as DbSession
 
 from api.database import get_db_session_dependency
+from api.routes.users import get_current_user
 from api.schema.internal.errors import (
     BadRequestError,
     RefreshTokenMissingError,
@@ -17,6 +18,7 @@ from api.schema.internal.errors import (
     UserNotFoundError,
 )
 
+from api.schema.internal.users import UserProfileDetail
 from api.services.auth.accounts import (
     authenticate_user,
     change_user_password,
@@ -101,6 +103,10 @@ async def register(
     set_auth_cookies(response=response, tokens=tokens)
     return None
 
+@router.get(path="/me")
+@typed_limit("60/minute")
+async def me_wrapper(request: Request, user_id: UUID = Depends(get_user_id), db: DbSession = Depends(get_db_session_dependency)) -> UserProfileDetail:
+    return get_current_user(request, user_id, db)
 
 @router.get(path="/validate")
 @typed_limit("60/minute")
