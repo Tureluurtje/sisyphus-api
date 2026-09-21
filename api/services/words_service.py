@@ -37,40 +37,54 @@ def _tomorrow_start_local_naive(now: Optional[datetime] = None) -> datetime:
     return datetime.combine(tomorrow, time.min)
 
 
-def calculate_due_date(box: int) -> Optional[datetime]:
-    now = datetime.now()
+def calculate_due_date(
+    box: int, now: Optional[datetime] = None
+) -> Optional[datetime]:  # NOSONAR
+    current_time = now or datetime.now(NETHERLANDS_TIMEZONE)
+    current_local = (
+        current_time.astimezone(NETHERLANDS_TIMEZONE)
+        if current_time.tzinfo is not None
+        else current_time.replace(tzinfo=NETHERLANDS_TIMEZONE)
+    )
+    current_date = current_local.date()
+    next_midnight = datetime.combine(current_date + timedelta(days=1), time.min)
+
     match box:
         case 0:
-            return now + timedelta(days=1)
+            return next_midnight
         case 1:
-            next_day = now + timedelta(days=1)
-            while next_day.weekday() >= 5:
-                next_day += timedelta(days=1)
-            return next_day
+            for offset in range(1, 8):
+                candidate = current_date + timedelta(days=offset)
+                if candidate.weekday() < 5:
+                    return datetime.combine(candidate, time.min)
+            return next_midnight
         case 2:
-            for days_ahead in range(1, 8):
-                candidate = now + timedelta(days=days_ahead)
+            for offset in range(1, 8):
+                candidate = current_date + timedelta(days=offset)
                 if candidate.weekday() in (1, 4):
-                    return candidate
-            return now
+                    return datetime.combine(candidate, time.min)
+            return next_midnight
         case 3:
-            days_ahead = (6 - now.weekday()) % 7 or 7
-            return now + timedelta(days=days_ahead)
+            for offset in range(1, 8):
+                candidate = current_date + timedelta(days=offset)
+                if candidate.weekday() == 6:
+                    return datetime.combine(candidate, time.min)
+            return datetime.combine(current_date + timedelta(days=7), time.min)
         case 4:
-            days_ahead = (7 - now.weekday()) % 7
-            days_ahead = 14 if days_ahead == 0 else days_ahead + 7
-            return now + timedelta(days=days_ahead)
+            for offset in range(1, 8):
+                candidate = current_date + timedelta(days=offset)
+                if candidate.weekday() == 5:
+                    return datetime.combine(candidate, time.min)
+            return datetime.combine(current_date + timedelta(days=7), time.min)
         case 5:
-            year = now.year + (1 if now.month == 12 else 0)
-            month = 1 if now.month == 12 else now.month + 1
-            day = (
-                min(
-                    now.day, (datetime(year, month % 12 + 1, 1) - timedelta(days=1)).day
-                )
-                if month != 12
-                else min(now.day, 31)
-            )
-            return now.replace(year=year, month=month, day=day)
+            first_day_next_month = (
+                current_date.replace(day=1) + timedelta(days=32)
+            ).replace(day=1)
+            for offset in range(31):
+                candidate = first_day_next_month + timedelta(days=offset)
+                if candidate.weekday() == 0:
+                    return datetime.combine(candidate, time.min)
+            return datetime.combine(current_date + timedelta(days=28), time.min)
         case _:
             app_logger.warning(f"box number of {box} not in allowed numbers(0-5)")
             return None
@@ -186,6 +200,8 @@ def get_due_words_service(
         # Include every word scheduled through the end of today in the Netherlands.
         tomorrow_start = _tomorrow_start_local_naive()
 
+        netherlands_now = datetime.now(NETHERLANDS_TIMEZONE).replace(tzinfo=None)
+
         # Then find cards for this year
         due_words = (
             db.query(Words)
@@ -198,7 +214,7 @@ def get_due_words_service(
                 Words.target_date < tomorrow_start,
                 or_(
                     Cards.id.is_(None),  # never learned
-                    Cards.due_at <= datetime.now(timezone.utc),  # due
+                    Cards.due_at <= netherlands_now,  # due at Dutch local midnight
                 ),
             )
             .limit(limit)
@@ -217,6 +233,7 @@ def get_due_words_service(
                 )
             )
         return due_word_model_words
+
 
 def get_difficult_words_service(
     user_id: UUID,
@@ -253,6 +270,7 @@ def get_difficult_words_service(
         )
         for word in words
     ]
+
 
 def submit_difficult_word_review_service(
     user_id: UUID,
@@ -305,7 +323,7 @@ def submit_word_review_service(user_id: UUID, reviews: list[ReviewedWord]) -> No
                     db=db,
                 )
             db.commit()
-        except:
+        except Exception:
             db.rollback()
 
 
