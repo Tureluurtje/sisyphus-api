@@ -11,18 +11,26 @@ from api.services import words_service
 
 
 def test_ensure_aware_and_tomorrow_start_local_naive():
-    assert words_service._ensure_aware(datetime(2024, 1, 1)).tzinfo is not None # type: ignore
-    assert isinstance(words_service._tomorrow_start_local_naive(), datetime) # type: ignore
-    assert words_service._tomorrow_start_local_naive().tzinfo is None # type: ignore
+    assert words_service._ensure_aware(datetime(2024, 1, 1)).tzinfo is not None  # type: ignore
+    assert isinstance(words_service._tomorrow_start_local_naive(), datetime)  # type: ignore
+    assert words_service._tomorrow_start_local_naive().tzinfo is None  # type: ignore
 
 
 def test_calculate_due_date_and_new_stability():
-    assert words_service.calculate_due_date(0) is not None
-    assert words_service.calculate_due_date(99) is None
+    monday = datetime(2026, 9, 21, 15, 45, tzinfo=timezone.utc)
+    amsterdam = words_service.NETHERLANDS_TIMEZONE
+    assert words_service.calculate_due_date(0, monday) is not None
+    assert words_service.calculate_due_date(99, monday) is None
+    assert words_service.calculate_due_date(1, monday) == datetime(2026, 9, 22, 0, 0)
+    assert words_service.calculate_due_date(2, monday) == datetime(2026, 9, 22, 0, 0)
+    assert words_service.calculate_due_date(3, monday) == datetime(2026, 9, 27, 0, 0)
+    assert words_service.calculate_due_date(4, monday) == datetime(2026, 9, 26, 0, 0)
+    assert words_service.calculate_due_date(5, monday) == datetime(2026, 10, 5, 0, 0)
+
     card = SimpleNamespace(
         stability=0.3, last_reviewed=datetime.now(timezone.utc) - timedelta(days=2)
     )
-    value = words_service.calculate_new_stability(card, 1, 0) # type: ignore
+    value = words_service.calculate_new_stability(card, 1, 0)  # type: ignore
     assert 0.05 <= value <= 1.0
 
 
@@ -107,8 +115,8 @@ def test_get_difficult_words_service():
     db.query.side_effect = [word_query, user_query]
     with patch("api.services.words_service.calculate_schoolyear", return_value="25-26"):
         result = words_service.get_difficult_words_service(user_id, db, 0.5)
-    assert result[0].word == "hola" # type: ignore
-    assert result[0].translation == "hello" # type: ignore
+    assert result[0].word == "hola"  # type: ignore
+    assert result[0].translation == "hello"  # type: ignore
 
 
 def test_submit_difficult_word_review_service():
@@ -234,5 +242,5 @@ def test_add_review_entry_and_get_stack_service():
         stack_single = words_service.get_stack_service(
             uuid4(), stack_id=0, all_stacks=False
         )
-    assert stack_single.stack_id == 0 # type: ignore
+    assert stack_single.stack_id == 0  # type: ignore
     assert stack_single.wordAmount == 1
