@@ -1,0 +1,2254 @@
+{
+  "listId": "dfd967e3-3beb-4621-b1e0-fc13f60bdc9e",
+  "year": "25-26",
+  "grade": "1",
+  "chapters": [
+    {
+      "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+      "name": "h31-32",
+      "words": [
+        {
+          "wordId": "78fbd34c-30d2-49d1-90bc-91688188bf1e",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "suus",
+          "translation": "zijn / haar / hun",
+          "targetDate": "2025-09-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "ecb06010-bd70-4ce0-a0c3-25fcf3b0d3a4",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "cupido, cupidines",
+          "translation": "verlangen / begeerte",
+          "targetDate": "2025-09-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "a6fb06ef-fc5b-4875-a9d7-04bd9d827c8e",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "consul, consules",
+          "translation": "consul",
+          "targetDate": "2025-09-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "8fb2b8c9-161b-4b68-98fe-4073e615cce8",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "periculum",
+          "translation": "gevaar",
+          "targetDate": "2025-09-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "08863e8c-b1e8-4a64-88a9-8550867b0119",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "salus, salutes",
+          "translation": "geluk / redding / welzijn",
+          "targetDate": "2025-09-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "f727df8e-1fe8-447e-bc09-f937d62b0d2a",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "praeponere",
+          "translation": "verkiezen boven (+ dat)",
+          "targetDate": "2025-09-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "33e972dd-2b31-4817-95f2-5e798f06d001",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "tempus, tempora",
+          "translation": "tijd",
+          "targetDate": "2025-09-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "cdaed3fc-e836-40c5-b29a-d8c6797286ff",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "adesse",
+          "translation": "aanwezig zijn",
+          "targetDate": "2025-09-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "124264d6-4cf2-42c2-a770-d4a4c932f775",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "convertere ad",
+          "translation": "richten op",
+          "targetDate": "2025-09-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "2809c044-6bfe-44b5-938f-c589faa44f80",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "prodere",
+          "translation": "verraden",
+          "targetDate": "2025-09-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "a1436374-1287-4659-9206-8de1b569dec1",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "liberare",
+          "translation": "bevrijden",
+          "targetDate": "2025-09-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "4be14df7-35b2-4228-8829-48cd1b3eaff8",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "processi",
+          "translation": "pf van procedere: naar voren gaan",
+          "targetDate": "2025-09-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "540f4d96-49e2-4c4f-a045-24e62f0dded7",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "procedere",
+          "translation": "naar voren gaan",
+          "targetDate": "2025-09-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "ea817ace-c439-427e-8310-13ec74275dc7",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "supplicium",
+          "translation": "(dood)straf",
+          "targetDate": "2025-09-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "b1b49c7c-f524-415e-8f17-f1bd676b167a",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "verberare",
+          "translation": "afranselen",
+          "targetDate": "2025-09-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "37ec845e-828a-4214-9f2b-cf03f9d7b613",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "dissimulare",
+          "translation": "verbergen / niets laten merken van",
+          "targetDate": "2025-09-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "143e7239-420c-4d25-9869-810736c9cf7a",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "castra (meervoud groep 2)",
+          "translation": "(leger)kamp",
+          "targetDate": "2025-09-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "7e5221ac-a9e9-4fe4-baad-bda180d1bbf5",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "circum",
+          "translation": "rond(om)",
+          "targetDate": "2025-09-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "6d5864c1-5269-467f-bfde-21ca82b05500",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "celer, celeris, celere",
+          "translation": "snel",
+          "targetDate": "2025-09-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "d0ff83e9-cf18-4bb5-bbef-f78339259fdd",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "civis, cives",
+          "translation": "burger",
+          "targetDate": "2025-09-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "8128fd6c-5437-486e-a690-4ae5589e8539",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "vocare (2)",
+          "translation": "roepen, noemen",
+          "targetDate": "2025-09-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "8ddd4dd2-9605-4559-8f47-9c0c0c16fa46",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "occidere",
+          "translation": "doden",
+          "targetDate": "2025-09-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "3b1afc6e-3e9e-4cc7-aeea-cc99b81d1939",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "securus",
+          "translation": "onbezorgd",
+          "targetDate": "2025-09-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "5b454497-1c50-4a97-9c4f-fb3c42068c87",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "audax, audaces (2)",
+          "translation": "dapper, roekeloos",
+          "targetDate": "2025-09-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "31ed4e2f-cb1e-4b36-8349-3d385099d7eb",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "ferox, feroces",
+          "translation": "moedig / onstuimig",
+          "targetDate": "2025-09-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "5ae256c6-e63e-48e9-b5f2-598db849ccac",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "temptare (2)",
+          "translation": "proberen, testen / op de proef stellen",
+          "targetDate": "2025-09-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "eaf6c237-28a0-46df-9c91-75f808a765fc",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "crudelis",
+          "translation": "wreed",
+          "targetDate": "2025-09-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "6c76578e-5fa7-4cf6-8c75-29711ccb541c",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "fortitudo, fortitudines",
+          "translation": "dapperheid",
+          "targetDate": "2025-09-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "929ffa23-bdd1-4ab3-99c4-46c86ab93361",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "ignis, ignes",
+          "translation": "vuur",
+          "targetDate": "2025-09-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "78d66ac2-024d-48b1-960d-3c85c8b2f0d3",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "dexter, dext(e)ra, dext(e)rum",
+          "translation": "rechter- / rechts",
+          "targetDate": "2025-09-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "e5d0ad32-19b9-4084-a147-e98e3e5e9ffb",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "virtus, virtutes",
+          "translation": "moed / verdienste",
+          "targetDate": "2025-09-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "cbb1caea-e1e5-432d-912f-c82427d0f524",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "commotus",
+          "translation": "ontroerd / bewogen",
+          "targetDate": "2025-09-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "4475f3d2-301c-4826-80cc-82a27d650fe9",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "remisi",
+          "translation": "pf van remittere: terugzenden / laten gaan",
+          "targetDate": "2025-09-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "768736b7-ceab-4e23-9ab7-0989bfcc5ff5",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "remittere",
+          "translation": "terugsturen / laten gaan",
+          "targetDate": "2025-09-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "ba0cf03d-22b1-4ccc-8afc-e55ddc107881",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "omnis (enkelvoud)",
+          "translation": "elk / ieder / geheel",
+          "targetDate": "2025-09-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "4acccdcf-172e-4bc1-ba8d-7ceed95ae09e",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "omnes (meervoud)",
+          "translation": "alle(n)",
+          "targetDate": "2025-09-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "26d28193-c252-4809-8134-d578d11e2ca3",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "fortis",
+          "translation": "dapper",
+          "targetDate": "2025-09-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "7736ce0c-3612-4109-b143-cdcddb89150a",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "laudare",
+          "translation": "prijzen",
+          "targetDate": "2025-09-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "42a57786-79f1-4d3e-a61b-8c2bfe9907e4",
+          "chapterId": "21358ba2-1e23-4d7f-9221-161a2c6aeeef",
+          "word": "appellare",
+          "translation": "noemen",
+          "targetDate": "2025-09-11T22:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+      "name": "h33-34",
+      "words": [
+        {
+          "wordId": "1b97cfba-6850-4b8e-8ae4-c2061aabfa0d",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "acer, acris, acre",
+          "translation": "fel / scherp",
+          "targetDate": "2025-09-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "110b2e77-d932-42d5-8700-c32e0df5dfb0",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "opem ferre",
+          "translation": "hulp brengen",
+          "targetDate": "2025-09-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "cc850a3b-5f40-4a71-9b53-11eee4141e11",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "constitui",
+          "translation": "pf van constituere: besluiten",
+          "targetDate": "2025-09-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "daea4cce-41a7-46fb-8dea-b05866415ffd",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "constituere",
+          "translation": "besluiten",
+          "targetDate": "2025-09-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "0d8d7fc0-ca1f-45a0-b8cc-c1903d10250c",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "accurri",
+          "translation": "pf van accurrere: komen aanrennen",
+          "targetDate": "2025-09-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "81a42f42-d793-48f4-9132-36d105e62819",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "accurrere",
+          "translation": "komen aanrennen",
+          "targetDate": "2025-09-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "34232374-1c8a-4144-84ca-db6b4cbdb264",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "tergum",
+          "translation": "rug",
+          "targetDate": "2025-09-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "8c4ce0df-7634-4d8f-9b66-12f3756028ac",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "invasi",
+          "translation": "pf van invadere: aanvallen",
+          "targetDate": "2025-09-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "a0fb66b4-3968-4c6d-b726-210d1347d647",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "invadere",
+          "translation": "aanvallen",
+          "targetDate": "2025-09-28T22:00:00.000Z"
+        },
+        {
+          "wordId": "f1dcf666-84cd-4963-89b1-c168674dc944",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "oppidum",
+          "translation": "stad",
+          "targetDate": "2025-09-28T22:00:00.000Z"
+        },
+        {
+          "wordId": "8f35b053-176d-4baa-8003-a34b0eed5379",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "erupi",
+          "translation": "pf van erumpere: uitbreken",
+          "targetDate": "2025-09-28T22:00:00.000Z"
+        },
+        {
+          "wordId": "1e71ef73-fbc2-44ba-82c1-6cdf9001f7fa",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "erumpere",
+          "translation": "uitbreken",
+          "targetDate": "2025-09-28T22:00:00.000Z"
+        },
+        {
+          "wordId": "b7d8732d-f806-4e0d-9a17-a4f93737bf0b",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "urgére",
+          "translation": "lastigvallen / in het nauw brengen",
+          "targetDate": "2025-09-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "fea604b2-cb6f-4a1a-93dd-46b3749fde5b",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "metuere",
+          "translation": "vrezen",
+          "targetDate": "2025-09-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "3d3d38ba-3662-43eb-ac70-fb3c970effca",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "pauci (meervoud groep 2)",
+          "translation": "enkele / weinige",
+          "targetDate": "2025-09-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "80c9f456-53bb-4d52-925f-9a8c737f2cec",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "patére",
+          "translation": "openstaan",
+          "targetDate": "2025-09-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "06d61768-0e0e-492d-a141-c5a00d09b414",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "irrupi",
+          "translation": "pf van irrumpere: binnendringen",
+          "targetDate": "2025-09-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "af766b8b-6807-4894-aad9-7468a9185013",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "irrumpere",
+          "translation": "binnendringen",
+          "targetDate": "2025-09-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "62fcd082-e508-4348-a657-bb68d0afc0f9",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "lignum",
+          "translation": "hout",
+          "targetDate": "2025-09-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "022d7f1a-8657-4a74-9339-a41b3ec53d89",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "singuli (mv bonus-groep)",
+          "translation": "telkens één / stuk voor stuk",
+          "targetDate": "2025-09-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "d319401e-7800-47f0-8a86-194aa72522e6",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "incendi",
+          "translation": "pf van incendere: aansteken / in brand steken",
+          "targetDate": "2025-10-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "b0796728-55af-4e8e-bb64-3e6fe7d3feae",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "incendere",
+          "translation": "aansteken / in brand steken",
+          "targetDate": "2025-10-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "d744b1c2-2f3f-457b-9d1a-64bc742448d0",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "auxi",
+          "translation": "pf van augére: vergroten / vermeerderen",
+          "targetDate": "2025-10-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "e7f1788a-afc7-406d-a6ba-7271b9cc5f76",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "augére",
+          "translation": "vermeerderen / vergroten",
+          "targetDate": "2025-10-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "fe813b10-fb9a-4ae4-ac9c-12c3d1540f57",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "animus (2)",
+          "translation": "geest, hart / moed",
+          "targetDate": "2025-10-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "a535a2cd-efa6-4281-8312-a88ec671a96c",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "expugnare",
+          "translation": "veroveren",
+          "targetDate": "2025-10-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "ef67d0d6-87b2-4740-88c0-2533e2bd7063",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "ferre (2)",
+          "translation": "dragen, brengen",
+          "targetDate": "2025-10-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "c28acecd-bc6b-4674-8e3d-c18fd4c30fb9",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "mulier, mulieres",
+          "translation": "vrouw",
+          "targetDate": "2025-10-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "ab035a55-88fa-46c3-bf7a-2edf7ae69290",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "eo",
+          "translation": "daar / daarheen",
+          "targetDate": "2025-10-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "e20103aa-2fc9-4b13-86d2-ab9167e44d1d",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "ingens, ingentes",
+          "translation": "enorm / heel groot / geweldig",
+          "targetDate": "2025-10-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "a295964e-32fc-4513-80ba-dfbc70ec6824",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "agmen, agmina",
+          "translation": "stoet / colonne",
+          "targetDate": "2025-10-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "ce2865d3-28f1-4aaa-8518-356c12824d35",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "recusare",
+          "translation": "weigeren",
+          "targetDate": "2025-10-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "7cb777b5-0c7a-4aec-89d6-58e97bec0486",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "tremere",
+          "translation": "trillen",
+          "targetDate": "2025-10-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "fc2020bf-8a5a-446b-b9b0-67d4913b77c4",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "priusquam",
+          "translation": "voordat",
+          "targetDate": "2025-10-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "9504da9e-04e0-4dea-a7b9-eb1c7f7fd9e7",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "utrum...an",
+          "translation": "of...of",
+          "targetDate": "2025-10-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "aadbe641-9379-40a4-bfdf-7a9a9d1ea17e",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "vastare",
+          "translation": "verwoesten",
+          "targetDate": "2025-10-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "15bfa2a1-7636-4668-ab6b-72ae602f5ea3",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "genui",
+          "translation": "pf van gignere: baren / voortbrengen",
+          "targetDate": "2025-10-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "57cef726-4a66-4483-b0ba-0f8070de21c9",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "gignere",
+          "translation": "baren / voortbrengen",
+          "targetDate": "2025-10-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "588da605-8740-420f-9523-269eeed8fef7",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "alui",
+          "translation": "pf van alere: voeden",
+          "targetDate": "2025-10-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "a96c147a-7674-494a-a3ed-cd6a3170f410",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "alere",
+          "translation": "voeden",
+          "targetDate": "2025-10-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "21162ec5-6f2d-47cb-8dbd-db499ac981eb",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "intra",
+          "translation": "binnen",
+          "targetDate": "2025-10-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "9f070d90-3e48-45f0-a0d5-39b5d1e4d348",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "dimisi",
+          "translation": "pf van dimittere: wegzenden / laten gaan",
+          "targetDate": "2025-10-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "cfa71d41-4a77-4f78-96bd-21005f3c6093",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "dimittere",
+          "translation": "wegzenden / laten gaan",
+          "targetDate": "2025-10-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "377968e0-02c8-42c5-b65e-75e6dc241856",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "legio, legiones",
+          "translation": "legioen",
+          "targetDate": "2025-10-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "31328caa-d7e5-4c40-bca7-8f8dc88217e3",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "abduxi",
+          "translation": "pf van abducere: wegvoeren",
+          "targetDate": "2025-10-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "09115208-1fab-4eb7-a3e6-03364493b7bf",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "abducere",
+          "translation": "wegvoeren",
+          "targetDate": "2025-10-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "3359a638-d538-41be-b576-02528d2832f2",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "ager , agri (groep 2)",
+          "translation": "akker",
+          "targetDate": "2025-10-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "9a585a16-4e20-4eb1-9cd8-9ff0715a5b63",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "paulo",
+          "translation": "een beetje",
+          "targetDate": "2025-10-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "e1f20272-e0e8-418b-891a-2070d932488b",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "post (bijwoord)",
+          "translation": "later",
+          "targetDate": "2025-10-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "aadf93b2-782e-41ac-bf27-40d23a199326",
+          "chapterId": "4d007b34-68a8-41e5-a102-384755795dde",
+          "word": "post (voorzetsel)",
+          "translation": "na / achter",
+          "targetDate": "2025-10-08T22:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+      "name": "h35-36",
+      "words": [
+        {
+          "wordId": "01747f2e-8fa4-498e-bb5a-aea2d0a86e0a",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "hospes, hospites",
+          "translation": "gast",
+          "targetDate": "2025-11-02T23:00:00.000Z"
+        },
+        {
+          "wordId": "f89a97f8-b993-4a54-9f5e-e26dcc00f07d",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "nullus",
+          "translation": "geen",
+          "targetDate": "2025-11-02T23:00:00.000Z"
+        },
+        {
+          "wordId": "358c68bb-211c-4d5e-9834-903c850186c2",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "defendere",
+          "translation": "verdedigen",
+          "targetDate": "2025-11-03T23:00:00.000Z"
+        },
+        {
+          "wordId": "5f4ded4e-dd10-4338-bb50-876b7326c8f4",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "pax, pacem",
+          "translation": "vrede",
+          "targetDate": "2025-11-03T23:00:00.000Z"
+        },
+        {
+          "wordId": "f36f3933-359e-43a4-9829-09d0cf75e9f6",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "afferre",
+          "translation": "brengen",
+          "targetDate": "2025-11-04T23:00:00.000Z"
+        },
+        {
+          "wordId": "c2cc307d-2454-4c6d-b30b-190f5ebbe1ea",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "condicio, condiciones (2)",
+          "translation": "voorwaarde, situatie",
+          "targetDate": "2025-11-04T23:00:00.000Z"
+        },
+        {
+          "wordId": "595dedd1-7663-4586-8619-a1406c5699a1",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "adimere",
+          "translation": "wegnemen / afnemen",
+          "targetDate": "2025-11-05T23:00:00.000Z"
+        },
+        {
+          "wordId": "ce7368f0-cf31-4fd1-93e3-eb2de24926fc",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "argentum",
+          "translation": "zilver",
+          "targetDate": "2025-11-05T23:00:00.000Z"
+        },
+        {
+          "wordId": "fc71c72e-aad9-4cdb-b07e-ecc6f49939cf",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "privatus",
+          "translation": "persoonlijk / privé-",
+          "targetDate": "2025-11-06T23:00:00.000Z"
+        },
+        {
+          "wordId": "7bdc2e43-73ea-487c-8047-1b2f9921b1fe",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "publicus",
+          "translation": "openbaar / van de staat / staats-",
+          "targetDate": "2025-11-06T23:00:00.000Z"
+        },
+        {
+          "wordId": "29373da5-dd0f-4774-babb-2e834c36f582",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "contuli",
+          "translation": "pf van conferre: verzamelen / bij elkaar brengen",
+          "targetDate": "2025-11-07T23:00:00.000Z"
+        },
+        {
+          "wordId": "0aaeac72-9360-4abe-86b2-9f16ce5970f7",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "conferre",
+          "translation": "verzamelen / bij elkaar brengen",
+          "targetDate": "2025-11-07T23:00:00.000Z"
+        },
+        {
+          "wordId": "829f849b-9cfe-4902-afd0-183d669eb426",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "exire",
+          "translation": "weggaan / naar buiten gaan",
+          "targetDate": "2025-11-08T23:00:00.000Z"
+        },
+        {
+          "wordId": "b0a61f6b-0968-4817-93dc-b9f87229cbd2",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "primores (meervoud groep 3)",
+          "translation": "de voornaamsten / de eersten",
+          "targetDate": "2025-11-08T23:00:00.000Z"
+        },
+        {
+          "wordId": "613d2536-63e8-4a6c-9dad-d2aefb1971a3",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "concilium",
+          "translation": "vergadering",
+          "targetDate": "2025-11-09T23:00:00.000Z"
+        },
+        {
+          "wordId": "4bf8325b-b9c5-4080-9f9b-cdc99b6276c2",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "accendi",
+          "translation": "pf van accendere: aansteken",
+          "targetDate": "2025-11-09T23:00:00.000Z"
+        },
+        {
+          "wordId": "cbeac231-aeb6-45e7-82b4-a48867d064bb",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "accendere",
+          "translation": "aansteken",
+          "targetDate": "2025-11-10T23:00:00.000Z"
+        },
+        {
+          "wordId": "5dd1998c-e3b2-428b-80ef-d413d793064a",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "primum",
+          "translation": "eerst",
+          "targetDate": "2025-11-10T23:00:00.000Z"
+        },
+        {
+          "wordId": "d3074503-2e7d-43f7-8c76-6be5aacd3700",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "ieci",
+          "translation": "pf van iacere: gooien / werpen",
+          "targetDate": "2025-11-11T23:00:00.000Z"
+        },
+        {
+          "wordId": "bce148cf-e7c8-4030-b975-66c3902ca961",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "iacere /io",
+          "translation": "gooien / werpen",
+          "targetDate": "2025-11-11T23:00:00.000Z"
+        },
+        {
+          "wordId": "0314ce04-9688-42a9-af35-b66d486d398e",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "tumultus 4",
+          "translation": "tumult / onrust / rumoer",
+          "targetDate": "2025-11-12T23:00:00.000Z"
+        },
+        {
+          "wordId": "b92abb35-f9b8-471f-bb46-efc940b4643a",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "turris, turres",
+          "translation": "toren",
+          "targetDate": "2025-11-12T23:00:00.000Z"
+        },
+        {
+          "wordId": "281bec7e-b0a8-41cb-bc67-8721a518fc0c",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "ruina",
+          "translation": "puinhoop / ruïne",
+          "targetDate": "2025-11-13T23:00:00.000Z"
+        },
+        {
+          "wordId": "e3e2734f-2e0a-4ddd-8012-56aa3e63203c",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "exercitus 4",
+          "translation": "leger",
+          "targetDate": "2025-11-13T23:00:00.000Z"
+        },
+        {
+          "wordId": "b8299001-4728-4403-8fe3-9e35ed4def4d",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "circa",
+          "translation": "rond / rondom",
+          "targetDate": "2025-11-14T23:00:00.000Z"
+        },
+        {
+          "wordId": "0f6ce85e-dbf9-4a35-a31f-5775c9da7fea",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "insignis",
+          "translation": "opvallend",
+          "targetDate": "2025-11-14T23:00:00.000Z"
+        },
+        {
+          "wordId": "1a109533-01b0-4bde-821b-a7d0dbf0322e",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "eques, equites",
+          "translation": "ruiter",
+          "targetDate": "2025-11-15T23:00:00.000Z"
+        },
+        {
+          "wordId": "90fa31b9-64df-4b33-b409-dab8a838e0db",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "cecidi",
+          "translation": "pf van caedere: doden / slachten",
+          "targetDate": "2025-11-15T23:00:00.000Z"
+        },
+        {
+          "wordId": "743494c1-92d6-4a10-bacc-2bc1149f1dd3",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "caedere",
+          "translation": "doden / slachten",
+          "targetDate": "2025-11-16T23:00:00.000Z"
+        },
+        {
+          "wordId": "aa52626a-1de8-49f4-8dc9-dc956c086a09",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "hasta",
+          "translation": "lans",
+          "targetDate": "2025-11-16T23:00:00.000Z"
+        },
+        {
+          "wordId": "b7f9acc8-1d47-4f40-a0a7-8c39d7b33940",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "transfixi",
+          "translation": "pf van transfigere: doorboren",
+          "targetDate": "2025-11-17T23:00:00.000Z"
+        },
+        {
+          "wordId": "1a5f9d90-eb4e-4d0a-95a6-75433d9dd892",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "transfigere",
+          "translation": "doorboren",
+          "targetDate": "2025-11-17T23:00:00.000Z"
+        },
+        {
+          "wordId": "a2862e28-3787-4fe2-9452-786e2a811aa1",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "lacus 4",
+          "translation": "(een) meer",
+          "targetDate": "2025-11-18T23:00:00.000Z"
+        },
+        {
+          "wordId": "d8f0201d-3fe1-4a6d-bd57-4ab5f1d457cb",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "pavor, pavores",
+          "translation": "(doods)angst",
+          "targetDate": "2025-11-18T23:00:00.000Z"
+        },
+        {
+          "wordId": "1bf7ca78-f8e8-4111-ab0e-644ad2a1f09e",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "angustus",
+          "translation": "nauw",
+          "targetDate": "2025-11-19T23:00:00.000Z"
+        },
+        {
+          "wordId": "9bfb7233-1027-4364-a070-1e0a842533d7",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "arduus",
+          "translation": "steil",
+          "targetDate": "2025-11-19T23:00:00.000Z"
+        },
+        {
+          "wordId": "812fecd0-496d-4647-8784-effb3f51aa29",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "evadere",
+          "translation": "ontsnappen",
+          "targetDate": "2025-11-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "9d182bfb-0b3e-4425-a8a6-2b61a44c0ae8",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "deesse",
+          "translation": "afwezig zijn / ontbreken",
+          "targetDate": "2025-11-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "518aba8a-bf30-40f3-861d-cd9d4f6e2fa8",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "palus, paludes",
+          "translation": "moeras",
+          "targetDate": "2025-11-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "9e7ded06-cd95-444d-bfc3-84e1c130867e",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "caput, capita",
+          "translation": "hoofd",
+          "targetDate": "2025-11-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "59aa045f-5a81-4590-bf96-9c84d80fdab6",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "equitatus 4",
+          "translation": "ruiterij",
+          "targetDate": "2025-11-22T23:00:00.000Z"
+        },
+        {
+          "wordId": "89c1c54c-c452-4119-be8f-dbbf30b67890",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "posterus",
+          "translation": "volgend(e)",
+          "targetDate": "2025-11-22T23:00:00.000Z"
+        },
+        {
+          "wordId": "d0cc7ccd-1951-4426-86da-6bcc9b60fbef",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "dies 5",
+          "translation": "dag",
+          "targetDate": "2025-11-23T23:00:00.000Z"
+        },
+        {
+          "wordId": "52cc3bb1-670d-45a4-b15b-70ed8407f24c",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "fides 5 (2)",
+          "translation": "trouw, (ere)woord",
+          "targetDate": "2025-11-23T23:00:00.000Z"
+        },
+        {
+          "wordId": "08f3e86f-8a09-4987-bee2-e5d95302cc00",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "milia (meervoud groep 3)",
+          "translation": "duizend / duizenden",
+          "targetDate": "2025-11-24T23:00:00.000Z"
+        },
+        {
+          "wordId": "435eab59-38cd-4500-9308-f61c6ac6cde4",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "servare (2)",
+          "translation": "redden, bewaren",
+          "targetDate": "2025-11-24T23:00:00.000Z"
+        },
+        {
+          "wordId": "ad4fc848-e36b-48d3-824c-21b70a2cd18e",
+          "chapterId": "bea4f298-7267-4b61-a1e2-73b645c27b0b",
+          "word": "vinculum",
+          "translation": "band / boei",
+          "targetDate": "2025-11-25T23:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+      "name": "h37-38",
+      "words": [
+        {
+          "wordId": "a96b9873-2a8b-4d10-8853-9564e9fefd94",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "res 5",
+          "translation": "zaak / ding",
+          "targetDate": "2026-01-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "cce7e6ce-4266-4cc7-a54a-ee154a88706c",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "rem gerere",
+          "translation": "oorlog voeren",
+          "targetDate": "2026-01-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "5ac4b32e-d823-4b75-9362-8a0f79be0673",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "sedes, sedes (2)",
+          "translation": "zetel, woonplaats",
+          "targetDate": "2026-01-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "9cdb7922-906a-45e4-949a-0e13a555bc1e",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "ac",
+          "translation": "en",
+          "targetDate": "2026-01-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "0534511f-1d0f-4de4-bfb3-6c47d6c54fe6",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "contra (bijwoord) (2)",
+          "translation": "daarentegen, tegen",
+          "targetDate": "2026-01-22T23:00:00.000Z"
+        },
+        {
+          "wordId": "12e8abdc-40be-4171-9cb3-d7387a7191c7",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "hostilis",
+          "translation": "vijandelijk",
+          "targetDate": "2026-01-22T23:00:00.000Z"
+        },
+        {
+          "wordId": "348029d5-942d-451b-b6ad-fd9a18a1ae50",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "inimicus (2)",
+          "translation": "vijand, vijandig",
+          "targetDate": "2026-01-23T23:00:00.000Z"
+        },
+        {
+          "wordId": "d15104eb-ca02-46b6-b7c6-cec54a47b484",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "procul a(b)",
+          "translation": "ver van",
+          "targetDate": "2026-01-23T23:00:00.000Z"
+        },
+        {
+          "wordId": "d62ba989-e20e-4543-8784-1a5b85296d2a",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "vix",
+          "translation": "nauwelijks / met moeite",
+          "targetDate": "2026-01-24T23:00:00.000Z"
+        },
+        {
+          "wordId": "ee1c4756-1807-41a1-a472-3726b8b02669",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "pars, partes",
+          "translation": "deel",
+          "targetDate": "2026-01-24T23:00:00.000Z"
+        },
+        {
+          "wordId": "4133cab7-2c6f-471a-9eb7-b6eab939ca3f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "tertius",
+          "translation": "derde",
+          "targetDate": "2026-01-25T23:00:00.000Z"
+        },
+        {
+          "wordId": "cd77bbcf-d0f5-4bc6-9334-4f475bdb26e1",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "duxi",
+          "translation": "pf van ducere: leiden / voeren",
+          "targetDate": "2026-01-25T23:00:00.000Z"
+        },
+        {
+          "wordId": "41a80eaf-a276-4cd0-a6ba-bbe86b322df9",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "ducere",
+          "translation": "leiden / voeren",
+          "targetDate": "2026-01-26T23:00:00.000Z"
+        },
+        {
+          "wordId": "5c07875e-18b8-4c65-ae23-2fa6ac7ae91c",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "satis +gen.",
+          "translation": "genoeg",
+          "targetDate": "2026-01-26T23:00:00.000Z"
+        },
+        {
+          "wordId": "f34ac0fd-469f-4c77-ab22-b3dbe166c985",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "frumentum",
+          "translation": "koren / graan",
+          "targetDate": "2026-01-27T23:00:00.000Z"
+        },
+        {
+          "wordId": "223bbc1c-b47d-4dc9-be3d-ab49a50a31db",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "praeda",
+          "translation": "buit",
+          "targetDate": "2026-01-27T23:00:00.000Z"
+        },
+        {
+          "wordId": "7fbdd070-9da0-4ea0-bc66-eaafddb8f2eb",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "proelium",
+          "translation": "strijd",
+          "targetDate": "2026-01-28T23:00:00.000Z"
+        },
+        {
+          "wordId": "eb779cc1-5981-467d-aecf-af3ebe2939db",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "proelium committere",
+          "translation": "de strijd aangaan",
+          "targetDate": "2026-01-28T23:00:00.000Z"
+        },
+        {
+          "wordId": "14384751-8c82-4359-aea4-e74e29c94da9",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "superare",
+          "translation": "overwinnen",
+          "targetDate": "2026-01-29T23:00:00.000Z"
+        },
+        {
+          "wordId": "a77a9c93-c866-4857-b069-b633834ef409",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "unus",
+          "translation": "één / enige / alleen",
+          "targetDate": "2026-01-29T23:00:00.000Z"
+        },
+        {
+          "wordId": "44b51761-fdea-4eb8-a41f-18e1a4b32a98",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "difficilis",
+          "translation": "moeilijk",
+          "targetDate": "2026-01-30T23:00:00.000Z"
+        },
+        {
+          "wordId": "2e67a0ab-282e-4ec0-a0f1-c4dfee95abb3",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "magis (bijwoord)",
+          "translation": "meer",
+          "targetDate": "2026-01-30T23:00:00.000Z"
+        },
+        {
+          "wordId": "d47dff14-dd0d-456a-8baa-30de77080961",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "quam",
+          "translation": "dan",
+          "targetDate": "2026-01-31T23:00:00.000Z"
+        },
+        {
+          "wordId": "77f3c3ed-dd78-4727-a36d-824c75a281d0",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "collega",
+          "translation": "collega / ambtgenoot",
+          "targetDate": "2026-01-31T23:00:00.000Z"
+        },
+        {
+          "wordId": "021fe9c7-3f0a-4847-9051-e82bc90aee97",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "imperator, imperatores",
+          "translation": "veldheer",
+          "targetDate": "2026-02-01T23:00:00.000Z"
+        },
+        {
+          "wordId": "fa1f6cb6-013a-4ad5-83e9-b7f319ae49f9",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "resistere",
+          "translation": "weerstand bieden / verzetten",
+          "targetDate": "2026-02-01T23:00:00.000Z"
+        },
+        {
+          "wordId": "d11adccd-cff8-45ae-9992-0ea8a4842319",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "contemnere",
+          "translation": "minachten / verachten",
+          "targetDate": "2026-02-02T23:00:00.000Z"
+        },
+        {
+          "wordId": "80fa9fca-5bea-440c-adfb-95351854062a",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "vanus",
+          "translation": "leeg / ijdel / vergeefs",
+          "targetDate": "2026-02-02T23:00:00.000Z"
+        },
+        {
+          "wordId": "8d61d48d-b364-4738-a239-695dd6520d1f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "gloria",
+          "translation": "roem / glorie",
+          "targetDate": "2026-02-03T23:00:00.000Z"
+        },
+        {
+          "wordId": "c0917f2a-32e2-4374-b9b1-4ef74617ff5a",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "spernere",
+          "translation": "minachten",
+          "targetDate": "2026-02-03T23:00:00.000Z"
+        },
+        {
+          "wordId": "2d6ece0c-e45e-4456-95f6-a1d0251f633f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "verus",
+          "translation": "werkelijk / echt / waar",
+          "targetDate": "2026-02-04T23:00:00.000Z"
+        },
+        {
+          "wordId": "db084b3d-8698-4c9f-a5b5-4dfc55c6aea4",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "descendere",
+          "translation": "afdalen",
+          "targetDate": "2026-02-04T23:00:00.000Z"
+        },
+        {
+          "wordId": "de21aa2a-1285-4e48-a65c-9f62c2a3bf6f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "vires, virium (meervoud)",
+          "translation": "krachten",
+          "targetDate": "2026-02-05T23:00:00.000Z"
+        },
+        {
+          "wordId": "1ea1e487-8b1b-4548-8c3c-139e489426c9",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "superesse",
+          "translation": "over zijn",
+          "targetDate": "2026-02-05T23:00:00.000Z"
+        },
+        {
+          "wordId": "122fc438-e0aa-4dab-be73-c3a95168de5f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "spes 5",
+          "translation": "hoop",
+          "targetDate": "2026-02-06T23:00:00.000Z"
+        },
+        {
+          "wordId": "1f00ec21-7c5b-46be-923d-88052d97fafc",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "dum (3)",
+          "translation": "terwijl, zolang als, totdat",
+          "targetDate": "2026-02-06T23:00:00.000Z"
+        },
+        {
+          "wordId": "d90a9cc2-248b-4e21-9b33-ee658cf35e87",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "senatus 4",
+          "translation": "senaat",
+          "targetDate": "2026-02-07T23:00:00.000Z"
+        },
+        {
+          "wordId": "28fa70d0-8c81-4636-b8f9-fa94524d3643",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "totus",
+          "translation": "geheel / helemaal",
+          "targetDate": "2026-02-07T23:00:00.000Z"
+        },
+        {
+          "wordId": "311cc161-9983-463c-8403-0368cb467668",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "cladis, clades",
+          "translation": "nederlaag / ondergang",
+          "targetDate": "2026-02-08T23:00:00.000Z"
+        },
+        {
+          "wordId": "fc813f37-f9f2-4416-a5ec-2f3158adc5e8",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "munire",
+          "translation": "ommuren / versterken",
+          "targetDate": "2026-02-08T23:00:00.000Z"
+        },
+        {
+          "wordId": "aa97fb6e-8df7-45e4-a5dd-89798e7e449a",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "advenire",
+          "translation": "er aan komen / naderen",
+          "targetDate": "2026-02-09T23:00:00.000Z"
+        },
+        {
+          "wordId": "0b4457af-9c7a-4d4a-ac61-5dac2cac4b1f",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "praeceptum",
+          "translation": "voorschrift",
+          "targetDate": "2026-02-09T23:00:00.000Z"
+        },
+        {
+          "wordId": "5c9caed4-745b-42d9-b87d-e3fa7c9aeca2",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "adhuc",
+          "translation": "tot nu toe",
+          "targetDate": "2026-02-10T23:00:00.000Z"
+        },
+        {
+          "wordId": "465eeb87-56be-4141-a8d5-3c6792189c0e",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "oppressi",
+          "translation": "pf van opprimere: overweldigen / onderdrukken",
+          "targetDate": "2026-02-10T23:00:00.000Z"
+        },
+        {
+          "wordId": "0eaca67e-a8bc-4374-9bb4-7c79962b96a6",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "opprimere",
+          "translation": "overweldigen /onderdrukken",
+          "targetDate": "2026-02-11T23:00:00.000Z"
+        },
+        {
+          "wordId": "da756963-683f-4430-9788-547f705989ed",
+          "chapterId": "d1343d74-185a-4504-ad7f-12f4bffa9b9b",
+          "word": "ignorare",
+          "translation": "niet weten",
+          "targetDate": "2026-02-11T23:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+      "name": "h39-40",
+      "words": [
+        {
+          "wordId": "51df6114-3e0b-444e-8d32-cf5c8e6df075",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "nuper",
+          "translation": "onlangs",
+          "targetDate": "2026-02-12T23:00:00.000Z"
+        },
+        {
+          "wordId": "4203efe8-cf16-4457-a97b-30b6a882f0e4",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "iter, itinera",
+          "translation": "tocht / reis",
+          "targetDate": "2026-02-12T23:00:00.000Z"
+        },
+        {
+          "wordId": "1c9c1c3f-73c7-4ee8-929d-a173cfddfaca",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "desertus",
+          "translation": "verlaten / eenzaam",
+          "targetDate": "2026-02-13T23:00:00.000Z"
+        },
+        {
+          "wordId": "4aec89c8-f175-43a4-a254-243152628ebb",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "laborare",
+          "translation": "hard werken / zwoegen",
+          "targetDate": "2026-02-13T23:00:00.000Z"
+        },
+        {
+          "wordId": "75feef63-1079-406b-8a6f-bf7cfe4a1093",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "villa",
+          "translation": "landgoed / landhuis",
+          "targetDate": "2026-02-14T23:00:00.000Z"
+        },
+        {
+          "wordId": "2c2ec86d-4fee-4cf8-aedf-eca602f4e869",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "a / ab (2)",
+          "translation": "van / vanaf, door",
+          "targetDate": "2026-02-14T23:00:00.000Z"
+        },
+        {
+          "wordId": "bace93d0-1f9e-4c85-8a00-e9142809fb03",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "habitare (2)",
+          "translation": "wonen, bewonen",
+          "targetDate": "2026-02-15T23:00:00.000Z"
+        },
+        {
+          "wordId": "90298939-90a4-4e5f-bf5b-c56a80b7f680",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "colere (3)",
+          "translation": "vereren, verzorgen, bebouwen",
+          "targetDate": "2026-02-15T23:00:00.000Z"
+        },
+        {
+          "wordId": "9b5eb8c3-bf25-43c2-a923-918ec0a6287d",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "defendi",
+          "translation": "pf van defendere: verdedigen",
+          "targetDate": "2026-02-16T23:00:00.000Z"
+        },
+        {
+          "wordId": "28da741b-fea9-4385-8965-420fde1c10e1",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "fames, fames",
+          "translation": "honger",
+          "targetDate": "2026-02-16T23:00:00.000Z"
+        },
+        {
+          "wordId": "69c5e95c-862b-4007-adaa-dfc95d0f296e",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "lex, leges",
+          "translation": "wet",
+          "targetDate": "2026-02-17T23:00:00.000Z"
+        },
+        {
+          "wordId": "6c4633d5-b505-43ba-ab67-25a92a7a97d7",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "dignus + abl.",
+          "translation": "waard / waardig",
+          "targetDate": "2026-02-17T23:00:00.000Z"
+        },
+        {
+          "wordId": "bb985490-4b79-418a-88fc-5ea941e095e1",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "creare (2)",
+          "translation": "scheppen, kiezen tot",
+          "targetDate": "2026-02-18T23:00:00.000Z"
+        },
+        {
+          "wordId": "b155b2c2-8d0f-487d-84a4-462c9ff744d2",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "occupare",
+          "translation": "bezetten",
+          "targetDate": "2026-02-18T23:00:00.000Z"
+        },
+        {
+          "wordId": "13515f6d-36ec-4903-bb04-ce4d472f383b",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "complexus 4",
+          "translation": "omhelzing",
+          "targetDate": "2026-02-19T23:00:00.000Z"
+        },
+        {
+          "wordId": "49808ba5-0a34-406f-9e4c-c534b0bf39f3",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "collegi",
+          "translation": "pf van colligere: verzamelen",
+          "targetDate": "2026-02-19T23:00:00.000Z"
+        },
+        {
+          "wordId": "66bf825e-aba0-485e-ad32-e0150b1ef6ec",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "colligere",
+          "translation": "verzamelen",
+          "targetDate": "2026-02-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "4d1cc796-ac4d-4c4c-b449-e264a84da4d6",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "commisi",
+          "translation": "pf van committere: beginnen / aangaan",
+          "targetDate": "2026-02-20T23:00:00.000Z"
+        },
+        {
+          "wordId": "a6969874-295a-494d-be04-c93851388347",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "committere",
+          "translation": "beginnen / aangaan",
+          "targetDate": "2026-02-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "7f6a8daf-2de4-406f-bf38-c46f7c9df30f",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "fidelis",
+          "translation": "trouw",
+          "targetDate": "2026-02-21T23:00:00.000Z"
+        },
+        {
+          "wordId": "af6d9d06-cb25-4687-939c-d1fbd1975f2b",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "super",
+          "translation": "boven op",
+          "targetDate": "2026-02-22T23:00:00.000Z"
+        },
+        {
+          "wordId": "94f4606f-f2e1-4e2c-9df6-97106534da29",
+          "chapterId": "c2143fee-4502-4407-a956-763bd76ea55a",
+          "word": "pondus, pondera",
+          "translation": "gewicht",
+          "targetDate": "2026-02-22T23:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+      "name": "h41-42",
+      "words": [
+        {
+          "wordId": "6afc4c14-aff6-4932-9f75-3e8f532f1247",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "patientia",
+          "translation": "geduld",
+          "targetDate": "2026-03-25T23:00:00.000Z"
+        },
+        {
+          "wordId": "3042a478-e9be-4419-b31d-9a7018f9a2df",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "furor, furores",
+          "translation": "razernij",
+          "targetDate": "2026-03-25T23:00:00.000Z"
+        },
+        {
+          "wordId": "74e4122a-0fb6-4442-bf95-9c3ae4731b3a",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "atque",
+          "translation": "en",
+          "targetDate": "2026-03-26T23:00:00.000Z"
+        },
+        {
+          "wordId": "9650a6aa-9672-49be-9297-042494362dcb",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "audacia (3)",
+          "translation": "dapperheid, dappere daad, overmoed",
+          "targetDate": "2026-03-26T23:00:00.000Z"
+        },
+        {
+          "wordId": "15954d45-d15f-4dc0-8c24-e334cb386951",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "debére",
+          "translation": "moeten",
+          "targetDate": "2026-03-27T23:00:00.000Z"
+        },
+        {
+          "wordId": "73ba6e06-ebaf-4d9e-af62-5889f56f2735",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "sentire",
+          "translation": "voelen",
+          "targetDate": "2026-03-27T23:00:00.000Z"
+        },
+        {
+          "wordId": "429587ae-cfeb-4118-8cca-079fd55fcc42",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "superior, superiores (2)",
+          "translation": "hoger, vroeger",
+          "targetDate": "2026-03-28T23:00:00.000Z"
+        },
+        {
+          "wordId": "0db4679f-6a8e-43d7-a07e-541b3161c689",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "convocare",
+          "translation": "bijeenroepen",
+          "targetDate": "2026-03-28T23:00:00.000Z"
+        },
+        {
+          "wordId": "1a1bd26a-c24a-4506-96a5-5df363b2a24c",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "res publica",
+          "translation": "staat",
+          "targetDate": "2026-03-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "81d36914-ab5f-4026-a2af-73cde9d3cdce",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "evertere",
+          "translation": "omverwerpen",
+          "targetDate": "2026-03-29T22:00:00.000Z"
+        },
+        {
+          "wordId": "8d273000-56b1-4ca4-8c83-109eb171ef92",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "insanus",
+          "translation": "gek",
+          "targetDate": "2026-03-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "8f3a4123-9842-4bbe-a3b1-7ce64792752b",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "mos, mores",
+          "translation": "gewoonte",
+          "targetDate": "2026-03-30T22:00:00.000Z"
+        },
+        {
+          "wordId": "b0b1c645-2baa-4ded-8f6a-82dfc61934d7",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "intellegere",
+          "translation": "begrijpen",
+          "targetDate": "2026-03-31T22:00:00.000Z"
+        },
+        {
+          "wordId": "7e0ceee3-6f68-4584-a53d-74ef6bdaa3fa",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "vitare",
+          "translation": "ontwijken / uit de weg gaan",
+          "targetDate": "2026-03-31T22:00:00.000Z"
+        },
+        {
+          "wordId": "aad0f09f-ade8-440e-83a3-97e998a93575",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "oportet",
+          "translation": "het behoort",
+          "targetDate": "2026-04-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "89dac950-edd2-4cd1-a523-e9519934dc40",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "iussu",
+          "translation": "op bevel",
+          "targetDate": "2026-04-01T22:00:00.000Z"
+        },
+        {
+          "wordId": "4a60094f-ccd3-431d-be5c-5298ac832bc9",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "orbis, orbes",
+          "translation": "cirkel",
+          "targetDate": "2026-04-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "920651ba-0f21-4d59-adaf-dfb5862ac3e6",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "orbis terrarum",
+          "translation": "de hele wereld",
+          "targetDate": "2026-04-02T22:00:00.000Z"
+        },
+        {
+          "wordId": "4c15e1e7-98de-438a-b20b-cc47521c7a94",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "caedes, caedes",
+          "translation": "bloedbad",
+          "targetDate": "2026-04-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "3fe0c41e-3e72-457d-a56f-091087587a6c",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "incendium",
+          "translation": "brand",
+          "targetDate": "2026-04-03T22:00:00.000Z"
+        },
+        {
+          "wordId": "765aafb0-360f-4b51-ba17-d6db05b4b808",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "quam + superl.",
+          "translation": "zo...mogelijk",
+          "targetDate": "2026-04-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "8fdfb43c-9e9a-4f64-b999-0fc9683996bc",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "educere",
+          "translation": "wegvoeren",
+          "targetDate": "2026-04-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "5ca36537-205b-4393-b03a-69b4ae4e0300",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "timor, timores",
+          "translation": "angst",
+          "targetDate": "2026-04-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "d168409d-0b29-40a4-ac7b-cf5e81f5cb70",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "diutius",
+          "translation": "langer (van tijd)",
+          "targetDate": "2026-04-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "47850450-6f6e-42ed-ab4a-9ebc531b4a75",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "minus",
+          "translation": "minder",
+          "targetDate": "2026-04-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "c1bc6867-1c16-4f20-a031-d13935ab1d90",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "litterae (meervoud groep 1)",
+          "translation": "brief",
+          "targetDate": "2026-04-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "19bfcb53-7c34-42b4-9af4-4b043b1fc9a1",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "non solum...sed etiam",
+          "translation": "niet alleen...maar ook",
+          "targetDate": "2026-04-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "1cf0aa37-39b7-4c3b-a52c-d06abaa10e34",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "aut...aut",
+          "translation": "of...of",
+          "targetDate": "2026-04-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "a0da578c-908a-44b1-8838-11e8b409f58e",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "scribere",
+          "translation": "schrijven",
+          "targetDate": "2026-04-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "6d6adc71-55ba-489d-bbad-485c2b677504",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "tristis",
+          "translation": "bedroefd",
+          "targetDate": "2026-04-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "9cca7d49-fde3-45c3-aed5-5e63cf6d97dd",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "legere (2)",
+          "translation": "verzamelen, lezen",
+          "targetDate": "2026-04-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "b4bfa6cf-3e9b-4e46-afc8-227924715d00",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "apud",
+          "translation": "bij",
+          "targetDate": "2026-04-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "ceb24807-b829-4915-a097-1f17510cf75e",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "optimus",
+          "translation": "beste (superlativus van bonus)",
+          "targetDate": "2026-04-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "f48d01cd-0911-40f7-bbd5-1cbe070d49ba",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "aliquando",
+          "translation": "eens",
+          "targetDate": "2026-04-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "f3bc49c9-2d7e-4c18-8131-52b94d7ad8b8",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "gratia",
+          "translation": "dank",
+          "targetDate": "2026-04-11T22:00:00.000Z"
+        },
+        {
+          "wordId": "04cd32b4-12ec-447a-ba97-9671f0aa5f41",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "referre",
+          "translation": "terugbrengen / brengen",
+          "targetDate": "2026-04-11T22:00:00.000Z"
+        },
+        {
+          "wordId": "86bfc3d1-d690-4f5f-8544-54e72b5713ea",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "gratiam referre + dat",
+          "translation": "bedanken",
+          "targetDate": "2026-04-12T22:00:00.000Z"
+        },
+        {
+          "wordId": "e56f1b85-ea91-425f-bc38-c624f6c6e6e2",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "malus",
+          "translation": "slecht",
+          "targetDate": "2026-04-12T22:00:00.000Z"
+        },
+        {
+          "wordId": "bdc85a13-498b-4bb9-a635-b0c2f09f26d5",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "quam primum",
+          "translation": "zo spoedig mogelijk",
+          "targetDate": "2026-04-13T22:00:00.000Z"
+        },
+        {
+          "wordId": "b0ca954f-a3e4-4ef4-8a1c-6f9821c48941",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "rettuli",
+          "translation": "pf van referre: terugbrengen / brengen",
+          "targetDate": "2026-04-13T22:00:00.000Z"
+        },
+        {
+          "wordId": "0838ce5c-08d7-404d-954f-cbd53fbf977b",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "florui",
+          "translation": "pf van florére: bloeien",
+          "targetDate": "2026-04-14T22:00:00.000Z"
+        },
+        {
+          "wordId": "c60c2b26-d24d-482a-b084-7c6222c85b66",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "florére",
+          "translation": "bloeien",
+          "targetDate": "2026-04-14T22:00:00.000Z"
+        },
+        {
+          "wordId": "efc544ad-b5ab-4575-8e01-28d8a67cbf18",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "vitium",
+          "translation": "fout",
+          "targetDate": "2026-04-15T22:00:00.000Z"
+        },
+        {
+          "wordId": "dd930225-0146-474b-8d57-5843b789ad2b",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "plus, plura",
+          "translation": "meer",
+          "targetDate": "2026-04-15T22:00:00.000Z"
+        },
+        {
+          "wordId": "fb51f9dd-87c0-4ff1-b74a-bd11e6af9979",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "impedire",
+          "translation": "belemmeren / tegenhouden",
+          "targetDate": "2026-04-16T22:00:00.000Z"
+        },
+        {
+          "wordId": "6dd2f1e2-678d-4fce-985e-6efe41df56f7",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "maeror, maerorem",
+          "translation": "verdriet",
+          "targetDate": "2026-04-16T22:00:00.000Z"
+        },
+        {
+          "wordId": "99ce5b2c-85b3-4703-b680-c3b1c5640932",
+          "chapterId": "07e24fe1-e9e0-4a48-a15b-5c970fba8bbb",
+          "word": "valére",
+          "translation": "gezond zijn",
+          "targetDate": "2026-04-17T22:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+      "name": "h43-44",
+      "words": [
+        {
+          "wordId": "4c9e187f-aae6-4658-baa9-a14648098747",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "maiores (meervoud groep 3)",
+          "translation": "voorouders",
+          "targetDate": "2026-04-18T22:00:00.000Z"
+        },
+        {
+          "wordId": "c51c388a-3170-4d74-bc8c-b9bb711a2b3a",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "similis",
+          "translation": "gelijk",
+          "targetDate": "2026-04-18T22:00:00.000Z"
+        },
+        {
+          "wordId": "6ccaa655-d8d4-4926-b3d8-4d2927dba6e2",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "inopia",
+          "translation": "gebrek",
+          "targetDate": "2026-04-19T22:00:00.000Z"
+        },
+        {
+          "wordId": "235946e5-9f9d-4c30-b51d-dd5f494db05d",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "tolerare",
+          "translation": "verdragen",
+          "targetDate": "2026-04-19T22:00:00.000Z"
+        },
+        {
+          "wordId": "d22d4549-0be8-4034-bb35-e6dce29677e1",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "aetas, aetates",
+          "translation": "leeftijd",
+          "targetDate": "2026-04-20T22:00:00.000Z"
+        },
+        {
+          "wordId": "34450c78-32a3-48d1-8e5c-b9166af9eb9c",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "denique",
+          "translation": "tenslotte",
+          "targetDate": "2026-04-20T22:00:00.000Z"
+        },
+        {
+          "wordId": "edc2d5e6-6a5a-4fc7-84ff-735c92f623da",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "fines (meervoud groep 3)",
+          "translation": "gebied",
+          "targetDate": "2026-04-21T22:00:00.000Z"
+        },
+        {
+          "wordId": "aa20421a-bc69-4562-a56d-171b388facb6",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "excessi",
+          "translation": "pf excedere: gaan uit",
+          "targetDate": "2026-04-21T22:00:00.000Z"
+        },
+        {
+          "wordId": "9cf8a301-2b15-4d29-a91d-c26fdbd7103d",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "excedere",
+          "translation": "verlaten / gaan uit",
+          "targetDate": "2026-04-22T22:00:00.000Z"
+        },
+        {
+          "wordId": "b3ec4ab0-6f7d-4077-bf1b-2bdaecb34dda",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "libertas, libertates",
+          "translation": "vrijheid",
+          "targetDate": "2026-04-22T22:00:00.000Z"
+        },
+        {
+          "wordId": "841071fd-c03e-4d72-8a10-e6076ae9738c",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "invidia",
+          "translation": "jaloezie",
+          "targetDate": "2026-04-23T22:00:00.000Z"
+        },
+        {
+          "wordId": "9265feff-c084-4412-abd3-3f7b88662bb6",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "adductus",
+          "translation": "ppp van adducere: brengen tot",
+          "targetDate": "2026-04-23T22:00:00.000Z"
+        },
+        {
+          "wordId": "5d6711d3-99a9-439c-b96a-e2350dccdf6b",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "adducere",
+          "translation": "brengen tot",
+          "targetDate": "2026-04-24T22:00:00.000Z"
+        },
+        {
+          "wordId": "da16caf2-799f-4db5-9cd2-7c5717220a24",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "potens, potentes",
+          "translation": "machtig",
+          "targetDate": "2026-04-24T22:00:00.000Z"
+        },
+        {
+          "wordId": "22061226-b8cd-431a-9da9-9b35e3aefc73",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "servitus, servitutes",
+          "translation": "slavernij",
+          "targetDate": "2026-04-25T22:00:00.000Z"
+        },
+        {
+          "wordId": "f99e71f4-1550-4366-9f2b-cfd0c1bd1cac",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "redigere in",
+          "translation": "terugbrengen tot",
+          "targetDate": "2026-04-25T22:00:00.000Z"
+        },
+        {
+          "wordId": "86f1ee05-5aa6-41d3-bbaa-d708cb7b7962",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "respicere/io",
+          "translation": "terugkijken",
+          "targetDate": "2026-04-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "b860e997-1834-42fc-87d8-480beae0a797",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "subiectus",
+          "translation": "ppp van subiecere: onderwerpen",
+          "targetDate": "2026-04-26T22:00:00.000Z"
+        },
+        {
+          "wordId": "2e2c5850-6bd5-4d41-904b-472d633f4748",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "subicere/io",
+          "translation": "onderwerpen",
+          "targetDate": "2026-04-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "05675159-1ce3-49ae-9ebe-d84e77a01925",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "provincia",
+          "translation": "provincie",
+          "targetDate": "2026-04-27T22:00:00.000Z"
+        },
+        {
+          "wordId": "5530ad29-f4de-405d-ac93-b6e1de7222aa",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "redactus",
+          "translation": "ppp van redigere: terugbrengen",
+          "targetDate": "2026-05-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "fcbb7e16-cafc-4b92-b912-b220ca0a2507",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "perpetuus",
+          "translation": "eeuwig",
+          "targetDate": "2026-05-04T22:00:00.000Z"
+        },
+        {
+          "wordId": "a02df02d-c9b2-49c5-bd44-80ea29e4ff12",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "premere (2)",
+          "translation": "drukken, in het nauw brengen",
+          "targetDate": "2026-05-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "cf8e2029-cdc4-4082-94b9-bde6ac00980c",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "Gallus",
+          "translation": "Galliër",
+          "targetDate": "2026-05-05T22:00:00.000Z"
+        },
+        {
+          "wordId": "6ab308ec-80bb-4122-9c73-9a11f8193256",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "nisi (2)",
+          "translation": "als niet, tenzij",
+          "targetDate": "2026-05-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "3ac4a87d-c925-48c5-8796-5085c643e916",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "valetudo, valetudines",
+          "translation": "gezondheid",
+          "targetDate": "2026-05-06T22:00:00.000Z"
+        },
+        {
+          "wordId": "1605e183-0163-4964-8ad8-fbe24a8069c1",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "munitio, munitiones",
+          "translation": "schans",
+          "targetDate": "2026-05-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "c6b83c56-a04d-4d65-92fa-7384dff8da2b",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "accessi",
+          "translation": "pf van accedere: naderen / gaan naar",
+          "targetDate": "2026-05-07T22:00:00.000Z"
+        },
+        {
+          "wordId": "3c022b89-98bf-4f8e-898f-9287586fcfbd",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "accedere",
+          "translation": "naderen / gaan naar",
+          "targetDate": "2026-05-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "212b2424-86b5-469b-8522-77abf7ae3e0d",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "flére",
+          "translation": "huilen",
+          "targetDate": "2026-05-08T22:00:00.000Z"
+        },
+        {
+          "wordId": "47022ca4-f165-4f97-adc0-57718334647e",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "custos, custodes",
+          "translation": "wachter",
+          "targetDate": "2026-05-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "444870de-c7ea-4d9a-a887-dadd5a4987aa",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "positus",
+          "translation": "ppp van ponere: plaatsen",
+          "targetDate": "2026-05-09T22:00:00.000Z"
+        },
+        {
+          "wordId": "f8fe7e7e-32b1-4b0f-b208-40c15c93c450",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "ponere",
+          "translation": "plaatsen",
+          "targetDate": "2026-05-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "b9300f26-47b7-4cc1-b43b-171486cfa341",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "fieri (3)",
+          "translation": "ontstaan, gebeuren, (gemaakt) worden",
+          "targetDate": "2026-05-10T22:00:00.000Z"
+        },
+        {
+          "wordId": "1527c3d1-cb4e-412c-ae41-ef175f449bc8",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "alius...alius",
+          "translation": "de een...de ander",
+          "targetDate": "2026-05-11T22:00:00.000Z"
+        },
+        {
+          "wordId": "7886bfd6-5164-49fc-9201-4dd9c7a722dd",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "vivus",
+          "translation": "levend",
+          "targetDate": "2026-05-11T22:00:00.000Z"
+        },
+        {
+          "wordId": "64f126fb-fa8f-4953-99ce-ce479d12ee8e",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "fuga",
+          "translation": "vlucht",
+          "targetDate": "2026-05-12T22:00:00.000Z"
+        },
+        {
+          "wordId": "7275913d-fcba-4575-b796-ad1fd0e2129a",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "comprehendere",
+          "translation": "grijpen",
+          "targetDate": "2026-05-12T22:00:00.000Z"
+        },
+        {
+          "wordId": "838cedd6-1fbe-46d5-aac5-835cbcebda8e",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "signum (2)",
+          "translation": "teken, veldteken",
+          "targetDate": "2026-05-13T22:00:00.000Z"
+        },
+        {
+          "wordId": "1fd8449a-5585-4528-a957-806d18bddc53",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "militaris",
+          "translation": "militair / van het leger",
+          "targetDate": "2026-05-13T22:00:00.000Z"
+        },
+        {
+          "wordId": "1a0ac540-d333-4bb3-ac9a-f3e426edf108",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "incolumis",
+          "translation": "ongedeerd",
+          "targetDate": "2026-05-14T22:00:00.000Z"
+        },
+        {
+          "wordId": "fa53883a-f18d-4edb-b6ce-1e40449bcf47",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "Gallus (2)",
+          "translation": "Galliër, Gallisch",
+          "targetDate": "2026-05-14T22:00:00.000Z"
+        },
+        {
+          "wordId": "6c799c57-49f1-45c7-b26a-f31b597f4433",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "arx, arces",
+          "translation": "burcht",
+          "targetDate": "2026-05-15T22:00:00.000Z"
+        },
+        {
+          "wordId": "b6746420-398b-4644-bee5-0df3d618befc",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "copiae (meervoud groep 1)",
+          "translation": "troepen",
+          "targetDate": "2026-05-15T22:00:00.000Z"
+        },
+        {
+          "wordId": "e623e476-2891-47f9-a7d9-1f1dd6b40667",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "numerus",
+          "translation": "aantal",
+          "targetDate": "2026-05-16T22:00:00.000Z"
+        },
+        {
+          "wordId": "a16bd392-3654-4198-ae06-e82eb0419841",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "captus",
+          "translation": "ppp van capere: nemen",
+          "targetDate": "2026-05-16T22:00:00.000Z"
+        },
+        {
+          "wordId": "97a21059-7b55-41af-a01e-8371f7b5dd1a",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "interfectus",
+          "translation": "ppp van interficere: doden",
+          "targetDate": "2026-05-17T22:00:00.000Z"
+        },
+        {
+          "wordId": "ffd9db4c-988f-48e0-b430-74101468e408",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "reliquus",
+          "translation": "overig",
+          "targetDate": "2026-05-17T22:00:00.000Z"
+        },
+        {
+          "wordId": "1d37389e-ec86-44cb-b8a6-aba672ae85c0",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "civitas, civitates (2)",
+          "translation": "burgerij, stad",
+          "targetDate": "2026-05-18T22:00:00.000Z"
+        },
+        {
+          "wordId": "69b4948b-ccbe-4eac-8d2f-6ab655cf325c",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "discessi",
+          "translation": "pf van discedere: uiteengaan",
+          "targetDate": "2026-05-18T22:00:00.000Z"
+        },
+        {
+          "wordId": "4884ab3b-d0ec-4631-902b-7fdf2b15c2dc",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "discedere",
+          "translation": "uiteengaan",
+          "targetDate": "2026-05-19T22:00:00.000Z"
+        },
+        {
+          "wordId": "b2ae5c43-75b8-44d3-9e20-13a96ad43935",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "suscepi",
+          "translation": "pf van suscipere: op zich nemen",
+          "targetDate": "2026-05-19T22:00:00.000Z"
+        },
+        {
+          "wordId": "2ad7f394-ab69-42b8-b0a2-248519b950d2",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "suscipere/io",
+          "translation": "opnemen",
+          "targetDate": "2026-05-20T22:00:00.000Z"
+        },
+        {
+          "wordId": "e142f371-074e-4df3-a754-e41a5109e462",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "necessitas, necessitates (2)",
+          "translation": "noodzaak, behoefte",
+          "targetDate": "2026-05-20T22:00:00.000Z"
+        },
+        {
+          "wordId": "6d3e3fd7-1821-4afe-ade6-1c0188292343",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "genitivus + causa",
+          "translation": "wegens / vanwege",
+          "targetDate": "2026-05-21T22:00:00.000Z"
+        },
+        {
+          "wordId": "8b2ff181-d06f-4d21-a2d0-bcf4d6fa3c97",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "communis",
+          "translation": "algemeen",
+          "targetDate": "2026-05-21T22:00:00.000Z"
+        },
+        {
+          "wordId": "c3a91450-23e7-4c69-bae0-83523a6b1aaa",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "cedere",
+          "translation": "gaan / wijken",
+          "targetDate": "2026-05-22T22:00:00.000Z"
+        },
+        {
+          "wordId": "83d68784-2992-4345-a010-167623b7abc1",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "offerre",
+          "translation": "aanbieden",
+          "targetDate": "2026-05-22T22:00:00.000Z"
+        },
+        {
+          "wordId": "78979fdd-d0a7-46f9-a9f7-a693c20a4518",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "missus",
+          "translation": "ppp van mittere: sturen / zenden",
+          "targetDate": "2026-05-23T22:00:00.000Z"
+        },
+        {
+          "wordId": "ad37c6fa-d486-4d1c-9532-851ba9f96dc5",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "princeps, principes",
+          "translation": "voornaamste",
+          "targetDate": "2026-05-23T22:00:00.000Z"
+        },
+        {
+          "wordId": "53d5c440-1e1c-47c5-b134-c219dfd89eee",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "productus",
+          "translation": "ppp van producere: naar voren leiden",
+          "targetDate": "2026-05-24T22:00:00.000Z"
+        },
+        {
+          "wordId": "276bff5e-ce79-4f57-94ff-86b8c44ba6f7",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "producere",
+          "translation": "naar voren leiden",
+          "targetDate": "2026-05-24T22:00:00.000Z"
+        },
+        {
+          "wordId": "ac3ef0fe-ca0d-4ba8-af1c-9ed7fdc8d8b3",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "proieci",
+          "translation": "pf van proicere: naar voren werpen",
+          "targetDate": "2026-05-25T22:00:00.000Z"
+        },
+        {
+          "wordId": "7d8058fd-695c-461d-8f11-6ee979c14067",
+          "chapterId": "1a661c5c-75e5-4915-add2-a7d6709a2db9",
+          "word": "proicere/io",
+          "translation": "naar voren werpen",
+          "targetDate": "2026-05-25T22:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}
