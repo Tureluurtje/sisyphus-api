@@ -6,8 +6,14 @@ import asyncio
 from typing import Optional
 
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from api.services.auth.oauth import google_callback_handler, initiate_google_oauth
+import google_auth_oauthlib.flow
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from api.config import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_OAUTH_REDIRECT_URL
 from sqlalchemy.orm import Session as DbSession
 
+from api.config import GOOGLE_CLIENT_SECRET_FILE
 from api.database import get_db_session_dependency
 from api.routes.users import get_current_user
 from api.schema.internal.errors import (
@@ -42,6 +48,7 @@ from api.services.auth.dependencies import (
     typed_limit,
 )
 from api.services.auth.email import send_password_reset_email, send_verification_email
+from api.services.auth.oauth import initiate_google_oauth
 from api.services.auth.tokens import (
     issue_auth_tokens,
     revoke_access_token,
@@ -265,3 +272,19 @@ async def delete(
     delete_account(user_id=user_id, db=db)
     db.commit()
     return DeleteResponse(success=True)
+
+# Google
+
+@router.get("/google")
+def google_login(request: Request) -> RedirectResponse:
+    authorization_url, state, code_verifier = initiate_google_oauth()
+
+    request.session["google_state"] = state
+    request.session["google_code_verifier"] = code_verifier
+
+    return RedirectResponse(url=authorization_url)
+
+
+@router.get("/google/callback")
+def google_callback(request: Request):
+    return google_callback_handler(request)
