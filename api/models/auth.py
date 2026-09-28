@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
+    UniqueConstraint,
     func,
     text,
     Enum as SQLEnum,
@@ -26,6 +27,10 @@ class VerificationTokenPurposes(PyEnum):
     EMAIL_VERIFICATION = "email_verification"
     PASSWORD_RESET = "password_reset"
 
+class OauthProviders(PyEnum):
+    GOOGLE = "google"
+    APPLE = "apple"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -37,7 +42,9 @@ class User(Base):
     grade: Mapped[int] = mapped_column(BIGINT, nullable=False)
 
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Nullable password because oauth accounts don't have a password
+    password: Mapped[str] = mapped_column(String, nullable=True)
 
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -59,6 +66,10 @@ class User(Base):
     )
     verification_tokens: Mapped[List["VerificationTokens"]] = relationship(
         argument="VerificationTokens",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    oauth_accounts: Mapped[List["OAuthAccount"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -148,3 +159,39 @@ class VerificationTokens(Base):
 
     # relationships
     user: Mapped["User"] = relationship(argument="User")
+
+
+class OAuthAccount(Base):
+    __tablename__ = "oauth_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    provider: Mapped[str] = mapped_column(
+        SQLEnum(OauthProviders, name="oauth_providers_enum"),
+        nullable=False,
+    )
+
+    provider_user_id: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="oauth_accounts"
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "provider",
+            "provider_user_id",
+            name="uq_oauth_provider_user",
+        ),
+    )
