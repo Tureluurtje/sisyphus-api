@@ -4,6 +4,7 @@ node_modules
 .DS_Store
 package-lock.json
 .env
+client-secret.json
 __pycache__
 *.pyc
 *.pyo
