@@ -6,14 +6,10 @@ import asyncio
 from typing import Optional
 
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from api.schema.internal.auth import AuthTokens
 from api.services.auth.oauth import google_callback_handler, initiate_google_oauth
-import google_auth_oauthlib.flow
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
-from api.config import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_OAUTH_REDIRECT_URL
 from sqlalchemy.orm import Session as DbSession
 
-from api.config import GOOGLE_CLIENT_SECRET_FILE
 from api.database import get_db_session_dependency
 from api.routes.users import get_current_user
 from api.schema.internal.errors import (
@@ -286,5 +282,7 @@ def google_login(request: Request) -> RedirectResponse:
 
 
 @router.get("/google/callback")
-def google_callback(request: Request):
-    return google_callback_handler(request)
+def google_callback(request: Request, db: DbSession = Depends(get_db_session_dependency)) -> AuthTokens:
+    tokens = google_callback_handler(request, db)
+    db.commit()
+    return tokens
