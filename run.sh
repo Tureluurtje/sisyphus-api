@@ -17,6 +17,8 @@ fi
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-8000}"
 WORKERS="${WORKERS:-1}"
+SSL_CERTFILE="${SSL_CERTFILE:-}"
+SSL_KEYFILE="${SSL_KEYFILE:-}"
 
 SSH_HOST="${SSH_HOST:-vps-db}"
 DB_TUNNEL_PORT="${DB_PORT:-5433}"
@@ -145,6 +147,13 @@ elif command -v python3 >/dev/null 2>&1 \
 else
     echo "No runnable Uvicorn found." >&2
     exit 1
+fi
+
+if [ -n "$SSL_CERTFILE" ] && [ -n "$SSL_KEYFILE" ]; then
+    UVICORN_COMMAND+=(
+        --ssl-certfile "$SSL_CERTFILE"
+        --ssl-keyfile "$SSL_KEYFILE"
+    )
 fi
 
 "${UVICORN_COMMAND[@]}" &

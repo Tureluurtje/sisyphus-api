@@ -57,8 +57,9 @@ async def _rate_limit_exceeded_handler(request: Request, exc: Exception):
 from slowapi.middleware import SlowAPIMiddleware
 
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
-from api.config import CORS_ORIGINS
+from api.config import CORS_ORIGINS, SECRET_KEY, SECURE_COOKIES
 
 
 from api.routes import auth as auth_routes, users as users_routes, words as word_routes, leaderboard as leaderboard_routes
@@ -100,6 +101,13 @@ app = FastAPI(lifespan=lifespan)
 # Annotate as Any to avoid Pylance/pyright complaints when type stubs
 # for apscheduler are missing — we still instantiate the real scheduler.
 scheduler: Any = AsyncIOScheduler()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    https_only=SECURE_COOKIES,
+    same_site="lax",
+)
 
 # Setup templates and static files
 BASE_DIR = Path(__file__).resolve().parent

@@ -5,6 +5,8 @@ node_modules
 package-lock.json
 .env
 client-secret.json
+localhost.pem
+localhost-key.pem
 __pycache__
 *.pyc
 *.pyo
