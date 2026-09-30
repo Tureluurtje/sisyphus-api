@@ -4,10 +4,12 @@ from fastapi import Request
 import google_auth_oauthlib.flow
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from jwt import InvalidTokenError
+import jwt
 from oauthlib.oauth2 import MismatchingStateError
 from sqlalchemy.orm import Session as DbSession
 
-from api.config import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_OAUTH_REDIRECT_URL
+from api.config import GOOGLE_CLIENT_SECRET_FILE, GOOGLE_OAUTH_REDIRECT_URL, apple_jwks_client, APPLE_ISSUER, APPLE_JWKS_URL
 from api.models.auth import OAuthAccount, OauthProviders, User
 from api.schema.internal.auth import AuthTokens
 from api.schema.internal.errors import BadRequestError
@@ -72,11 +74,25 @@ def google_callback_handler(request: Request, db: DbSession):
     provider_user_email = user_info["email"]
     provider_user_name = user_info.get("name")
 
-    return authenticate_google_callback(provider_user_id, provider_user_email, provider_user_name, db)
+    return authenticate_third_party_callback(OauthProviders.GOOGLE, provider_user_id, provider_user_email, provider_user_name, db)
 
-def authenticate_google_callback(provider_user_id: str, provider_user_email: str, provider_user_name: Optional[str], db: DbSession) -> AuthTokens:
+def apple_callback_handler(identity_token: str, client_id: str, nonce: str, db: DbSession):
+    try:
+        signing_key = apple_jwks_client.get_signing_key_from_jwt( identity_token )
+        claims = jwt.decode( identity_token, signing_key.key, algorithms=["RS256"], audience=client_id, issuer=APPLE_ISSUER, )
+        if claims.get("nonce") != nonce:
+            raise InvalidTokenError("Invalid nonce")
+    except InvalidTokenError as e:
+        raise ValueError("Invalid Apple identity token") from e
+
+    apple_user_id = claims["sub"]
+    email = claims.get("email")
+
+    return apple_user_id, email
+
+def authenticate_third_party_callback(provider: OauthProviders,provider_user_id: str, provider_user_email: str, provider_user_name: Optional[str], db: DbSession) -> AuthTokens:
     OAuth_user_account = db.query(OAuthAccount).filter(
-        OAuthAccount.provider == OauthProviders.GOOGLE,
+        OAuthAccount.provider == provider,
         OAuthAccount.provider_user_id == provider_user_id
     ).scalar()
 
@@ -85,12 +101,12 @@ def authenticate_google_callback(provider_user_id: str, provider_user_email: str
         existing_user_account = db.query(User).filter(User.email == provider_user_email).scalar()
         if not existing_user_account:
             # No account to link to, register as new user
-            return register_google_account(provider_user_id, provider_user_email, provider_user_name, db)
+            return register_google_account(provider, provider_user_id, provider_user_email, provider_user_name, db)
 
         # Overwrite for issue_auth_tokens() function, this is allowed since it was previously unbound
         OAuth_user_account = OAuthAccount(
             user_id=existing_user_account.id,
-            provider=OauthProviders.GOOGLE,
+            provider=provider,
             provider_user_id=provider_user_id
         )
 
@@ -102,7 +118,7 @@ def authenticate_google_callback(provider_user_id: str, provider_user_email: str
 
     return new_tokens
 
-def register_google_account(provider_user_id: str, provider_user_email: str, provider_user_name: Optional[str], db: DbSession) -> AuthTokens:
+def register_google_account(provider: OauthProviders, provider_user_id: str, provider_user_email: str, provider_user_name: Optional[str], db: DbSession) -> AuthTokens:
     # Create a new User instance
     new_user = User(
         username=provider_user_name,

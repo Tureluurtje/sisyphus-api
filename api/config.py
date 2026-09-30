@@ -13,6 +13,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from typing import Optional
 
+from jwt import PyJWKClient
+
 
 def load_environment_file() -> None:
     """Load a .env file from the current working directory or a parent.
@@ -114,3 +116,7 @@ GOOGLE_CLIENT_SECRET_FILE = Path(__file__).resolve().parent.parent / "client-sec
 GOOGLE_OAUTH_REDIRECT_URL: str = require_env("GOOGLE_OAUTH_REDIRECT_URL")
 
 RESEND_API_KEY: str = require_env("RESEND_API_KEY")
+
+APPLE_ISSUER = "https://appleid.apple.com"
+APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
+apple_jwks_client = PyJWKClient(APPLE_JWKS_URL)
