@@ -1,0 +1,8 @@
+title = "Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Postman resource UUID is an identifier, not a secret"
+paths = ['''(^|/)\.postman/resources\.yaml$''']
