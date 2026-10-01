@@ -32,3 +32,6 @@ logs/**
 git_commit.md
 client-secret.json
 .cortex/
+localhost.pem
+localhost-key.pem
+all_databases_and_users.sql
