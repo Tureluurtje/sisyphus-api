@@ -27,3 +27,5 @@ logs/**
 *.coverage
 .python-version
 git_commit.md
+.cortex/
+client-secret.json
