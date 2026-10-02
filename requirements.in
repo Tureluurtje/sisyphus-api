@@ -45,3 +45,4 @@ email-validator==2.3.0
 webencodings==0.5.1
 wrapt==2.2.1
 zxcvbn==4.5.0
+pytest==9.1.1
