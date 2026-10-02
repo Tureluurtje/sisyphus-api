@@ -24,7 +24,12 @@ jobs:
               run: |
                 python -m pip install --only-binary :all: --require-hashes --upgrade pip
                 pip install --only-binary :all: --require-hashes -r requirements.txt
-                pip install --only-binary :all: --require-hashes pytest
+                pytest_download_dir="$(mktemp -d)"
+                python -m pip download --only-binary :all: --no-deps --dest "$pytest_download_dir" pytest
+                pytest_wheel="$(find "$pytest_download_dir" -name 'pytest-*.whl' -print -quit)"
+                pytest_hash="$(python -m pip hash "$pytest_wheel" | sed -n 's/^--hash=sha256://p')"
+                printf 'pytest==%s --hash=sha256:%s\n' "$(python -m pip show pytest 2>/dev/null | sed -n 's/^Version: //p')" "$pytest_hash" > "$pytest_download_dir/requirements.txt"
+                pip install --only-binary :all: --require-hashes -r "$pytest_download_dir/requirements.txt"
 
             - name: Run tests
               run: pytest
