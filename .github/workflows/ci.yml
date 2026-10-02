@@ -11,6 +11,9 @@ jobs:
     test:
         runs-on: ubuntu-latest
 
+        env:
+            GOOGLE_OAUTH_REDIRECT_URL: "https://localhost/oauth/google/callback"
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4
