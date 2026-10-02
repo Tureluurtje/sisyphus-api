@@ -2,6 +2,9 @@ name: CI
 
 on:
     push:
+        branches:
+            - develop
+            - main
     pull_request:
 
 jobs:
@@ -20,7 +23,7 @@ jobs:
             - name: Install dependencies
               run: |
                 python -m pip install --only-binary :all: --require-hashes --upgrade pip
-                pip install --only-binary :all: --require-hashes -r requirements-test.txt
+                pip install --only-binary :all: --require-hashes -r requirements.txt
 
             - name: Run tests
               run: pytest
