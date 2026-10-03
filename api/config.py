@@ -112,7 +112,14 @@ REFRESH_TOKEN_EXPIRE_SECONDS = int(_refresh_default)
 _verification_default: str = require_env("REFRESH_TOKEN_EXPIRE_SECONDS", "2592000")
 VERIFICATION_TOKEN_EXPIRE_SECONDS = int(_refresh_default)
 
-GOOGLE_CLIENT_SECRET_FILE = Path(__file__).resolve().parent.parent / "client-secret.json"
+_google_client_secret_file = Path(
+    require_env("GOOGLE_CLIENT_SECRET_FILE", "client-secret.json")
+).expanduser()
+GOOGLE_CLIENT_SECRET_FILE = (
+    _google_client_secret_file
+    if _google_client_secret_file.is_absolute()
+    else Path.cwd() / _google_client_secret_file
+)
 GOOGLE_OAUTH_REDIRECT_URL: str = require_env("GOOGLE_OAUTH_REDIRECT_URL")
 
 RESEND_API_KEY: str = require_env("RESEND_API_KEY")
