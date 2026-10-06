@@ -13,6 +13,9 @@ dnspython==2.8.0
 dotenv==0.9.9
 email-validator==2.3.0
 fastapi==0.136.1
+google==3.0.0
+google-auth==2.58.1
+google-auth-oauthlib==1.4.1
 h11==0.16.0
 idna==3.16
 itsdangerous==2.2.0
