@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{url}}/words/due"
+method: GET
+headers:
+  X-CSRF-Token: "{{csrf_token}}"
+order: 2781867467428750

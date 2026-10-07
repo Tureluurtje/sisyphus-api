@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{url}}/auth/login"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "email": "test@test.com",
+        "password": "superhardpassword"
+    }
+auth:
+  type: noauth
+order: 1791360586181
