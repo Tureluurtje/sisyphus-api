@@ -7,7 +7,7 @@ from typing import Optional
 
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from api.schema.internal.auth import AuthTokens
-from api.services.auth.oauth import apple_callback_handler, google_callback_handler, initiate_google_oauth
+from api.services.auth.oauth import google_callback_handler, initiate_google_oauth
 from sqlalchemy.orm import Session as DbSession
 
 from api.database import get_db_session_dependency
@@ -286,12 +286,3 @@ def google_callback(request: Request, db: DbSession = Depends(get_db_session_dep
     tokens = google_callback_handler(request, db)
     db.commit()
     return tokens
-
-@router.post("/apple/callback")
-def apple_callback(data: AppleCallBackRequest, request: Request, db: DbSession = Depends(get_db_session_dependency)):
-    return apple_callback_handler(
-        identity_token=data.identity_token,
-        client_id=settings.APPLE_CLIENT_ID,
-        nonce=data.nonce,
-        db=db,
-    )
