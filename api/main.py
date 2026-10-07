@@ -255,6 +255,15 @@ def sitemap():
         return JSONResponse(status_code=404, content={"error": "Not found"})
 
 
+@app.get("/loaderio-f047fa459f4fe5912674d32983d9ff24.txt")
+def loaderio_verification():
+    """Serve loaderio verification."""
+    try:
+        return FileResponse(path=str(BASE_DIR / "public" / "loaderio-f047fa459f4fe5912674d32983d9ff24.txt"))
+    except FileNotFoundError:
+        return JSONResponse(status_code=404, content={"error": "Not found"})
+
+
 @app.get("/.well-known/appspecific/com.chrome.devtools.json")
 def well_known_devtools_json():
     """Serve Chrome DevTools configuration."""
@@ -383,7 +392,6 @@ def _check_database() -> dict[str, str]:
     except Exception as e:
         error_logger.exception({"health_check": "db_failure", "error": str(e)})
         return {"status": "error", "error": str(e)}
-
 
 @app.get("/health")
 def health() -> dict[str, bool | dict[str, dict[str, str]]]:
